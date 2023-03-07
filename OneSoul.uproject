@@ -9,7 +9,8 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
-				"Engine"
+				"Engine",
+				"UMG"
 			]
 		}
 	],
@@ -22,8 +23,8 @@
 			]
 		},
 		{
-			"Name": "UdpMessaging",
-			"Enabled": false
+			"Name": "Metasound",
+			"Enabled": true
 		}
 	]
 }
