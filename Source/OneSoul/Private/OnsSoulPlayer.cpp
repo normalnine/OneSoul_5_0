@@ -46,8 +46,6 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	Camera -> SetupAttachment(SpringArm);
 	Camera -> bUsePawnControlRotation = false;
 
-	SetPlayerMaxSpeed(WalkSpeed);
-
 	SprintSpeed = 800.f;
 	WalkSpeed = 400.f;
 
@@ -67,6 +65,8 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 
 	Health = 100.f;
 	MaxHealth = 100.f;
+
+	SetPlayerMaxSpeed(WalkSpeed);
 }
 
 void AOnsSoulPlayer::BeginPlay()
