@@ -22,20 +22,6 @@ protected:
    
     virtual void BeginPlay() override;
 
-	virtual void OnSphereOverlap(
-			         UPrimitiveComponent* OverlappedComponent,
-			         AActor* OthrActor,
-			         UPrimitiveComponent* OtherComp,
-			         int32 OtherBodyIndex,
-			         bool bFromSweep,
-			         const FHitResult& SweepResult) override;
-
-	virtual void OnSphereEndOverlap(
-			     UPrimitiveComponent* OverlappedComponent,
-			     AActor* OthrActor,
-			     UPrimitiveComponent* OtherComp,
-			     int32 OtherBodyIndex) override;
-    
 	UFUNCTION()
 	void OnBoxOverlap(
 	                 UPrimitiveComponent* OverlappedComponent,

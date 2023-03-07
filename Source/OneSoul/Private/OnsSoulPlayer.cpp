@@ -48,7 +48,6 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 
 	SetPlayerMaxSpeed(WalkSpeed);
 
-
 	SprintSpeed = 800.f;
 	WalkSpeed = 400.f;
 
@@ -140,7 +139,7 @@ void AOnsSoulPlayer::SetWeaponCollisionEnabled(ECollisionEnabled::Type Collision
 
 void AOnsSoulPlayer::MoveForward(float Value)
 {
-    if(ActionState == EActionState::ECS_Attacking) return;
+    if(ActionState != EActionState::ECS_Unoccipied) return;
 	if (Controller && (Value != 0.f))
 	{
 	   const FRotator ControlRotation = GetControlRotation();
@@ -153,7 +152,7 @@ void AOnsSoulPlayer::MoveForward(float Value)
 
 void AOnsSoulPlayer::MoveRight(float Value)
 {
-	if (ActionState == EActionState::ECS_Attacking) return;
+	if (ActionState != EActionState::ECS_Unoccipied) return;
 	if (Controller && (Value != 0.f))
 	{
 	 const FRotator ControlRotation = GetControlRotation();

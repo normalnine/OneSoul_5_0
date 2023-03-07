@@ -52,45 +52,6 @@ void AWeapon::BeginPlay()
 
 }
 
-void AWeapon::OnSphereOverlap(
-              UPrimitiveComponent* OverlappedComponent,
-              AActor* OthrActor,
-              UPrimitiveComponent* OtherComp,
-              int32 OtherBodyIndex,
-              bool bFromSweep,
-              const FHitResult& SweepResult)
-{
- Super::OnSphereOverlap(
-        OverlappedComponent,
-        OthrActor,
-        OtherComp,
-        OtherBodyIndex,
-        bFromSweep,
-        SweepResult);
-
-        AOnsSoulPlayer* OneSoulCharacter = Cast<AOnsSoulPlayer>(OthrActor);
-        
-        if (OneSoulCharacter)
-        {
-          
-        }
-     
-}
-
-void AWeapon::OnSphereEndOverlap(
-              UPrimitiveComponent* OverlappedComponent,
-              AActor* OthrActor,
-              UPrimitiveComponent* OtherComp,
-              int32 OtherBodyIndex)
-{
- Super::OnSphereEndOverlap(
-        OverlappedComponent,
-        OthrActor,
-        OtherComp,
-        OtherBodyIndex);
-
-}
-
 void AWeapon::OnBoxOverlap(
               UPrimitiveComponent* OverlappedComponent,
               AActor* OthrActor,
@@ -143,7 +104,7 @@ void AWeapon::BoxTrace(FHitResult& BoxHit)
 		ETraceTypeQuery::TraceTypeQuery1,
 		false,
 		ActorsToIgnore,
-		bShowBoxDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None,
+		bShowBoxDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::ForDuration,
 		BoxHit,
 		true
 	);

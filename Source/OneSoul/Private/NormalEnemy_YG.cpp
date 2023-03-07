@@ -232,8 +232,17 @@ float ANormalEnemy_YG::TakeDamage(
 					   AActor* DamageCauser)
 {
 	HandleDamage(Damage);
-	CombatTarget = EventInstigator -> GetPawn();
-	ChaseTarget();
+	CombatTarget = EventInstigator->GetPawn();
+
+	if (IsInsideAttackRadius())
+	{
+		EnemyState = EEnemyState::EES_Attacking;
+	}
+	else if (IsOutsideAttackRadius())
+	{
+		ChaseTarget();
+	}
+
 	return Damage;
 }
 
@@ -330,8 +339,8 @@ void ANormalEnemy_YG::HandleDamage(float Damage)
 {
 	if (Attributes && HealthBarWidget)
 	{
-		Attributes->ReceiveDamage(Damage);
 		HealthBarWidget->SetHealthPercent(Attributes->GetHealthPercent());
+		Attributes->ReceiveDamage(Damage);
 	}
 }
 
@@ -428,9 +437,10 @@ void ANormalEnemy_YG::DirectionalHitReact(const FVector& ImpactPoint)
 
 void ANormalEnemy_YG::Attack()
 {   
+   
+   if(CombatTarget == nullptr) return;
 
 	EnemyState = EEnemyState::EES_Engaged;
-
     PlayAttackMontage();
    
 }
