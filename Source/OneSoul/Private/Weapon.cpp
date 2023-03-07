@@ -99,48 +99,62 @@ void AWeapon::OnBoxOverlap(
               bool bFromSweep,
               const FHitResult& SweepResult)
 {
-   const FVector Start = BoxTraceStart -> GetComponentLocation();
-   const FVector End =  BoxTraceEnd -> GetComponentLocation();
-
-   TArray<AActor*> ActorsToIgnore;
-   ActorsToIgnore.Add(this);
    
-   FHitResult BoxHit;
+		if (ActorIsSameType(OthrActor)) return;
 
-   UKismetSystemLibrary::BoxTraceSingle(
-                         this,
-                         Start,
-                         End,
-                         FVector(25.f,15.f,25.f),
-                         BoxTraceStart->GetComponentRotation(),
-                         ETraceTypeQuery::TraceTypeQuery1,
-                         false,
-                         ActorsToIgnore,
-                         EDrawDebugTrace::ForDuration,
-                         BoxHit,
-                         true);
-    if (BoxHit.GetActor())
-    {
+		FHitResult BoxHit;
+		BoxTrace(BoxHit);
 
+		if (BoxHit.GetActor())
+		{
+			if (ActorIsSameType(BoxHit.GetActor())) return;
 
-      IHitInterface* HitInterface = Cast<IHitInterface>(BoxHit.GetActor());
-      if (HitInterface)
-      {
-       HitInterface -> GetHit(BoxHit.ImpactPoint);
-      }
-      IgnoreActors.AddUnique(BoxHit.GetActor());
-      CreateFields(BoxHit.ImpactPoint);
-
-      UGameplayStatics::ApplyDamage(
-                        BoxHit.GetActor(),
-                        Damage,
-                        GetInstigator()->GetController(),
-                        this,
-                        UDamageType::StaticClass());
-    }
+			UGameplayStatics::ApplyDamage(BoxHit.GetActor(), Damage, GetInstigator()->GetController(), this, UDamageType::StaticClass());
+			ExecuteGetHit(BoxHit);
+			CreateFields(BoxHit.ImpactPoint);
+		}
 }
 
 bool AWeapon::ActorIsSameType(AActor* otherActor)
 {
   return GetOwner()->ActorHasTag(TEXT("Enemy")) && otherActor->ActorHasTag(TEXT("Enemy"));
+}
+
+void AWeapon::BoxTrace(FHitResult& BoxHit)
+{
+	const FVector Start = BoxTraceStart->GetComponentLocation();
+	const FVector End = BoxTraceEnd->GetComponentLocation();
+
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(this);
+	ActorsToIgnore.Add(GetOwner());
+
+	for (AActor* Actor : IgnoreActors)
+	{
+		ActorsToIgnore.AddUnique(Actor);
+	}
+
+	UKismetSystemLibrary::BoxTraceSingle(
+		this,
+		Start,
+		End,
+		BoxTraceExtent,
+		BoxTraceStart->GetComponentRotation(),
+		ETraceTypeQuery::TraceTypeQuery1,
+		false,
+		ActorsToIgnore,
+		bShowBoxDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None,
+		BoxHit,
+		true
+	);
+	IgnoreActors.AddUnique(BoxHit.GetActor());
+}
+
+void AWeapon::ExecuteGetHit(FHitResult& BoxHit)
+{
+	IHitInterface* HitInterface = Cast<IHitInterface>(BoxHit.GetActor());
+	if (HitInterface)
+	{
+		HitInterface->GetHit(BoxHit.ImpactNormal);
+	}
 }

@@ -63,6 +63,16 @@ private:
 
 	 bool ActorIsSameType(AActor* otherActor);
 
+	 void BoxTrace(FHitResult& BoxHit);
+
+	 void ExecuteGetHit(FHitResult& BoxHit);
+
+	 UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	 FVector BoxTraceExtent = FVector(5.f);
+
+	 UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	 bool bShowBoxDebug = false;
+
 public:
 
 	 TArray<AActor* > IgnoreActors;
