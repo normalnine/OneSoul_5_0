@@ -2,33 +2,437 @@
 
 
 #include "OnsSoulPlayer.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
+#include "Components/WidgetComponent.h"
+#include "Components/BoxComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
+#include "Engine/SkeletalMeshSocket.h"
+#include "Item.h"
+#include "Weapon.h"
 
-// Sets default values
 AOnsSoulPlayer::AOnsSoulPlayer()
+      
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationRoll = false;
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 400.f, 0.f);
+	GetCharacterMovement()->JumpZVelocity = 600.f;
+	GetCharacterMovement()->AirControl = 0.2f;
+
+	GetMesh() -> SetRelativeLocationAndRotation(
+	             FVector(0.f,0.f,-90.f),
+				 FRotator(0.f,-90.f,0.f));
+	GetMesh() -> SetCollisionObjectType(ECC_WorldDynamic);
+	GetMesh() -> SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	GetMesh() -> SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility,ECollisionResponse::ECR_Block);
+	GetMesh() -> SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic,ECollisionResponse::ECR_Overlap);
+	GetMesh() -> SetGenerateOverlapEvents(true);
+
+    SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring"));
+	SpringArm -> SetupAttachment(GetRootComponent());
+	SpringArm -> TargetArmLength = 300.f;
+	SpringArm -> bUsePawnControlRotation = true;
+
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	Camera -> SetupAttachment(SpringArm);
+	Camera -> bUsePawnControlRotation = false;
+
+	SetPlayerMaxSpeed(WalkSpeed);
+
+
+	SprintSpeed = 800.f;
+	WalkSpeed = 400.f;
+
+	MaxStamina = 100.f;
+	CurrentStamina = 100.f;
+	MinStamina = 0.f;
+
+	bIsTargeting = false;
+	TargetingDistance = 900.f;
+	TargetingRadius = 100.f;
+	TargetRotationInterpSpeed = 9.f;
+
+	IsAttacking = false;
+	bLMBDown = false;
+	ComboCnt = 0;
+	bIsAttackButton = false;
+
+	Health = 100.f;
+	MaxHealth = 100.f;
 }
 
-// Called when the game starts or when spawned
 void AOnsSoulPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	Tags.Add(FName("OneSoulCharacter"));
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && LevelStartMontage)
+	{
+		AnimInstance->Montage_Play(LevelStartMontage);
+
+	}
+
+	switch (RotationMode)
+	{
+	case ERotationMode::OrienttoCamera:
+	    bUseControllerRotationYaw = false;
+		GetCharacterMovement()->bUseControllerDesiredRotation = true;
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+		break;
+	case ERotationMode::OrienttoMovement:
+		bUseControllerRotationYaw = false;
+		GetCharacterMovement()->bUseControllerDesiredRotation = false;
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+		break;
+	}
+
 }
 
-// Called every frame
 void AOnsSoulPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (bIsTargeting)
+	{
+	  UpdateTargetingControlRotation();
+	}
+
 }
 
-// Called to bind functionality to input
 void AOnsSoulPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	PlayerInputComponent->BindAxis("Move Forward",this,&AOnsSoulPlayer::MoveForward);
+	PlayerInputComponent->BindAxis("Move Right",this,&AOnsSoulPlayer::MoveRight);
+	PlayerInputComponent->BindAxis("Turn Right",this,&AOnsSoulPlayer::Turn);
+	PlayerInputComponent->BindAxis("Look Up",this,&AOnsSoulPlayer::LookUp);
+
+	PlayerInputComponent->BindAction("Jump",IE_Pressed,this,&AOnsSoulPlayer::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AOnsSoulPlayer::StopJumping);
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AOnsSoulPlayer::StartSprint);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AOnsSoulPlayer::StopSprint);
+	PlayerInputComponent->BindAction("ToggleLockOn", IE_Pressed, this, &AOnsSoulPlayer::ToggleLockOnInput);
+	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &AOnsSoulPlayer::LMBDown);
+	PlayerInputComponent->BindAction("Attack", IE_Released, this, &AOnsSoulPlayer::LMBUP);
+	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &AOnsSoulPlayer::EKeyPressed);
 }
 
+void AOnsSoulPlayer::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnable)
+{
+	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
+	{
+		EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionEnable);
+		EquippedWeapon -> IgnoreActors.Empty();
+	}
+}
+
+void AOnsSoulPlayer::MoveForward(float Value)
+{
+    if(ActionState == EActionState::ECS_Attacking) return;
+	if (Controller && (Value != 0.f))
+	{
+	   const FRotator ControlRotation = GetControlRotation();
+	   const FRotator YawRotation(0.f,ControlRotation.Yaw,0.f);
+
+	   const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	   AddMovementInput(Direction, Value);
+    }
+}
+
+void AOnsSoulPlayer::MoveRight(float Value)
+{
+	if (ActionState == EActionState::ECS_Attacking) return;
+	if (Controller && (Value != 0.f))
+	{
+	 const FRotator ControlRotation = GetControlRotation();
+	 const FRotator YawRotatin(0.f, ControlRotation.Yaw, 0.f);
+
+	 const FVector Direction = FRotationMatrix(YawRotatin).GetUnitAxis(EAxis::Y);
+	 AddMovementInput(Direction, Value);
+    }
+}
+
+void AOnsSoulPlayer::LookUp(float Value)
+{
+ AddControllerPitchInput(Value);
+}
+
+void AOnsSoulPlayer::Turn(float Value)
+{
+	if (!bIsTargeting)
+	{
+      AddControllerYawInput(Value);
+    }
+}
+
+void AOnsSoulPlayer::StartSprint()
+{
+   if (CurrentStamina > MinStamina)
+	{
+	  UKismetSystemLibrary::K2_ClearTimer(this, "RegenerateStamina");
+	  SetPlayerMaxSpeed(SprintSpeed);
+	  UKismetSystemLibrary::K2_SetTimer(this, "SprintTimer", 0.1f, true);
+	}
+}
+
+void AOnsSoulPlayer::StopSprint()
+{
+  FLatentActionInfo Stop_sp;
+  UKismetSystemLibrary::K2_ClearTimer(this, "SprintTimer");
+  SetPlayerMaxSpeed(WalkSpeed);
+  UKismetSystemLibrary::K2_ClearTimer(this, "SprintTimer");
+  UKismetSystemLibrary::RetriggerableDelay(GetWorld(), 0.2f, Stop_sp);
+  if (UKismetSystemLibrary::K2_IsTimerActive(this, "SprintTimer"))
+  {
+
+  }
+  else
+  {
+	  UKismetSystemLibrary::K2_SetTimer(this, "RegenerateStamina", 0.03f, true);
+  }
+}
+
+void AOnsSoulPlayer::ToggleLockOn()
+{
+    if (!bIsTargeting)
+	{
+		EnableLockOn();
+	}
+	else
+	{
+		DisableLockOn();
+	}
+}
+
+void AOnsSoulPlayer::Attack()
+{
+	bLMBDown = true;
+
+	UAnimInstance* AnimInstance = (GetMesh()->GetAnimInstance());
+	IsAttacking = true;
+
+	const char* Attackist[] = { "Attack1","Attack2","Attack3" };
+
+	if (!(AnimInstance->Montage_IsPlaying(AttackMontage)) && CanAttack())
+	{
+		AnimInstance->Montage_Play(AttackMontage);
+	}
+	else if ((AnimInstance->Montage_IsPlaying(AttackMontage)) && CanAttack())
+	{
+
+		AnimInstance->Montage_Play(AttackMontage);
+		AnimInstance->Montage_JumpToSection(FName(Attackist[ComboCnt]));
+	}
+}
+
+void AOnsSoulPlayer::EKeyPressed()
+{
+ AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
+ AItem* OverlappingWidget = Cast<AItem>(OverlappingItem);
+
+ if (OverlappingWeapon)
+ {
+	 OverlappingWidget->PickupWidget->SetVisibility(false);
+	 EquipWeapon(OverlappingWeapon);
+ }
+ else
+ {
+	 if (CanDisarm())
+	 {
+	  PlayEquipMontage(FName("UnEquip"));
+	  CharacterState = ECharacterState::ECS_Unequipped;
+	 }
+	 else if (CanArm())
+	 {
+	  PlayEquipMontage(FName("Equip"));
+	  CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+	 }
+ }
+}
+
+void AOnsSoulPlayer::SetPlayerMaxSpeed(float MaxSpeed)
+{
+ GetCharacterMovement()->MaxWalkSpeed = MaxSpeed;
+}
+
+void AOnsSoulPlayer::SprintTimer()
+{
+	if (GetVelocity().Length() > 10.f)
+	{
+
+		CurrentStamina = FMath::Clamp(CurrentStamina - 1.f, MinStamina, MaxStamina);
+		if (CurrentStamina <= MinStamina)
+		{
+
+			StopSprint();
+		}
+	}
+	else
+	{
+		StopSprint();
+	}
+}
+
+void AOnsSoulPlayer::RegenerateStamina()
+{
+  float OnePul = CurrentStamina + 1.f;
+  CurrentStamina = FMath::Clamp(OnePul, MinStamina, MaxStamina);
+  if (CurrentStamina >= MaxStamina)
+   {
+	 UKismetSystemLibrary::K2_ClearTimer(this, "RegenerateStamina");
+   }
+}
+
+void AOnsSoulPlayer::EnableLockOn()
+{
+	FVector Start = this->GetActorLocation();
+	FVector End = Camera->GetForwardVector() * TargetingDistance + Start;
+	TEnumAsByte<EObjectTypeQuery> Pawn = UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn);
+	TargetObjectTypes.Add(Pawn);
+
+	TArray<AActor*> IgnoreActors;
+	IgnoreActors.Add(this);
+
+	FHitResult HitResult;
+
+	bool Result = UKismetSystemLibrary::SphereTraceSingleForObjects(
+		                                GetWorld(),
+		                                Start,
+		                                End,
+		                                TargetingRadius,
+	                                 	TargetObjectTypes,
+		                                false,
+		                                IgnoreActors,
+		                                 EDrawDebugTrace::None,
+		                                 HitResult,
+		                                 true);
+
+	auto HitActor = UKismetSystemLibrary::IsValid(HitResult.GetActor());
+
+	if (Result == true && HitActor)
+	{
+		TargetActor = HitResult.GetActor();
+		bIsTargeting = true;
+		RotationMode = ERotationMode::OrienttoCamera;
+	}
+}
+
+void AOnsSoulPlayer::DisableLockOn()
+{
+ bIsTargeting = false;
+ RotationMode = ERotationMode::OrienttoMovement;
+}
+
+void AOnsSoulPlayer::ToggleLockOnInput()
+{
+ ToggleLockOn();
+}
+
+void AOnsSoulPlayer::UpdateTargetingControlRotation()
+{
+	auto OChar = UKismetSystemLibrary::IsValid(this);
+	auto Target = UKismetSystemLibrary::IsValid(TargetActor);
+
+	if (OChar && Target)
+	{
+		FVector Start = this->GetActorLocation();
+		FVector TargetR = TargetActor->GetActorLocation() - FVector(0.f, 0.f, 100.f);
+		FRotator TargetRot = UKismetMathLibrary::FindLookAtRotation(Start, TargetR);
+		FRotator CurrentRot = Controller->GetControlRotation();
+
+		FRotator YZ = UKismetMathLibrary::RInterpTo(
+			                              CurrentRot,
+			                              TargetRot,
+			                              UGameplayStatics::GetWorldDeltaSeconds(GetWorld()),
+			                              TargetRotationInterpSpeed);
+
+
+		FRotator NewRotation = UKismetMathLibrary::MakeRotator(CurrentRot.Roll, YZ.Pitch, YZ.Yaw);
+
+		Controller->SetControlRotation(NewRotation);
+	}
+
+}
+
+bool AOnsSoulPlayer::CanAttack()
+{
+ return ActionState == EActionState::ECS_Unoccipied && CharacterState != ECharacterState::ECS_Unequipped;
+}
+
+bool AOnsSoulPlayer::CanDisarm()
+{
+  return ActionState == EActionState::ECS_Unoccipied && CharacterState != ECharacterState::ECS_Unequipped;
+}
+
+bool AOnsSoulPlayer::CanArm()
+{
+  return ActionState == EActionState::ECS_Unoccipied && CharacterState == ECharacterState::ECS_Unequipped && EquippedWeapon;
+}
+
+void AOnsSoulPlayer::EquipWeapon(AWeapon* Weapon)
+{
+	Weapon->Equip(GetMesh(), FName("RightHandSoket"), this, this);
+	CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+	EquippedWeapon = Weapon;
+}
+
+void AOnsSoulPlayer::PlayEquipMontage(const FName& SectionName)
+{
+ UAnimInstance* AnimInstance = GetMesh() -> GetAnimInstance();
+ if (AnimInstance && EquipMontage)
+ {
+	 AnimInstance -> Montage_Play(EquipMontage);
+	 AnimInstance -> Montage_JumpToSection(SectionName,EquipMontage);
+ }
+}
+
+void AOnsSoulPlayer::LMBDown()
+{
+	bLMBDown = true;
+	if (IsAttacking == false && CanAttack())
+	{
+		Attack();
+		AttackHitCheck();
+	}
+	else if (IsAttacking == true && CanAttack())
+	{
+		bIsAttackButton = true;
+	}
+}
+
+void AOnsSoulPlayer::LMBUP()
+	{
+		bLMBDown = false;
+	}
+
+void AOnsSoulPlayer::EndAttacking()
+	{
+		IsAttacking = false;
+		ActionState = EActionState::ECS_Unoccipied;
+	}
+
+void AOnsSoulPlayer::AttackHitCheck()
+	{
+		if (ComboCnt >= 2)
+		{
+			ComboCnt = 0;
+		}
+		if (bIsAttackButton == true && CanAttack())
+		{
+			ComboCnt += 1;
+			bIsAttackButton = false;
+			Attack();
+		}
+	}

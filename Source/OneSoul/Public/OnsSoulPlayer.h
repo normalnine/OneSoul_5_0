@@ -6,24 +6,159 @@
 #include "GameFramework/Character.h"
 #include "OnsSoulPlayer.generated.h"
 
+class USpringArmComponent;
+class UCameraComponent;
+class UGroomComponent;
+class AItem;
+class AWeapon;
+
+UENUM(BlueprintType)
+enum class EActionState : uint8
+{
+	ECS_Unoccipied UMETA(DisplayName = "Unoccipied"),
+	ECS_Attacking UMETA(DisplayName = "Attacking"),
+	
+};
+
+UENUM(BlueprintType)
+enum class ECharacterState : uint8
+{
+ ECS_Unequipped UMETA(DisplayName = "Unequipped"),
+ ECS_EquippedOneHandedWeapon UMETA(DisplayName = "EquippedOneHandedWeapon"),
+ ECS_EquippedTwoHandedWeapon UMETA(DisplayName = "EquippedTwoHandedWeapon")
+};
+
+UENUM(BlueprintType)
+enum class ERotationMode : uint8
+{
+	OrienttoCamera,
+	OrienttoMovement
+};
+
 UCLASS()
 class ONESOUL_API AOnsSoulPlayer : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	AOnsSoulPlayer();
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION(BlueprintCallable, Category = "Attack")
+	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnable);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sprint")
+	float SprintSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sprint")
+	float WalkSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
+	float MaxStamina;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
+	float CurrentStamina;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
+	float MinStamina;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Targeting")
+	bool bIsTargeting;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Targeting")
+	float TargetingDistance;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Targeting")
+	float TargetingRadius;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Targeting")
+	float TargetRotationInterpSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Targeting")
+	TArray<TEnumAsByte<EObjectTypeQuery>> TargetObjectTypes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Targeting")
+	bool IsAttacking;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Targeting")
+	bool bLMBDown;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Targeting")
+	int32 ComboCnt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Targeting")
+	bool bIsAttackButton;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	float Health;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	float MaxHealth;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	ERotationMode RotationMode = ERotationMode::OrienttoMovement;
+
+	UFUNCTION(BlueprintCallable, Category = "Sprint")
+	void SetPlayerMaxSpeed(float MaxSpeed);
+	UFUNCTION(BlueprintCallable, Category = "Sprint")
+	void SprintTimer();
+	UFUNCTION(BlueprintCallable, Category = "Sprint")
+	void RegenerateStamina();
+	UFUNCTION(BlueprintCallable, Category = "Targeting")
+	void EnableLockOn();
+	UFUNCTION(BlueprintCallable, Category = "Targeting")
+	void DisableLockOn();
+	UFUNCTION(BlueprintCallable, Category = "Targeting")
+	void ToggleLockOnInput();
+	UFUNCTION(BlueprintCallable, Category = "Targeting")
+	void UpdateTargetingControlRotation();
+	UFUNCTION(BlueprintCallable, Category= "Attack")
+	bool CanAttack();
+	UFUNCTION(BlueprintCallable, Category = "Attack")
+	void EndAttacking();
+	UFUNCTION(BlueprintCallable, Category = "Attack")
+	void AttackHitCheck();
+	UFUNCTION(BlueprintCallable, Category = "Attack")
+	void Attack();
+	UFUNCTION(BlueprintCallable, Category = "Equip")
+	bool CanDisarm();
+	UFUNCTION(BlueprintCallable, Category = "Equip")
+	void PlayEquipMontage(const FName& SectionName);
+	UFUNCTION(BlueprintCallable, Category = "Equip")
+	bool CanArm();
+	UFUNCTION(BlueprintCallable, Category = "Equip")
+	void EquipWeapon(AWeapon* Weapon);
+
+protected:
+	virtual void BeginPlay() override;
+
+    void MoveForward(float Value);
+	void MoveRight(float Value);
+	void LookUp(float Value);
+	void Turn(float Value);
+	void StartSprint();
+	void StopSprint();
+	void ToggleLockOn();
+	void LMBDown();
+	void LMBUP();
+	void EKeyPressed();
+private:
+    
+    ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	EActionState ActionState = EActionState::ECS_Unoccipied;
+
+    UPROPERTY(VisibleAnywhere)
+	USpringArmComponent* SpringArm;
+
+	UPROPERTY(VisibleAnywhere)
+	UCameraComponent* Camera;
+
+	UPROPERTY(VisibleAnywhere)
+	class AActor* TargetActor;
+
+	UPROPERTY(VisibleInstanceOnly)
+	AItem* OverlappingItem;
+
+	UPROPERTY(VisibleAnywhere)
+	AWeapon* EquippedWeapon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montages, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* LevelStartMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montages, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* AttackMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montages, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* EquipMontage;
+
+public:
+   FORCEINLINE void SetOverlappingItem(AItem* Item) {OverlappingItem = Item;}
+   FORCEINLINE ECharacterState GetCharacterState() const {return CharacterState;}
 };
