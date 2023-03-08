@@ -11,12 +11,16 @@ class UCameraComponent;
 class UGroomComponent;
 class AItem;
 class AWeapon;
+class UOneSoulOverlay;
+class USoundBase;
 
 UENUM(BlueprintType)
 enum class EActionState : uint8
 {
 	ECS_Unoccipied UMETA(DisplayName = "Unoccipied"),
 	ECS_Attacking UMETA(DisplayName = "Attacking"),
+
+	ECS_Max UMETA(DisplayName = "DefaultMax")
 	
 };
 
@@ -44,6 +48,8 @@ public:
 	AOnsSoulPlayer();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Attack")
 	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnable);
@@ -81,6 +87,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float MaxHealth;
 
+	FTimerHandle HitReactTimer;
+
+	bool bCanHitReact;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	ERotationMode RotationMode = ERotationMode::OrienttoMovement;
 
@@ -114,6 +124,16 @@ public:
 	bool CanArm();
 	UFUNCTION(BlueprintCallable, Category = "Equip")
 	void EquipWeapon(AWeapon* Weapon);
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void ReceiveDamage(float Damge);
+	UFUNCTION(BlueprintCallable, Category = "Hit React")
+	void DirectionalHitReact(const FVector& ImpactPoint);
+	UFUNCTION(BlueprintCallable, Category = "Hit React")
+	void PlayHitReactMontage();
+	UFUNCTION(BlueprintCallable, Category = "Dead")
+	void Die();
+
+	void ReactHitTimer();
 
 protected:
 	virtual void BeginPlay() override;
@@ -157,6 +177,18 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montages, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* EquipMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montages, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* HitReactMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montages, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* DeathMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sounds, meta = (AllowPrivateAccess = "true"))
+	USoundBase* DeadSound;
+
+	UPROPERTY()
+	UOneSoulOverlay* OneSoulOverlay;
 
 public:
    FORCEINLINE void SetOverlappingItem(AItem* Item) {OverlappingItem = Item;}

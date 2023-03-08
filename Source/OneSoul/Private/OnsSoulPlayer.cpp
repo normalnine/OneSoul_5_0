@@ -10,9 +10,13 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "Sound/SoundBase.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Item.h"
 #include "Weapon.h"
+#include "OneSoulHUD.h"
+#include "OneSoulOverlay.h"
+#include "NormalEnemy_YG.h"
 
 AOnsSoulPlayer::AOnsSoulPlayer()
       
@@ -66,12 +70,15 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	Health = 100.f;
 	MaxHealth = 100.f;
 
+	bCanHitReact = true;
+
 	SetPlayerMaxSpeed(WalkSpeed);
 }
 
 void AOnsSoulPlayer::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	
 	Tags.Add(FName("OneSoulCharacter"));
 
@@ -81,6 +88,7 @@ void AOnsSoulPlayer::BeginPlay()
 		AnimInstance->Montage_Play(LevelStartMontage);
 
 	}
+
 
 	switch (RotationMode)
 	{
@@ -126,6 +134,66 @@ void AOnsSoulPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &AOnsSoulPlayer::LMBDown);
 	PlayerInputComponent->BindAction("Attack", IE_Released, this, &AOnsSoulPlayer::LMBUP);
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &AOnsSoulPlayer::EKeyPressed);
+}
+void AOnsSoulPlayer::DirectionalHitReact(const FVector& ImpactPoint)
+{
+	const FVector Forward = GetActorForwardVector();
+	// Lower Impact Point to the Enemy's Actor Location Z
+	const FVector ImpactLowered(ImpactPoint.X, ImpactPoint.Y, GetActorLocation().Z);
+	const FVector ToHit = (ImpactLowered - GetActorLocation()).GetSafeNormal();
+
+	// Forward * ToHit = |Forward||ToHit| * cos(theta)
+	// |Forward| = 1, |ToHit| = 1, so Forward * ToHit = cos(theta)
+	const double CosTheta = FVector::DotProduct(Forward, ToHit);
+	// Take the inverse cosine (arc-cosine) of cos(theta) to get theta
+	double Theta = FMath::Acos(CosTheta);
+	// convert from radians to degrees
+	Theta = FMath::RadiansToDegrees(Theta);
+
+	// if CrossProduct points down, Theta should be negative
+	const FVector CrossProduct = FVector::CrossProduct(Forward, ToHit);
+	if (CrossProduct.Z < 0)
+	{
+		Theta *= -1.f;
+	}
+
+	FName Section("FromBack");
+
+	if (Theta >= -45.f && Theta < 45.f)
+	{
+		Section = FName("FromFront");
+	}
+	else if (Theta >= -135.f && Theta < -45.f)
+	{
+		Section = FName("FromLeft");
+	}
+	else if (Theta >= 45.f && Theta < 135.f)
+	{
+		Section = FName("FromRight");
+	}
+
+	PlayHitReactMontage();
+}
+
+float AOnsSoulPlayer::TakeDamage(
+                      float Damage,
+					  struct FDamageEvent const& DamageEvent,
+					  AController* EventInstigator,
+					  AActor* DamageCauser)
+{
+	if (Health - Damage <= 0.f)
+	{
+	  Health = 0.f;
+	  Die();
+
+	}
+	else
+	{
+	  ReceiveDamage(Damage);
+	  PlayHitReactMontage();
+	}
+
+	return Damage;
 }
 
 void AOnsSoulPlayer::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnable)
@@ -215,25 +283,44 @@ void AOnsSoulPlayer::ToggleLockOn()
 	}
 }
 
-void AOnsSoulPlayer::Attack()
+void AOnsSoulPlayer::PlayHitReactMontage()
 {
-	bLMBDown = true;
-
-	UAnimInstance* AnimInstance = (GetMesh()->GetAnimInstance());
-	IsAttacking = true;
-
-	const char* Attackist[] = { "Attack1","Attack2","Attack3" };
-
-	if (!(AnimInstance->Montage_IsPlaying(AttackMontage)) && CanAttack())
+	if (bCanHitReact)
 	{
-		AnimInstance->Montage_Play(AttackMontage);
-	}
-	else if ((AnimInstance->Montage_IsPlaying(AttackMontage)) && CanAttack())
-	{
+	 UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	 if (AnimInstance && HitReactMontage)
+	 { 
+		AnimInstance->Montage_Play(HitReactMontage);
+		//AnimInstance->Montage_JumpToSection(SectionName, HitReactMontage);
+		GetWorldTimerManager().ClearTimer(HitReactTimer);
+	 }
 
-		AnimInstance->Montage_Play(AttackMontage);
-		AnimInstance->Montage_JumpToSection(FName(Attackist[ComboCnt]));
-	}
+	 bCanHitReact = false;
+	 GetWorldTimerManager().SetTimer(HitReactTimer, this, &AOnsSoulPlayer::ReactHitTimer,0.3);
+    }
+}
+
+void AOnsSoulPlayer::Attack()
+{ 
+
+		if(bCanHitReact == false) return;
+		bLMBDown = true;
+
+		UAnimInstance* AnimInstance = (GetMesh()->GetAnimInstance());
+		IsAttacking = true;
+
+		const char* Attackist[] = { "Attack1","Attack2","Attack3" };
+
+		if (!(AnimInstance->Montage_IsPlaying(AttackMontage)) && CanAttack())
+		{
+			AnimInstance->Montage_Play(AttackMontage);
+		}
+		else if ((AnimInstance->Montage_IsPlaying(AttackMontage)))
+		{
+			AnimInstance->Montage_Play(AttackMontage);
+			AnimInstance->Montage_JumpToSection(FName(Attackist[ComboCnt]));
+		}
+  
 }
 
 void AOnsSoulPlayer::EKeyPressed()
@@ -387,6 +474,11 @@ void AOnsSoulPlayer::EquipWeapon(AWeapon* Weapon)
 	EquippedWeapon = Weapon;
 }
 
+void AOnsSoulPlayer::ReceiveDamage(float Damge)
+{
+  Health = FMath:: Clamp(Health - Damge,0.f,MaxHealth);
+}
+
 void AOnsSoulPlayer::PlayEquipMontage(const FName& SectionName)
 {
  UAnimInstance* AnimInstance = GetMesh() -> GetAnimInstance();
@@ -399,13 +491,14 @@ void AOnsSoulPlayer::PlayEquipMontage(const FName& SectionName)
 
 void AOnsSoulPlayer::LMBDown()
 {
+   
 	bLMBDown = true;
 	if (IsAttacking == false && CanAttack())
 	{
 		Attack();
 		AttackHitCheck();
 	}
-	else if (IsAttacking == true && CanAttack())
+	else if (IsAttacking == true)
 	{
 		bIsAttackButton = true;
 	}
@@ -428,10 +521,32 @@ void AOnsSoulPlayer::AttackHitCheck()
 		{
 			ComboCnt = 0;
 		}
-		if (bIsAttackButton == true && CanAttack())
+		if (bIsAttackButton == true)
 		{
 			ComboCnt += 1;
 			bIsAttackButton = false;
 			Attack();
 		}
 	}
+
+void AOnsSoulPlayer::Die()
+{
+
+	Tags.Add(FName("Dead"));
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && DeathMontage)
+	{
+		AnimInstance->Montage_Play(DeathMontage);
+
+		UGameplayStatics::PlaySoundAtLocation(
+		                   GetWorld(),
+						   DeadSound,
+						   GetActorLocation());
+	}
+}
+
+void AOnsSoulPlayer::ReactHitTimer()
+{
+ bCanHitReact = true;
+}

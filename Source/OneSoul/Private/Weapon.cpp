@@ -8,6 +8,7 @@
 #include "Components/SphereComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "HitInterface.h"
+#include "NormalEnemy_YG.h"
 #include "Kismet/GameplayStatics.h"
 
 AWeapon::AWeapon()
@@ -61,18 +62,24 @@ void AWeapon::OnBoxOverlap(
               const FHitResult& SweepResult)
 {
    
-		if (ActorIsSameType(OthrActor)) return;
+		//if (ActorIsSameType(OthrActor)) return;
 
 		FHitResult BoxHit;
 		BoxTrace(BoxHit);
 
 		if (BoxHit.GetActor())
 		{
-			if (ActorIsSameType(BoxHit.GetActor())) return;
+			//if (ActorIsSameType(BoxHit.GetActor())) return;
 
 			UGameplayStatics::ApplyDamage(BoxHit.GetActor(), Damage, GetInstigator()->GetController(), this, UDamageType::StaticClass());
 			ExecuteGetHit(BoxHit);
 			CreateFields(BoxHit.ImpactPoint);
+		}
+
+		ANormalEnemy_YG* Enemy = Cast<ANormalEnemy_YG>(BoxHit.GetActor());
+		if (Enemy)
+		{
+			Enemy->ShowHitNumer(Damage, BoxHit.Location);
 		}
 }
 

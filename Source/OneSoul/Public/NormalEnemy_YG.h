@@ -87,6 +87,11 @@ public:
 	void HandleDamage(float Damage);
 	void DisableCapsule();
 
+	UFUNCTION(BlueprintCallable)
+	void ActivateWeapon();
+	UFUNCTION(BlueprintCallable)
+	void DeactivateWeapon();
+
 	FTimerHandle AttackTimer;
 
 	UPROPERTY(EditAnywhere, Category= Combat)
@@ -98,9 +103,36 @@ public:
 	UPROPERTY(EditAnywhere, Category = Combat)
 	float DeathLifeSpan;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShowHitNumer(int32 Damage, FVector HitLocation);
+
+	UFUNCTION(BlueprintCallable)
+	void StoreHitNumber(UUserWidget* HitNumber, FVector Location);
+
+	UFUNCTION()
+	void DestroyHitNumber(UUserWidget* HitNumber);
+
+	void UpdateHitNumbers();
+
 protected:
 	virtual void BeginPlay() override;
 
+	UFUNCTION()
+	virtual void OnBoxOverlap(
+		UPrimitiveComponent* OverlappedComponent,
+		AActor* OthrActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult);
+
+	UFUNCTION()
+	virtual	void OnBoxEndOverlap(
+	             UPrimitiveComponent* OverlappedComp,
+				 AActor* OtherActor,
+				 UPrimitiveComponent* OtherComp,
+				 int32 OtherBodyIndex);
+ 
 	void Die();
 	bool InTargetRange(AActor* Target, double Radius);
 	void MoveToTarget(AActor* Target);
@@ -177,7 +209,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	AActor* CombatTarget;
 
-	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UPROPERTY(EditDefaultsOnly, Category = Montage)
 	UAnimMontage* DeathMontage;
 
 	UPROPERTY(EditDefaultsOnly, Category = Montage)
@@ -185,5 +217,14 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = Montage)
 	UAnimMontage* AttackMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sounds, meta = (AllowPrivateAccess = "true"))
+	USoundBase* DeadSound;
+
+	UPROPERTY(VisibleAnywhere, Category = Combet, meta = (AllowPrivateAccess = "true"))
+	TMap <UUserWidget*, FVector> HitNumbers;
+
+	UPROPERTY(VisibleAnywhere, Category = Combet, meta = (AllowPrivateAccess = "true"))
+	float HitNumberDestoryTime;
 
 };
