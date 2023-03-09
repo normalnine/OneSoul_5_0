@@ -143,6 +143,8 @@ public:
 	void AttachWeaponToBack();
 	UFUNCTION(BlueprintCallable, Category = "Equip")
 	void AttachWeaponToHand();
+	UFUNCTION(BlueprintCallable, Category = "Equip")
+	void FinishEquipping();
 
 	void ReactHitTimer();
 

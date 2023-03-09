@@ -207,7 +207,7 @@ void AOnsSoulPlayer::SetWeaponCollisionEnabled(ECollisionEnabled::Type Collision
 
 void AOnsSoulPlayer::MoveForward(float Value)
 {
-    //if(ActionState != EActionState::ECS_Unoccipied) return;
+    if(ActionState != EActionState::ECS_Unoccipied) return;
 	if (Controller && (Value != 0.f))
 	{
 	   const FRotator ControlRotation = GetControlRotation();
@@ -220,7 +220,7 @@ void AOnsSoulPlayer::MoveForward(float Value)
 
 void AOnsSoulPlayer::MoveRight(float Value)
 {
-	//if (ActionState != EActionState::ECS_Unoccipied) return;
+	if (ActionState != EActionState::ECS_Unoccipied) return;
 	if (Controller && (Value != 0.f))
 	{
 	 const FRotator ControlRotation = GetControlRotation();
@@ -584,4 +584,9 @@ void AOnsSoulPlayer::AttachWeaponToHand()
 	{
 		EquippedWeapon->AttachMeshToSocket(GetMesh(), FName("RightHandSoket"));
 	}
+}
+
+void AOnsSoulPlayer::FinishEquipping()
+{
+	ActionState = EActionState::ECS_Unoccipied;
 }
