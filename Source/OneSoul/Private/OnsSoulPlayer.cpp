@@ -190,7 +190,7 @@ float AOnsSoulPlayer::TakeDamage(
 	else
 	{
 	  ReceiveDamage(Damage);
-	  PlayHitReactMontage();
+	  DirectionalHitReact(GetActorLocation());
 	}
 
 	return Damage;
@@ -207,7 +207,7 @@ void AOnsSoulPlayer::SetWeaponCollisionEnabled(ECollisionEnabled::Type Collision
 
 void AOnsSoulPlayer::MoveForward(float Value)
 {
-    if(ActionState != EActionState::ECS_Unoccipied) return;
+    //if(ActionState != EActionState::ECS_Unoccipied) return;
 	if (Controller && (Value != 0.f))
 	{
 	   const FRotator ControlRotation = GetControlRotation();
@@ -220,7 +220,7 @@ void AOnsSoulPlayer::MoveForward(float Value)
 
 void AOnsSoulPlayer::MoveRight(float Value)
 {
-	if (ActionState != EActionState::ECS_Unoccipied) return;
+	//if (ActionState != EActionState::ECS_Unoccipied) return;
 	if (Controller && (Value != 0.f))
 	{
 	 const FRotator ControlRotation = GetControlRotation();
@@ -286,21 +286,17 @@ void AOnsSoulPlayer::ToggleLockOn()
 void AOnsSoulPlayer::PlayHitReactMontage()
 {
 
-	if (bCanHitReact)
-	{
 	 UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	 if (AnimInstance && HitReactMontage)
 	 { 
 		AnimInstance->Montage_Play(HitReactMontage);
 	 }
 
-	 bCanHitReact = false;
-    }
 }
 
 void AOnsSoulPlayer::Attack()
 { 
-
+        
 		bLMBDown = true;
 
 		UAnimInstance* AnimInstance = (GetMesh()->GetAnimInstance());
@@ -327,21 +323,26 @@ void AOnsSoulPlayer::EKeyPressed()
 
  if (OverlappingWeapon)
  {
-	 OverlappingWidget->PickupWidget->SetVisibility(false);
+	 if (EquippedWeapon)
+	 {
+		 EquippedWeapon -> Destroy();
+	 }
+     OverlappingWidget->PickupWidget->SetVisibility(false);
 	 EquipWeapon(OverlappingWeapon);
  }
  else
  {
-	 if (CanDisarm())
-	 {
-	  PlayEquipMontage(FName("UnEquip"));
-	  CharacterState = ECharacterState::ECS_Unequipped;
+	 if (CanArm())
+	 {  
+		 Arm();
 	 }
-	 else if (CanArm())
+	 else if(CanDisarm())
 	 {
-	  PlayEquipMontage(FName("Equip"));
-	  CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+		 Disarm();
+		   
 	 }
+	
+	 
  }
 }
 
@@ -451,39 +452,21 @@ void AOnsSoulPlayer::UpdateTargetingControlRotation()
 
 bool AOnsSoulPlayer::CanAttack()
 {
- return ActionState == EActionState::ECS_Unoccipied && CharacterState != ECharacterState::ECS_Unequipped;
-}
-
-bool AOnsSoulPlayer::CanDisarm()
-{
-  return ActionState == EActionState::ECS_Unoccipied && CharacterState != ECharacterState::ECS_Unequipped;
-}
-
-bool AOnsSoulPlayer::CanArm()
-{
-  return ActionState == EActionState::ECS_Unoccipied && CharacterState == ECharacterState::ECS_Unequipped && EquippedWeapon;
+ return ActionState == EActionState::ECS_Unoccipied && 
+        CharacterState != ECharacterState::ECS_Unequipped;
 }
 
 void AOnsSoulPlayer::EquipWeapon(AWeapon* Weapon)
 {
 	Weapon->Equip(GetMesh(), FName("RightHandSoket"), this, this);
 	CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+	OverlappingItem = nullptr;
 	EquippedWeapon = Weapon;
 }
 
 void AOnsSoulPlayer::ReceiveDamage(float Damge)
 {
   Health = FMath:: Clamp(Health - Damge,0.f,MaxHealth);
-}
-
-void AOnsSoulPlayer::PlayEquipMontage(const FName& SectionName)
-{
- UAnimInstance* AnimInstance = GetMesh() -> GetAnimInstance();
- if (AnimInstance && EquipMontage)
- {
-	 AnimInstance -> Montage_Play(EquipMontage);
-	 AnimInstance -> Montage_JumpToSection(SectionName,EquipMontage);
- }
 }
 
 void AOnsSoulPlayer::LMBDown()
@@ -548,4 +531,57 @@ void AOnsSoulPlayer::Die()
 void AOnsSoulPlayer::ReactHitTimer()
 {
  bCanHitReact = true;
+}
+
+bool AOnsSoulPlayer::CanDisarm()
+{
+	return ActionState == EActionState::ECS_Unoccipied &&
+		CharacterState != ECharacterState::ECS_Unequipped;
+}
+
+bool AOnsSoulPlayer::CanArm()
+{
+	return ActionState == EActionState::ECS_Unoccipied&&
+		   CharacterState == ECharacterState::ECS_Unequipped &&
+		   EquippedWeapon;
+}
+
+void AOnsSoulPlayer::Disarm()
+{
+	PlayEquipMontage(FName("UnEquip"));
+	CharacterState = ECharacterState::ECS_Unequipped;
+	ActionState = EActionState::EAS_EquippingWeapon;
+}
+
+void AOnsSoulPlayer::Arm()
+{
+	PlayEquipMontage(FName("Equip"));
+	CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+	ActionState = EActionState::EAS_EquippingWeapon;
+}
+
+void AOnsSoulPlayer::PlayEquipMontage(const FName& SectionName)
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && EquipMontage)
+	{
+		AnimInstance->Montage_Play(EquipMontage);
+		AnimInstance->Montage_JumpToSection(SectionName, EquipMontage);
+	}
+}
+
+void AOnsSoulPlayer::AttachWeaponToBack()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->AttachMeshToSocket(GetMesh(), FName("SpineSocket"));
+	}
+}
+
+void AOnsSoulPlayer::AttachWeaponToHand()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->AttachMeshToSocket(GetMesh(), FName("RightHandSoket"));
+	}
 }

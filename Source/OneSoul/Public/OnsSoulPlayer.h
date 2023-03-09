@@ -21,6 +21,7 @@ enum class EActionState : uint8
 	ECS_Unoccipied UMETA(DisplayName = "Unoccipied"),
 	ECS_Attacking UMETA(DisplayName = "Attacking"),
 	ECS_HitReact UMETA(DisplayName = "HitReact"),
+	EAS_EquippingWeapon UMETA(DisplayName= "EquippingWeapon"),
 
 	ECS_Max UMETA(DisplayName = "DefaultMax")
 	
@@ -118,14 +119,6 @@ public:
 	void AttackHitCheck();
 	UFUNCTION(BlueprintCallable, Category = "Attack")
 	void Attack();
-	UFUNCTION(BlueprintCallable, Category = "Equip")
-	bool CanDisarm();
-	UFUNCTION(BlueprintCallable, Category = "Equip")
-	void PlayEquipMontage(const FName& SectionName);
-	UFUNCTION(BlueprintCallable, Category = "Equip")
-	bool CanArm();
-	UFUNCTION(BlueprintCallable, Category = "Equip")
-	void EquipWeapon(AWeapon* Weapon);
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void ReceiveDamage(float Damge);
 	UFUNCTION(BlueprintCallable, Category = "Hit React")
@@ -134,6 +127,22 @@ public:
 	void PlayHitReactMontage();
 	UFUNCTION(BlueprintCallable, Category = "Dead")
 	void Die();
+	UFUNCTION(BlueprintCallable, Category = "Equip")
+	bool CanDisarm();
+	UFUNCTION(BlueprintCallable, Category = "Equip")
+	void EquipWeapon(AWeapon* Weapon);
+	UFUNCTION(BlueprintCallable, Category = "Equip")
+	bool CanArm();
+	UFUNCTION(BlueprintCallable, Category = "Equip")
+	void Disarm();
+	UFUNCTION(BlueprintCallable, Category = "Equip")
+	void Arm();
+	UFUNCTION(BlueprintCallable, Category = "Equip")
+	void PlayEquipMontage(const FName& SectionName);
+	UFUNCTION(BlueprintCallable, Category = "Equip")
+	void AttachWeaponToBack();
+	UFUNCTION(BlueprintCallable, Category = "Equip")
+	void AttachWeaponToHand();
 
 	void ReactHitTimer();
 
@@ -153,6 +162,7 @@ protected:
 private:
     
     ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
+
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	EActionState ActionState = EActionState::ECS_Unoccipied;
 
