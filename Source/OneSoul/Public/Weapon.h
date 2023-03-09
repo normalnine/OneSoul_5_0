@@ -47,6 +47,9 @@ private:
 	 UPROPERTY(EditAnywhere, Category = "Weapon")
 	 float Damage = 20.f;
 
+	 UPROPERTY(EditAnywhere, Category = "Weapon")
+	 float HeadDamage = 25.f;
+
 	 bool ActorIsSameType(AActor* otherActor);
 
 	 void BoxTrace(FHitResult& BoxHit);

@@ -57,7 +57,7 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	CurrentStamina = 100.f;
 	MinStamina = 0.f;
 
-	bCanHitReact = true;
+	bCanHitReact = false;
 
 	bIsTargeting = false;
 	TargetingDistance = 900.f;
@@ -135,8 +135,34 @@ void AOnsSoulPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Attack", IE_Released, this, &AOnsSoulPlayer::LMBUP);
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &AOnsSoulPlayer::EKeyPressed);
 }
+
+float AOnsSoulPlayer::TakeDamage(
+                      float Damage,
+					  struct FDamageEvent const& DamageEvent,
+					  AController* EventInstigator,
+					  AActor* DamageCauser)
+{
+	if (Health - Damage <= 0.f)
+	{
+	  Health = 0.f;
+	  Die();
+
+	}
+	else
+	{
+	  bCanHitReact= true;
+	  ReceiveDamage(Damage);
+	  DirectionalHitReact(GetActorLocation());
+	}
+
+	return Damage;
+}
+
 void AOnsSoulPlayer::DirectionalHitReact(const FVector& ImpactPoint)
 {
+   
+   if(bCanHitReact == false) return;
+
 	const FVector Forward = GetActorForwardVector();
 	// Lower Impact Point to the Enemy's Actor Location Z
 	const FVector ImpactLowered(ImpactPoint.X, ImpactPoint.Y, GetActorLocation().Z);
@@ -173,27 +199,6 @@ void AOnsSoulPlayer::DirectionalHitReact(const FVector& ImpactPoint)
 	}
 
 	PlayHitReactMontage();
-}
-
-float AOnsSoulPlayer::TakeDamage(
-                      float Damage,
-					  struct FDamageEvent const& DamageEvent,
-					  AController* EventInstigator,
-					  AActor* DamageCauser)
-{
-	if (Health - Damage <= 0.f)
-	{
-	  Health = 0.f;
-	  Die();
-
-	}
-	else
-	{
-	  ReceiveDamage(Damage);
-	  DirectionalHitReact(GetActorLocation());
-	}
-
-	return Damage;
 }
 
 void AOnsSoulPlayer::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnable)
@@ -290,14 +295,18 @@ void AOnsSoulPlayer::PlayHitReactMontage()
 	 if (AnimInstance && HitReactMontage)
 	 { 
 		AnimInstance->Montage_Play(HitReactMontage);
+
+		UGameplayStatics::PlaySoundAtLocation(
+		                  GetWorld(),
+						  HitReactSound,
+						  GetActorLocation());
+        bCanHitReact = true;
 	 }
 
 }
 
 void AOnsSoulPlayer::Attack()
 { 
-        
-		bLMBDown = true;
 
 		UAnimInstance* AnimInstance = (GetMesh()->GetAnimInstance());
 		IsAttacking = true;
@@ -308,12 +317,12 @@ void AOnsSoulPlayer::Attack()
 		{
 			AnimInstance->Montage_Play(AttackMontage);
 		}
-		else if ((AnimInstance->Montage_IsPlaying(AttackMontage)))
+		else if ((AnimInstance->Montage_IsPlaying(AttackMontage)) && CanAttack())
 		{
 			AnimInstance->Montage_Play(AttackMontage);
 			AnimInstance->Montage_JumpToSection(FName(Attackist[ComboCnt]));
 		}
-  
+ 
 }
 
 void AOnsSoulPlayer::EKeyPressed()
@@ -341,7 +350,6 @@ void AOnsSoulPlayer::EKeyPressed()
 		 Disarm();
 		   
 	 }
-	
 	 
  }
 }
@@ -491,8 +499,8 @@ void AOnsSoulPlayer::LMBUP()
 
 void AOnsSoulPlayer::EndAttacking()
 	{
-		IsAttacking = false;
 		ActionState = EActionState::ECS_Unoccipied;
+		IsAttacking = false;
 	}
 
 void AOnsSoulPlayer::AttackHitCheck()
@@ -526,11 +534,6 @@ void AOnsSoulPlayer::Die()
 	}
 	UGameplayStatics::GetPlayerController(this, 0)->SetInputMode(FInputModeUIOnly());
 	EquippedWeapon -> Destroy(true);
-}
-
-void AOnsSoulPlayer::ReactHitTimer()
-{
- bCanHitReact = true;
 }
 
 bool AOnsSoulPlayer::CanDisarm()

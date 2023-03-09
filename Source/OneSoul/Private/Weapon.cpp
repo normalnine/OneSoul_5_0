@@ -64,23 +64,32 @@ void AWeapon::OnBoxOverlap(
    
 		//if (ActorIsSameType(OthrActor)) return;
 
-		FHitResult BoxHit;
-		BoxTrace(BoxHit);
+	      FHitResult BoxHit;
+	      BoxTrace(BoxHit);
+
+		  ANormalEnemy_YG* Enemy = Cast<ANormalEnemy_YG>(BoxHit.GetActor());
 
 		if (BoxHit.GetActor())
 		{
 			//if (ActorIsSameType(BoxHit.GetActor())) return;
 
-			UGameplayStatics::ApplyDamage(BoxHit.GetActor(), Damage, GetInstigator()->GetController(), this, UDamageType::StaticClass());
+			UGameplayStatics::ApplyDamage(
+			                  BoxHit.GetActor(),
+							  Damage,
+							  GetInstigator()->GetController(),
+							  this,
+							  UDamageType::StaticClass());
+
 			ExecuteGetHit(BoxHit);
 			CreateFields(BoxHit.ImpactPoint);
+
 		}
 
-		ANormalEnemy_YG* Enemy = Cast<ANormalEnemy_YG>(BoxHit.GetActor());
 		if (Enemy)
 		{
-			Enemy->ShowHitNumer(Damage, BoxHit.Location);
+		  Enemy->ShowHitNumer(Damage, BoxHit.Location,false);
 		}
+
 }
 
 bool AWeapon::ActorIsSameType(AActor* otherActor)

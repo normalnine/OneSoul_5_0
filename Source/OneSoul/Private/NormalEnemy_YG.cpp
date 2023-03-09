@@ -21,7 +21,7 @@ ANormalEnemy_YG::ANormalEnemy_YG()
 	PrimaryActorTick.bCanEverTick = true;
 
 	CombatRadius =500.f;
-	AttackRadius =300.f;
+	AttackRadius =250.f;
 	PatrolRadius = 200.f;
 
 	WaitMin = 5.f;
@@ -34,10 +34,10 @@ ANormalEnemy_YG::ANormalEnemy_YG()
 	AttackMax = 1.f;
 	BaseDamage = 20.f;
 
-	DeathLifeSpan = 2.5f;
+	DeathLifeSpan = 1.f;
 
 	HitNumberDestoryTime = 1.5f;
-
+	
 	bUseControllerRotationPitch= false;
 	bUseControllerRotationRoll = false;
 	bUseControllerRotationYaw = false;
@@ -98,6 +98,7 @@ void ANormalEnemy_YG::OnBoxOverlap(
 					  const FHitResult& SweepResult)
 {
   if(OtherComp == nullptr) return;
+
   auto player = Cast<AOnsSoulPlayer>(OthrActor);
   if (player)
   {
@@ -199,7 +200,6 @@ void ANormalEnemy_YG::CheckPatrolTarget()
 void ANormalEnemy_YG::PatrolTimerFinished()
 {
   MoveToTarget(PartrolTarget);
-
 }
 
 void ANormalEnemy_YG::Tick(float DeltaTime)

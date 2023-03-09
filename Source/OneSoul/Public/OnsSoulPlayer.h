@@ -22,6 +22,7 @@ enum class EActionState : uint8
 	ECS_Attacking UMETA(DisplayName = "Attacking"),
 	ECS_HitReact UMETA(DisplayName = "HitReact"),
 	EAS_EquippingWeapon UMETA(DisplayName= "EquippingWeapon"),
+	EAS_Stunned UMETA(DisplayName = "Stunned"),
 
 	ECS_Max UMETA(DisplayName = "DefaultMax")
 	
@@ -146,8 +147,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Equip")
 	void FinishEquipping();
 
-	void ReactHitTimer();
-
 protected:
 	virtual void BeginPlay() override;
 
@@ -200,6 +199,10 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sounds, meta = (AllowPrivateAccess = "true"))
 	USoundBase* DeadSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sounds, meta = (AllowPrivateAccess = "true"))
+	USoundBase* HitReactSound;
+
 
 	UPROPERTY()
 	UOneSoulOverlay* OneSoulOverlay;
