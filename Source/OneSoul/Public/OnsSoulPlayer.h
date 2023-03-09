@@ -13,12 +13,14 @@ class AItem;
 class AWeapon;
 class UOneSoulOverlay;
 class USoundBase;
+class ANormalEnemy_YG;
 
 UENUM(BlueprintType)
 enum class EActionState : uint8
 {
 	ECS_Unoccipied UMETA(DisplayName = "Unoccipied"),
 	ECS_Attacking UMETA(DisplayName = "Attacking"),
+	ECS_HitReact UMETA(DisplayName = "HitReact"),
 
 	ECS_Max UMETA(DisplayName = "DefaultMax")
 	
@@ -189,6 +191,9 @@ private:
 
 	UPROPERTY()
 	UOneSoulOverlay* OneSoulOverlay;
+
+	UPROPERTY()
+	ANormalEnemy_YG* Taget;
 
 public:
    FORCEINLINE void SetOverlappingItem(AItem* Item) {OverlappingItem = Item;}

@@ -57,6 +57,8 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	CurrentStamina = 100.f;
 	MinStamina = 0.f;
 
+	bCanHitReact = true;
+
 	bIsTargeting = false;
 	TargetingDistance = 900.f;
 	TargetingRadius = 100.f;
@@ -69,8 +71,6 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 
 	Health = 100.f;
 	MaxHealth = 100.f;
-
-	bCanHitReact = true;
 
 	SetPlayerMaxSpeed(WalkSpeed);
 }
@@ -285,25 +285,22 @@ void AOnsSoulPlayer::ToggleLockOn()
 
 void AOnsSoulPlayer::PlayHitReactMontage()
 {
+
 	if (bCanHitReact)
 	{
 	 UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	 if (AnimInstance && HitReactMontage)
 	 { 
 		AnimInstance->Montage_Play(HitReactMontage);
-		//AnimInstance->Montage_JumpToSection(SectionName, HitReactMontage);
-		GetWorldTimerManager().ClearTimer(HitReactTimer);
 	 }
 
 	 bCanHitReact = false;
-	 GetWorldTimerManager().SetTimer(HitReactTimer, this, &AOnsSoulPlayer::ReactHitTimer,0.3);
     }
 }
 
 void AOnsSoulPlayer::Attack()
 { 
 
-		if(bCanHitReact == false) return;
 		bLMBDown = true;
 
 		UAnimInstance* AnimInstance = (GetMesh()->GetAnimInstance());
@@ -544,6 +541,8 @@ void AOnsSoulPlayer::Die()
 						   DeadSound,
 						   GetActorLocation());
 	}
+	UGameplayStatics::GetPlayerController(this, 0)->SetInputMode(FInputModeUIOnly());
+	EquippedWeapon -> Destroy(true);
 }
 
 void AOnsSoulPlayer::ReactHitTimer()
