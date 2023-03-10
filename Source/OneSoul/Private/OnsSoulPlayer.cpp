@@ -57,6 +57,11 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	CurrentStamina = 100.f;
 	MinStamina = 0.f;
 
+	IsAttacking = false;
+	bLMBDown = false;
+	ComboCnt = 0;
+	bIsAttackButton = false;
+
 	bCanHitReact = false;
 
 	bIsTargeting = false;
@@ -64,10 +69,6 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	TargetingRadius = 100.f;
 	TargetRotationInterpSpeed = 9.f;
 
-	IsAttacking = false;
-	bLMBDown = false;
-	ComboCnt = 0;
-	bIsAttackButton = false;
 
 	Health = 100.f;
 	MaxHealth = 100.f;
@@ -151,11 +152,22 @@ float AOnsSoulPlayer::TakeDamage(
 	else
 	{
 	  bCanHitReact= true;
-	  ReceiveDamage(Damage);
 	  DirectionalHitReact(GetActorLocation());
+	  HitReactSounds();
+	  ReceiveDamage(Damage);
 	}
 
 	return Damage;
+}
+
+void AOnsSoulPlayer::SetOverlappongItem(class AItem* Item)
+{
+  OverlappingItem = Item;
+}
+
+void AOnsSoulPlayer::AddSouls(class ASoul* Soul)
+{
+
 }
 
 void AOnsSoulPlayer::DirectionalHitReact(const FVector& ImpactPoint)
@@ -198,7 +210,8 @@ void AOnsSoulPlayer::DirectionalHitReact(const FVector& ImpactPoint)
 		Section = FName("FromRight");
 	}
 
-	PlayHitReactMontage();
+	  PlayHitReactMontage();
+
 }
 
 void AOnsSoulPlayer::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnable)
@@ -292,14 +305,10 @@ void AOnsSoulPlayer::PlayHitReactMontage()
 {
 
 	 UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	 if (AnimInstance && HitReactMontage)
+	 if (AnimInstance && HitReactMontage && IsAttacking ==false)
 	 { 
 		AnimInstance->Montage_Play(HitReactMontage);
 
-		UGameplayStatics::PlaySoundAtLocation(
-		                  GetWorld(),
-						  HitReactSound,
-						  GetActorLocation());
         bCanHitReact = true;
 	 }
 
@@ -460,8 +469,9 @@ void AOnsSoulPlayer::UpdateTargetingControlRotation()
 
 bool AOnsSoulPlayer::CanAttack()
 {
- return ActionState == EActionState::ECS_Unoccipied && 
-        CharacterState != ECharacterState::ECS_Unequipped;
+
+	return ActionState == EActionState::ECS_Unoccipied &&
+	       CharacterState != ECharacterState::ECS_Unequipped;
 }
 
 void AOnsSoulPlayer::EquipWeapon(AWeapon* Weapon)
@@ -486,7 +496,7 @@ void AOnsSoulPlayer::LMBDown()
 		Attack();
 		AttackHitCheck();
 	}
-	else if (IsAttacking == true)
+	else if (IsAttacking == true && CanAttack())
 	{
 		bIsAttackButton = true;
 	}
@@ -592,4 +602,12 @@ void AOnsSoulPlayer::AttachWeaponToHand()
 void AOnsSoulPlayer::FinishEquipping()
 {
 	ActionState = EActionState::ECS_Unoccipied;
+}
+
+void AOnsSoulPlayer::HitReactSounds()
+{
+	UGameplayStatics::PlaySoundAtLocation(
+		              GetWorld(),
+		              HitReactSound,
+		              GetActorLocation());
 }

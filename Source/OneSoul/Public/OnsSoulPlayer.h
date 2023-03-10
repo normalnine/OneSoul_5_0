@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "PickUpInterface.h"
 #include "OnsSoulPlayer.generated.h"
 
 class USpringArmComponent;
@@ -11,6 +12,7 @@ class UCameraComponent;
 class UGroomComponent;
 class AItem;
 class AWeapon;
+class ASoul;
 class UOneSoulOverlay;
 class USoundBase;
 class ANormalEnemy_YG;
@@ -44,7 +46,7 @@ enum class ERotationMode : uint8
 };
 
 UCLASS()
-class ONESOUL_API AOnsSoulPlayer : public ACharacter
+class ONESOUL_API AOnsSoulPlayer : public ACharacter, public IPickUpInterface
 {
 	GENERATED_BODY()
 
@@ -54,6 +56,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	virtual void SetOverlappongItem(class AItem* Item) override;
+	virtual void AddSouls(class ASoul* Soul) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Attack")
 	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnable);
@@ -146,6 +150,8 @@ public:
 	void AttachWeaponToHand();
 	UFUNCTION(BlueprintCallable, Category = "Equip")
 	void FinishEquipping();
+	UFUNCTION(BlueprintCallable, Category = "Sounds")
+	void HitReactSounds();
 
 protected:
 	virtual void BeginPlay() override;
@@ -211,6 +217,5 @@ private:
 	ANormalEnemy_YG* Taget;
 
 public:
-   FORCEINLINE void SetOverlappingItem(AItem* Item) {OverlappingItem = Item;}
    FORCEINLINE ECharacterState GetCharacterState() const {return CharacterState;}
 };

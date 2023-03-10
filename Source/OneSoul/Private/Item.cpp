@@ -7,6 +7,9 @@
 #include "Components/WidgetComponent.h"
 #include "Components/SphereComponent.h"
 #include "OnsSoulPlayer.h"
+#include "Soul.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 
 AItem::AItem() :
      Amplitude(0.25f),
@@ -24,6 +27,9 @@ AItem::AItem() :
 
 	PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
 	PickupWidget -> SetupAttachment(GetRootComponent());
+
+	ItemEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Embers"));
+	ItemEffect -> SetupAttachment(GetRootComponent());
 }
 
 void AItem::BeginPlay()
@@ -34,6 +40,25 @@ void AItem::BeginPlay()
 	Sphere -> OnComponentEndOverlap.AddDynamic(this,&AItem::OnSphereEndOverlap);
 
 	PickupWidget -> SetVisibility(false);
+}
+
+void AItem::SpawnPickupSystem()
+{
+	if (PickupEffect)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			this,
+			PickupEffect,
+			GetActorLocation());
+	}
+}
+
+void AItem::SpawnPickupSound()
+{
+  UGameplayStatics::PlaySoundAtLocation(
+                    this,
+					PickupSound,
+					GetActorLocation());
 }
 
 float AItem::TransformedSin()
@@ -49,10 +74,10 @@ void AItem::OnSphereOverlap(
 			bool bFromSweep,
 			const FHitResult& SweepResult)
 {
- AOnsSoulPlayer*OneSoulPlayer = Cast<AOnsSoulPlayer>(OthrActor);
- if (OneSoulPlayer)
+IPickUpInterface* PickupInterface = Cast<IPickUpInterface>(OthrActor);
+ if (PickupInterface)
  {
-	 OneSoulPlayer->SetOverlappingItem(this);
+	 PickupInterface->SetOverlappongItem(this);
 	 PickupWidget -> SetVisibility(true);
  }
  
@@ -64,12 +89,12 @@ void AItem::OnSphereEndOverlap(
 			UPrimitiveComponent* OtherComp,
 			int32 OtherBodyIndex)
 {
-  AOnsSoulPlayer* OneSoulPlayer = Cast<AOnsSoulPlayer>(OthrActor);
-  if (OneSoulPlayer)
-  {
-	OneSoulPlayer->SetOverlappingItem(nullptr);
-	PickupWidget->SetVisibility(false);
-  }
+	IPickUpInterface* PickupInterface = Cast<IPickUpInterface>(OthrActor);
+	if (PickupInterface)
+	{
+		PickupInterface->SetOverlappongItem(nullptr);
+		PickupWidget->SetVisibility(false);
+	}
 }
 void AItem::Tick(float DeltaTime)
 {

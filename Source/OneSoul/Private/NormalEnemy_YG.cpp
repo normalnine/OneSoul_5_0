@@ -21,7 +21,7 @@ ANormalEnemy_YG::ANormalEnemy_YG()
 	PrimaryActorTick.bCanEverTick = true;
 
 	CombatRadius =500.f;
-	AttackRadius =250.f;
+	AttackRadius =220.f;
 	PatrolRadius = 200.f;
 
 	WaitMin = 5.f;

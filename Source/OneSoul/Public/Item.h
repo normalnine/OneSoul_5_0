@@ -4,12 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "PickUpInterface.h"
 #include "Item.generated.h"
 
 class UStaticMeshComponent;
 class UBoxComponent;
 class UWidgetComponent;
 class USphereComponent;
+class UNiagaraComponent;
+class UNiagaraSystem;
 
 UENUM(BlueprintType)
 enum class EItemState : uint8
@@ -33,6 +36,9 @@ public:
 	
 protected:
 	virtual void BeginPlay() override;
+
+	virtual void SpawnPickupSystem();
+	virtual void SpawnPickupSound();
 
 	//ÁøÆø
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Sine, meta = (AllowPrivateAccess = "true"))
@@ -68,8 +74,17 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* Sphere;
 
+	UPROPERTY(EditAnywhere)
+	UNiagaraComponent *ItemEffect;
+
 private:
     UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category= Sine,meta= (AllowPrivateAccess = "true"))
     float RunningTime;
+
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* PickupEffect;
+
+	UPROPERTY(EditAnywhere)
+    USoundBase* PickupSound;
 
 };
