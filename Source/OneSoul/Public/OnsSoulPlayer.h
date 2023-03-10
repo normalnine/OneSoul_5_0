@@ -94,8 +94,12 @@ public:
 	float Health;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float MaxHealth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Heal")
+	float Potion;
 
 	FTimerHandle HitReactTimer;
+
+	FTimerHandle PotionDrinkingTimer;
 
 	bool bCanHitReact;
 
@@ -152,6 +156,12 @@ public:
 	void FinishEquipping();
 	UFUNCTION(BlueprintCallable, Category = "Sounds")
 	void HitReactSounds();
+	UFUNCTION(BlueprintCallable, Category = "Heal")
+	void PotionHP(float PotionHP);
+	UFUNCTION(BlueprintCallable, Category = "Heal")
+	void PlayPotionHealMontage();
+	UFUNCTION(BlueprintCallable, Category = "Heal")
+	void PotionAttakTimer();
 
 protected:
 	virtual void BeginPlay() override;
@@ -166,6 +176,7 @@ protected:
 	void LMBDown();
 	void LMBUP();
 	void EKeyPressed();
+	void PotionDrinking();
 private:
     
     ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
@@ -202,6 +213,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montages, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* DeathMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montages, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* PotionHealMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sounds, meta = (AllowPrivateAccess = "true"))
 	USoundBase* DeadSound;

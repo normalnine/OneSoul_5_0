@@ -577,13 +577,11 @@ void ANormalEnemy_YG::Die()
 
 	}
 
-	 SpawnSoul();
-
 	ClearAttackTimer();
 	HideHealthBar();
 	DisableCapsule();
 	GetCharacterMovement()->bOrientRotationToMovement = false;
-
+	SpawnSoul();
     SetLifeSpan(DeathLifeSpan);
 
 }

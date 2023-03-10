@@ -69,9 +69,10 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	TargetingRadius = 100.f;
 	TargetRotationInterpSpeed = 9.f;
 
-
 	Health = 100.f;
 	MaxHealth = 100.f;
+
+	Potion = 20.f;
 
 	SetPlayerMaxSpeed(WalkSpeed);
 }
@@ -135,6 +136,7 @@ void AOnsSoulPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &AOnsSoulPlayer::LMBDown);
 	PlayerInputComponent->BindAction("Attack", IE_Released, this, &AOnsSoulPlayer::LMBUP);
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &AOnsSoulPlayer::EKeyPressed);
+	PlayerInputComponent->BindAction("Healing", IE_Pressed, this, &AOnsSoulPlayer::PotionDrinking);
 }
 
 float AOnsSoulPlayer::TakeDamage(
@@ -151,7 +153,6 @@ float AOnsSoulPlayer::TakeDamage(
 	}
 	else
 	{
-	  bCanHitReact= true;
 	  DirectionalHitReact(GetActorLocation());
 	  HitReactSounds();
 	  ReceiveDamage(Damage);
@@ -173,7 +174,8 @@ void AOnsSoulPlayer::AddSouls(class ASoul* Soul)
 void AOnsSoulPlayer::DirectionalHitReact(const FVector& ImpactPoint)
 {
    
-   if(bCanHitReact == false) return;
+   if(IsAttacking == true) return;
+
 
 	const FVector Forward = GetActorForwardVector();
 	// Lower Impact Point to the Enemy's Actor Location Z
@@ -305,7 +307,7 @@ void AOnsSoulPlayer::PlayHitReactMontage()
 {
 
 	 UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	 if (AnimInstance && HitReactMontage && IsAttacking ==false)
+	 if (AnimInstance && HitReactMontage)
 	 { 
 		AnimInstance->Montage_Play(HitReactMontage);
 
@@ -610,4 +612,39 @@ void AOnsSoulPlayer::HitReactSounds()
 		              GetWorld(),
 		              HitReactSound,
 		              GetActorLocation());
+}
+
+void AOnsSoulPlayer::PotionHP(float PotionHP)
+{
+	if (Health != 0)
+	{
+		Health += PotionHP;
+    }
+
+}
+
+void AOnsSoulPlayer::PotionDrinking()
+{
+	   
+	    IsAttacking = true;
+		Potion = FMath::Clamp(Health, 0.f, MaxHealth);
+		PotionHP(Potion);
+		PlayPotionHealMontage();
+		SetPlayerMaxSpeed(300.f);
+		GetWorldTimerManager().SetTimer(PotionDrinkingTimer, this, &AOnsSoulPlayer::PotionAttakTimer, 1.5f);
+
+}
+
+void AOnsSoulPlayer::PlayPotionHealMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && PotionHealMontage)
+	{
+		AnimInstance->Montage_Play(PotionHealMontage);
+	}
+}
+
+void AOnsSoulPlayer::PotionAttakTimer()
+{
+  IsAttacking = false;
 }

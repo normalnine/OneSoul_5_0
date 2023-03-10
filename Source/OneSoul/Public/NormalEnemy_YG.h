@@ -36,6 +36,7 @@ class UHealthBarComponent;
 class UPawnSensingComponent;
 class UBoxComponent;
 class AAIController;
+class ASoul;
 
 UCLASS()
 class ONESOUL_API ANormalEnemy_YG : public ACharacter, public IHitInterface
@@ -58,6 +59,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EEnemyState EnemyState = EEnemyState::EES_Patrolling;
 
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	TSubclassOf<class ASoul> SoulClass;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	ASoul* Souls;
+
 	UPROPERTY(EditAnywhere, Category = Combat)
 	float PatrollingSpeed;
 
@@ -65,38 +73,6 @@ public:
 	float ChasingSpeed;
 
 	UPROPERTY(EditAnywhere, Category = Combat)
-	TSubclassOf<class ASoul> SoulClass;
-
-	void StartPatrolling();
-	void ChaseTarget();
-	bool IsOutsideCombatRadius();
-	bool IsOutsideAttackRadius();
-	bool IsChasing();
-	bool IsInsideAttackRadius();
-	bool IsAttacking();
-
-	UFUNCTION(BlueprintCallable)
-	bool IsDead();
-
-	bool IsEngaged();
-	bool CanAttack();
-	bool IsAlive();
-	void ClearPatrolTimer();
-
-	UFUNCTION(BlueprintCallable)
-	void AttackEnd();
-
-	void StartAttackTimer();
-	void ClearAttackTimer();
-
-	void HandleDamage(float Damage);
-	void DisableCapsule();
-
-	UFUNCTION(BlueprintCallable)
-	void ActivateWeapon();
-	UFUNCTION(BlueprintCallable)
-	void DeactivateWeapon();
-
 	FTimerHandle AttackTimer;
 
 	UPROPERTY(EditAnywhere, Category= Combat)
@@ -108,6 +84,56 @@ public:
 	UPROPERTY(EditAnywhere, Category = Combat)
 	float DeathLifeSpan;
 
+	void StartPatrolling();
+
+	void ChaseTarget();
+
+	void ClearPatrolTimer();
+
+	bool IsOutsideCombatRadius();
+
+	bool IsOutsideAttackRadius();
+
+	bool IsChasing();
+
+	bool IsInsideAttackRadius();
+
+	bool IsAlive();
+
+	bool IsEngaged();
+
+	UFUNCTION(BlueprintCallable)
+	bool IsDead();
+
+	void Attack();
+
+	void PlayAttackMontage();
+
+	bool IsAttacking();
+
+	bool CanAttack();
+
+	void StartAttackTimer();
+
+	UFUNCTION(BlueprintCallable)
+	void AttackEnd();
+
+	void ClearAttackTimer();
+
+	void HandleDamage(float Damage);
+
+	void DisableCapsule();
+
+	UFUNCTION(BlueprintCallable, Category = Weapon)
+	void ActivateWeapon();
+
+	UFUNCTION(BlueprintCallable, Category = Weapon)
+	void DeactivateWeapon();
+
+	void HideHealthBar();
+
+	void ShowHealthBar();
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowHitNumer(int32 Damage, FVector HitLocation,bool bHeadShot);
 
@@ -117,6 +143,7 @@ public:
 	UFUNCTION()
 	void DestroyHitNumber(UUserWidget* HitNumber);
 
+	UFUNCTION()
 	void UpdateHitNumbers();
 
 	void PatrolTimerFinished();
@@ -130,12 +157,12 @@ protected:
 
 	UFUNCTION()
 	virtual void OnBoxOverlap(
-		UPrimitiveComponent* OverlappedComponent,
-		AActor* OthrActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult);
+		         UPrimitiveComponent* OverlappedComponent,
+		         AActor* OthrActor,
+		         UPrimitiveComponent* OtherComp,
+		         int32 OtherBodyIndex,
+		         bool bFromSweep,
+		         const FHitResult& SweepResult);
 
 	UFUNCTION()
 	virtual	void OnBoxEndOverlap(
@@ -146,12 +173,10 @@ protected:
  
 	void Die();
 	bool InTargetRange(AActor* Target, double Radius);
-	void MoveToTarget(AActor* Target);
 	AActor* ChoosePatrolTarget();
+	void MoveToTarget(AActor* Target);
 	void CheckCombatTarget();
 	void CheckPatrolTarget();
-	void HideHealthBar();
-	void ShowHealthBar();
 	void LoseInterset();
 	void InitializeEnemy();
 	void PlayHitReactMontage(const FName& SectionName);
@@ -160,10 +185,6 @@ protected:
 	void PawnSeen(APawn* SeenPawn);
     
 	void DirectionalHitReact(const FVector& ImpactPoint);
-
-	void Attack();
-
-	void PlayAttackMontage();
 
 
 private:
