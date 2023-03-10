@@ -34,4 +34,8 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = BodyMesh)
 		class UStaticMeshComponent* bodyMeshComp;
 
+
+	UFUNCTION()
+		void OnOverlapBeginMagic(class UPrimitiveComponent* selfComp, class AActor* otherActor, UPrimitiveComponent* otherComp,
+			int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 };

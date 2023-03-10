@@ -211,17 +211,26 @@ void UEnemy_Titan_FSM::UpdaetAttackDelay()
 		{
 			anim->PlayDamageAnim(TEXT("Shout"));
 			//몽타주 끝나면 블프에서 폴스로 바꿔주기
+			ChangeState(EEnemyState4::Attack2);
 		}
 		FVector dir = target->GetActorLocation() - me->GetActorLocation();
 		float dist = dir.Length();
 
 		if (dist < attackRange)
 		{
+			//기본 공격 패턴 2개
 			int32 index = FMath::RandRange(0, 1);
+			//hp가 적어지면 공격패턴 추가
+			if (hp<11)
+			{index =FMath::RandRange(0,2);}
+
+			//공격패턴 실행
 			if (index == 0)
 			{ChangeState(EEnemyState4::Attack0);}
-			else
+			else if(index ==1)
 			{ChangeState(EEnemyState4::Attack1);}
+			else
+			{ChangeState(EEnemyState4::Attack2);}
 			
 		}
 		else

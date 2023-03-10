@@ -3,8 +3,10 @@
 
 #include "Enemy_Skeleton.h"
 #include "Enemy_Skeleton_FSM.h"
+#include "OnsSoulPlayer.h"
 #include <Components/CapsuleComponent.h>
 #include <Components/SphereComponent.h>
+#include <Kismet/GameplayStatics.h>
 
 
 AEnemy_Skeleton::AEnemy_Skeleton()
@@ -55,6 +57,21 @@ AEnemy_Skeleton::AEnemy_Skeleton()
 	collisionComp->SetupAttachment(ShieldMeshComp);
 
 
+	SwordCollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AEnemy_Skeleton::OnOverlapBeginsword);
+
 
 	fsm = CreateDefaultSubobject<UEnemy_Skeleton_FSM>(TEXT("FSM"));
 }
+void AEnemy_Skeleton::OnOverlapBeginsword(class UPrimitiveComponent* selfComp, class AActor* otherActor, UPrimitiveComponent* otherComp,
+	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+	{
+
+		AOnsSoulPlayer* target = Cast<AOnsSoulPlayer>(otherActor);
+		//UEFSM* enemy = Cast<UEFSM>(otherActor);
+		if (target != nullptr)
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("OverLap 1"));
+		
+
+		}
+	}

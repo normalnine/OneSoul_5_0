@@ -3,7 +3,10 @@
 
 #include "Enemy_knight.h"
 #include "Enemy_knight_FSM.h"
+#include "OnsSoulPlayer.h"
 #include <Components/SphereComponent.h>
+#include <Components/CapsuleComponent.h>
+
 
 AEnemy_knight::AEnemy_knight()
 {
@@ -19,8 +22,28 @@ AEnemy_knight::AEnemy_knight()
 	}
 
 
+	SwordCollisionComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("SwordCollision"));
+	SwordCollisionComp->SetupAttachment(GetMesh(),"Bip001-R-HandSocket");
+
+	collisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("ShieldCollision"));
+	collisionComp->SetupAttachment(GetMesh(), "Bip001-L-HandSocket");
 
 
+	SwordCollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AEnemy_knight::OnOverlapBeginsword);
 
 	fsm = CreateDefaultSubobject<UEnemy_knight_FSM>(TEXT("FSM"));
+}
+
+void AEnemy_knight::OnOverlapBeginsword(class UPrimitiveComponent* selfComp, class AActor* otherActor, UPrimitiveComponent* otherComp,
+	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+
+	AOnsSoulPlayer* target = Cast<AOnsSoulPlayer>(otherActor);
+	//UEFSM* enemy = Cast<UEFSM>(otherActor);
+	if (target != nullptr)
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("OverLap 1"));
+
+
+	}
 }

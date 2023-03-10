@@ -36,4 +36,7 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Collision)
 		class UCapsuleComponent* SwordCollisionComp;
 
+	UFUNCTION()
+		void OnOverlapBeginsword(class UPrimitiveComponent* selfComp, class AActor* otherActor, UPrimitiveComponent* otherComp,
+			int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 };
