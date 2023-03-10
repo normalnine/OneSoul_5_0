@@ -78,4 +78,18 @@ void UEnemyBossAnim::AnimNotify_FireSpread()
 	enemy->fsm->SpawnFireSpread();
 }
 
+void UEnemyBossAnim::AnimNotify_Laser()
+{
+	enemy->fsm->SpawnLaser();
+}
+
+void UEnemyBossAnim::AnimNotify_Ghost()
+{
+	enemy->fsm->SpawnGhost();
+}
+
+void UEnemyBossAnim::AnimNotify_Roar()
+{
+	enemy->fsm->Roar();
+}
 

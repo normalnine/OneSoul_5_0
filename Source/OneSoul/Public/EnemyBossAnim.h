@@ -83,4 +83,12 @@ public:
 
 	UFUNCTION()
 		void AnimNotify_FireSpread();	
+	UFUNCTION()
+		void AnimNotify_Laser();
+
+	UFUNCTION()
+		void AnimNotify_Ghost();
+
+		UFUNCTION()
+		void AnimNotify_Roar();
 };

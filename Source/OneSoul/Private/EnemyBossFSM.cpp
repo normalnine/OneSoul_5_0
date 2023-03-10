@@ -13,6 +13,10 @@
 #include "EnemyBossFireball.h"
 #include "EnemyBossFireSpread.h"
 #include "OnsSoulPlayer.h"
+#include "EnemyBossHPBar.h"
+#include <GameFramework/CharacterMovementComponent.h>
+#include "EnemyBossLaser.h"
+#include "EnemyBossGhost.h"
 
 // Sets default values for this component's properties
 UEnemyBossFSM::UEnemyBossFSM()
@@ -48,12 +52,8 @@ void UEnemyBossFSM::BeginPlay()
 	//나의 초기 체력을 셋팅하자
 	currHP = maxHP;
 
-	//나의 초기 쉴드게이지를 셋팅하자
-	currShieldGauge = maxShieldGauge;
-
 	//나의 초기 위치를 저장하자
 	originPos = me->GetActorLocation();
-
 }
 
 
@@ -172,27 +172,6 @@ void UEnemyBossFSM::UpdateMove()
 
 void UEnemyBossFSM::UpdateAttack()
 {
-	// 머리 휘두르며 깨물기
-	if (anim->bAttackPlay0)
-	{
-
-	}
-
-	// 양쪽에서 총알 한 발씩 X2
-	else if (anim->bAttackPlay1)
-	{
-
-	}
-
-	// 브레스 발사체
-	else if (anim->bAttackPlay2)
-	{
-	}
-
-	// 브레스 스프레드
-	else if (anim->bAttackPlay3)
-	{
-	}
 	//2. 상태를 AttackDelay 로 전환	
 	ChangeState(EEnemyBossState::AttackDelay);
 }
@@ -348,7 +327,6 @@ void UEnemyBossFSM::ChangeState(EEnemyBossState state)
 		float WaitTime = 20.0f; //시간을 설정하고
 		GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
 			{
-				currShieldGauge = maxShieldGauge;
 				ChangeState(EEnemyBossState::Idle);
 			}), WaitTime, false);
 	}
@@ -362,30 +340,29 @@ void UEnemyBossFSM::ChangeState(EEnemyBossState state)
 	}
 }
 
-void UEnemyBossFSM::ReceiveDamage()
+void UEnemyBossFSM::ReceiveDamage(int32 damage)
 {
-	if (currShieldGauge < 1.0f)
+	//피를 줄이자
+	currHP -= damage;
+	EnemyBossHPBar->UpdateCurrHP(currHP, maxHP);
+
+	//데미지를 누적하자
+	accumulatedDamage += damage;
+	EnemyBossHPBar->UpdateAccumulatedDamage(accumulatedDamage);
+
+	bDamageDealtRecently = true;
+	GetWorld()->GetTimerManager().SetTimer(DamageResetTimerHandle, this, &UEnemyBossFSM::ResetDamageIfNoRecentDamage, 2.0f, false);
+
+	if (currHP > 0)
 	{
-		//피를 줄이자
-		currHP--;
-		//hp 가 0보다 크면 Damage 상태로 전환
-		if (currHP > 0)
+		if (accumulatedDamage > groggyDamage)
 		{
-			//ChangeState(EEnemyBossState::Damaged);
-		}
-		//그렇지 않으면 Die 상태로 전환
-		else
-		{
-			ChangeState(EEnemyBossState::Die);
+			ChangeState(EEnemyBossState::Damaged);
 		}
 	}
 	else
 	{
-		currShieldGauge--;
-		if (currShieldGauge < 1.0f)
-		{
-			ChangeState(EEnemyBossState::Damaged);
-		}
+		ChangeState(EEnemyBossState::Die);
 	}
 }
 
@@ -426,6 +403,13 @@ bool UEnemyBossFSM::IsTargetTrace()
 	//if (angle < 60 && dir.Length() < traceRange)
 	if (dir.Length() < traceRange)
 	{
+		if (EnemyBossHPBar == nullptr)
+		{
+			EnemyBossHPBar = CreateWidget<UEnemyBossHPBar>(GetWorld(), EnemyBossHPBarFactory);
+			EnemyBossHPBar->AddToViewport();
+			EnemyBossHPBar->UpdateCurrHP(currHP, maxHP);
+		}
+
 		//Enemy -----> target LineTrace 쏘자!!
 		FHitResult hitInfo;
 		FCollisionQueryParams param;
@@ -476,11 +460,11 @@ void UEnemyBossFSM::DecideAttackPattern()
 	}
 	else
 	{
-		randPattern = FMath::RandRange(0, 5);
+		randPattern = FMath::RandRange(0, 8);
 	}
 	
 	//UE_LOG(LogTemp, Warning, TEXT("attackNum : %d"), randPattern);
-
+	//anim->bAttackPlay8 = true;
 	switch (randPattern)
 	{
 	case 0:
@@ -535,6 +519,56 @@ void UEnemyBossFSM::SpawnFireball()
 
 void UEnemyBossFSM::SpawnFireSpread()
 {
-	AEnemyBossFireSpread* fireSpread = GetWorld()->SpawnActor<AEnemyBossFireSpread>(FireSpreadFactory, me->GetMesh()->GetSocketTransform(TEXT("MOUNTAIN_DRAGON_-Ponytail1Socket")));
+	AEnemyBossFireSpread* fireSpread = GetWorld()->SpawnActor<AEnemyBossFireSpread>(FireSpreadFactory, me->GetMesh()->GetSocketTransform(TEXT("MOUNTAIN_DRAGON_-Ponytail1Socket")));	
+}
+
+void UEnemyBossFSM::SpawnLaser()
+{
+	AEnemyBossLaser* Laser = GetWorld()->SpawnActor<AEnemyBossLaser>(LaserFactory, me->GetMesh()->GetSocketTransform(TEXT("MOUNTAIN_DRAGON_-Ponytail1Socket")));
+}
+
+void UEnemyBossFSM::ResetDamageIfNoRecentDamage()
+{
+	if (bDamageDealtRecently)
+	{
+		bDamageDealtRecently = false;
+		GetWorld()->GetTimerManager().SetTimer(DamageResetTimerHandle, this, &UEnemyBossFSM::ResetDamageIfNoRecentDamage, 2.0f, false);
+	}
+	else
+	{
+		accumulatedDamage = 0;
+		EnemyBossHPBar->UpdateAccumulatedDamage(accumulatedDamage);
+	}
+}
+
+void UEnemyBossFSM::SpawnGhost()
+{
+	FTransform trans = me->GetActorTransform();
+
 	
+	float WaitTime = 0.05f; //시간을 설정하고
+	GetWorld()->GetTimerManager().SetTimer(GhostHandle, FTimerDelegate::CreateLambda([&]()
+		{			
+			ghost = GetWorld()->SpawnActor<AEnemyBossGhost>(GhostFactory, me->GetActorLocation()+FVector(0,i*150,0), me->GetActorRotation());			
+			ghost = GetWorld()->SpawnActor<AEnemyBossGhost>(GhostFactory, me->GetActorLocation()+FVector(0,-i*150,0), me->GetActorRotation());
+
+			i += 1;
+
+			if (i > 15)
+			{
+				GetWorld()->GetTimerManager().ClearTimer(GhostHandle);
+				i = 5;
+			}
+			
+		}), WaitTime, true);
+}
+
+void UEnemyBossFSM::Roar()
+{
+	UCharacterMovementComponent* PlayerMovementComponent = target->FindComponentByClass<UCharacterMovementComponent>();
+
+	FVector ForceDirection = target->GetActorLocation() - me->GetActorLocation();
+	ForceDirection.Normalize();
+
+	PlayerMovementComponent->AddImpulse(ForceDirection * enemyAttackForce, true);
 }
