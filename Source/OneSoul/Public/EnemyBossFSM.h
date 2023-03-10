@@ -70,6 +70,21 @@ public:
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<class AEnemyBossFireSpread> FireSpreadFactory;
 
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<class AEnemyBossLaser> LaserFactory;
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<class AEnemyBossGhost> GhostFactory;
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<class UEnemyBossHPBar> EnemyBossHPBarFactory;
+
+	UPROPERTY(EditAnywhere)
+		class UEnemyBossHPBar* EnemyBossHPBar;
+
+	UPROPERTY(EditAnywhere)
+	class AEnemyBossGhost* ghost;
+
 	//현재시간
 	float currTime = 0;
 	//대기 상태 기다리는 시간
@@ -79,7 +94,7 @@ public:
 	float traceRange = 10000.0f;
 
 	//공격범위
-	float attackRange = 500.0f;
+	float attackRange = 2500.0f;
 
 	//회피범위
 	float avoidRange  = 150.0f;
@@ -88,7 +103,7 @@ public:
 	float attackDelayTime = 1.5f;
 
 	//피격 대기 시간
-	float damageDelayTime = 2.0f;
+	float damageDelayTime = 5.0f;
 
 	//회전 대기 시간
 	float rotateDelayTime = 2.0f;
@@ -96,15 +111,26 @@ public:
 	//회전 대기 시간
 	float currrotateDelayTime = 2.0f;
 
+	//고스트 스폰 위치
+	double i = 5;
+
+	//고스트 스폰 타이머 반복/정지
+	bool bSpawnGhost = true;
 
 	//현재 체력
 	float currHP;
 	//최대 체력
-	float maxHP = 1.0f;
-	//현재 보호막
-	float currShieldGauge;
-	//최대 보호막
-	float maxShieldGauge = 100.0f;
+	float maxHP = 15000;
+	//누적 데미지
+	float accumulatedDamage;
+	//누적 상태
+	bool bDamageDealtRecently = false;
+	//그로기 데미지
+	float groggyDamage = 5000;
+	//소울
+	float soul = 150000;
+	//넉백 수치
+	float enemyAttackForce = 2000.0f;
 
 	//죽었을 때 내려가는 속력
 	float dieSpeed = 100.0f;
@@ -118,6 +144,12 @@ public:
 
 	//랜덤한 위치
 	FVector randPos;
+
+	//누적 데미지 타이머
+	FTimerHandle DamageResetTimerHandle;
+
+	//고스트 스폰 타이머
+	FTimerHandle GhostHandle;
 
 public:
 	//대기
@@ -139,7 +171,7 @@ public:
 	void ChangeState(EEnemyBossState state);
 
 	//공격 받았을 때 처리하는 함수
-	void ReceiveDamage();
+	void ReceiveDamage(float damage);
 
 	//Delay 함수
 	bool IsWaitComplete(float delayTime);
@@ -161,4 +193,16 @@ public:
 
 	//FireSpread 소환
 	void SpawnFireSpread();
+
+	//Laser 소환
+	void SpawnLaser();
+
+	//누적 데미지 초기화
+	void ResetDamageIfNoRecentDamage();
+
+	//Ghost 소환
+	void SpawnGhost();
+
+	//Roar 공격
+	void Roar();
 };

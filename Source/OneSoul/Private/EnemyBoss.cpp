@@ -14,6 +14,8 @@ AEnemyBoss::AEnemyBoss()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	GetMesh()->SetRelativeScale3D(FVector(2.0));
+
 	capsuleCompHead = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Head Collision"));
 	capsuleCompHead->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("MOUNTAIN_DRAGON_-HeadSocket"));
 	capsuleCompHead->SetRelativeRotation(FRotator(0, 30, 90));
@@ -120,7 +122,7 @@ void AEnemyBoss::BeginOverlapHead(UPrimitiveComponent* OverlappedComponent, AAct
 {
 	if (bOverlap)
 	{
-		// 플레이어 데미지 함수 호출
+		// 플레이어 캐스팅 & 데미지 함수 호출
 		bOverlap = false;
 	}
 }
@@ -129,7 +131,7 @@ void AEnemyBoss::BeginOverlapLeftHand(UPrimitiveComponent* OverlappedComponent, 
 {
 	if (bOverlap)
 	{
-		// 플레이어 데미지 함수 호출
+		// 플레이어 캐스팅 & 데미지 함수 호출
 		bOverlap = false;
 	}
 }
@@ -138,7 +140,7 @@ void AEnemyBoss::BeginOverlapRightHand(UPrimitiveComponent* OverlappedComponent,
 {
 	if (bOverlap)
 	{
-		// 플레이어 데미지 함수 호출
+		// 플레이어 캐스팅 & 데미지 함수 호출
 		bOverlap = false;
 	}
 }
