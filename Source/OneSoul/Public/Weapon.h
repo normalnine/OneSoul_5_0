@@ -22,20 +22,6 @@ protected:
    
     virtual void BeginPlay() override;
 
-	virtual void OnSphereOverlap(
-			         UPrimitiveComponent* OverlappedComponent,
-			         AActor* OthrActor,
-			         UPrimitiveComponent* OtherComp,
-			         int32 OtherBodyIndex,
-			         bool bFromSweep,
-			         const FHitResult& SweepResult) override;
-
-	virtual void OnSphereEndOverlap(
-			     UPrimitiveComponent* OverlappedComponent,
-			     AActor* OthrActor,
-			     UPrimitiveComponent* OtherComp,
-			     int32 OtherBodyIndex) override;
-    
 	UFUNCTION()
 	void OnBoxOverlap(
 	                 UPrimitiveComponent* OverlappedComponent,
@@ -61,7 +47,20 @@ private:
 	 UPROPERTY(EditAnywhere, Category = "Weapon")
 	 float Damage = 20.f;
 
+	 UPROPERTY(EditAnywhere, Category = "Weapon")
+	 float HeadDamage = 25.f;
+
 	 bool ActorIsSameType(AActor* otherActor);
+
+	 void BoxTrace(FHitResult& BoxHit);
+
+	 void ExecuteGetHit(FHitResult& BoxHit);
+
+	 UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	 FVector BoxTraceExtent = FVector(5.f);
+
+	 UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	 bool bShowBoxDebug = false;
 
 public:
 

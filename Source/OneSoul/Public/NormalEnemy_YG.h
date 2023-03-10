@@ -24,8 +24,6 @@ enum class EEnemyState : uint8
 	EES_Engaged UMETA(DisplayName = "Engaged"),
 
 	EES_NoState UMETA(DisplayName = "NoState")
-
-
 };
 
 class UAnimMontage;
@@ -37,6 +35,7 @@ class AAIController;
 class UHealthBarComponent;
 class UPawnSensingComponent;
 class UBoxComponent;
+class AAIController;
 
 UCLASS()
 class ONESOUL_API ANormalEnemy_YG : public ACharacter, public IHitInterface
@@ -65,6 +64,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = Combat)
 	float ChasingSpeed;
 
+	UPROPERTY(EditAnywhere, Category = Combat)
+	TSubclassOf<class ASoul> SoulClass;
+
 	void StartPatrolling();
 	void ChaseTarget();
 	bool IsOutsideCombatRadius();
@@ -72,7 +74,10 @@ public:
 	bool IsChasing();
 	bool IsInsideAttackRadius();
 	bool IsAttacking();
+
+	UFUNCTION(BlueprintCallable)
 	bool IsDead();
+
 	bool IsEngaged();
 	bool CanAttack();
 	bool IsAlive();
@@ -87,6 +92,11 @@ public:
 	void HandleDamage(float Damage);
 	void DisableCapsule();
 
+	UFUNCTION(BlueprintCallable)
+	void ActivateWeapon();
+	UFUNCTION(BlueprintCallable)
+	void DeactivateWeapon();
+
 	FTimerHandle AttackTimer;
 
 	UPROPERTY(EditAnywhere, Category= Combat)
@@ -98,9 +108,42 @@ public:
 	UPROPERTY(EditAnywhere, Category = Combat)
 	float DeathLifeSpan;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShowHitNumer(int32 Damage, FVector HitLocation,bool bHeadShot);
+
+	UFUNCTION(BlueprintCallable)
+	void StoreHitNumber(UUserWidget* HitNumber, FVector Location);
+
+	UFUNCTION()
+	void DestroyHitNumber(UUserWidget* HitNumber);
+
+	void UpdateHitNumbers();
+
+	void PatrolTimerFinished();
+
+	void SpawnSoul();
+
+	void DieSound();
+
 protected:
 	virtual void BeginPlay() override;
 
+	UFUNCTION()
+	virtual void OnBoxOverlap(
+		UPrimitiveComponent* OverlappedComponent,
+		AActor* OthrActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult);
+
+	UFUNCTION()
+	virtual	void OnBoxEndOverlap(
+	             UPrimitiveComponent* OverlappedComp,
+				 AActor* OtherActor,
+				 UPrimitiveComponent* OtherComp,
+				 int32 OtherBodyIndex);
+ 
 	void Die();
 	bool InTargetRange(AActor* Target, double Radius);
 	void MoveToTarget(AActor* Target);
@@ -125,65 +168,79 @@ protected:
 
 private:
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "AI Navigation", meta = (AllowPrivateAccess = "true"))
 	UHealthBarComponent* HealthBarWidget;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "AI Navigation", meta = (AllowPrivateAccess = "true"))
     UBoxComponent* BoxCollision;
 
-	UPROPERTY(VisibleAnywhere)
-	UPawnSensingComponent* PawnSensing;
+	UPROPERTY(VisibleAnywhere, Category = "AI Navigation", meta = (AllowPrivateAccess = "true"))
+	UAttributeComponent* Attributes;
 
-	UPROPERTY(EditAnywhere,Category= Sounds)
-	USoundBase* HitSound;
+	UPROPERTY(VisibleAnywhere, Category = "AI Navigation", meta = (AllowPrivateAccess = "true"))
+	AActor* CombatTarget;
 
-	UPROPERTY(EditAnywhere, Category = VisualEffects)
-	UParticleSystem* HitParticles;
-
-	UPROPERTY(EditAnywhere)
-	double CombatRadius;
-
-	UPROPERTY(EditAnywhere)
-	double AttackRadius;
-
-	UPROPERTY()
-	class AAIController* EnemyController;
-
-	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
+	UPROPERTY(EditInstanceOnly, Category = "AI Navigation", meta = (AllowPrivateAccess = "true"))
 	AActor* PartrolTarget;
 
-	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
+	UPROPERTY(EditInstanceOnly, Category = "AI Navigation", meta = (AllowPrivateAccess = "true"))
 	TArray <AActor* > PatrolTargets;
 
-	UPROPERTY(EditAnywhere)
-	double PatrolRadius;
+	UPROPERTY(VisibleAnywhere, Category = "AI Navigation", meta = (AllowPrivateAccess = "true"))
+	UPawnSensingComponent* PawnSensing;
 
-	void PatrolTimerFinished();
+	UPROPERTY(EditAnywhere,Category= Sounds, meta = (AllowPrivateAccess = "true"))
+	USoundBase* HitSound;
+
+	UPROPERTY(EditAnywhere, Category = VisualEffects, meta = (AllowPrivateAccess = "true"))
+	UParticleSystem* HitParticles;
+
+	UPROPERTY(VisibleAnywhere, Category = "AI Navigation", meta = (AllowPrivateAccess = "true"))
+	AAIController* EnemyController;
+
+	UPROPERTY(EditAnywhere, Category = Combet, meta = (AllowPrivateAccess = "true"))
+	double CombatRadius;
+
+	UPROPERTY(EditAnywhere, Category = Combet, meta = (AllowPrivateAccess = "true"))
+	double AttackRadius;
+
+	UPROPERTY(EditAnywhere, Category = Combet, meta = (AllowPrivateAccess = "true"))
+	double PatrolRadius;
 
 	FTimerHandle PatrolTimer;
 
-	UPROPERTY(EditAnywhere, Category = "AI Navigation")
+	UPROPERTY(EditAnywhere, Category = "AI Navigation", meta = (AllowPrivateAccess = "true"))
 	float WaitMin;
 
-	UPROPERTY(EditAnywhere, Category = "AI Navigation")
+	UPROPERTY(EditAnywhere, Category = "AI Navigation", meta = (AllowPrivateAccess = "true"))
 	float WaitMax;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite ,Category = "AI Navigation", meta = (AllowPrivateAccess = "true"))
 	float BaseDamage;
 
-	UPROPERTY(VisibleAnywhere)
-	UAttributeComponent* Attributes;
+	UPROPERTY(VisibleAnywhere, Category = Combet, meta = (AllowPrivateAccess = "true"))
+	TMap <UUserWidget*, FVector> HitNumbers;
 
-	UPROPERTY(VisibleAnywhere)
-	AActor* CombatTarget;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = Combet, meta = (AllowPrivateAccess = "true"))
+	FString HeadBone;
 
-	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UPROPERTY(VisibleAnywhere, Category = Combet, meta = (AllowPrivateAccess = "true"))
+	float HitNumberDestoryTime;
+
+	UPROPERTY(EditDefaultsOnly, Category = Montage, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* DeathMontage;
 
-	UPROPERTY(EditDefaultsOnly, Category = Montage)
+	UPROPERTY(EditDefaultsOnly, Category = Montage, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* HitReactMontage;
 
-	UPROPERTY(EditDefaultsOnly, Category = Montage)
+	UPROPERTY(EditDefaultsOnly, Category = Montage, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* AttackMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sounds, meta = (AllowPrivateAccess = "true"))
+	USoundBase* DeadSound;
+
+	public:
+
+	FORCEINLINE FString GetHeadBone() const {return HeadBone;}
 
 };

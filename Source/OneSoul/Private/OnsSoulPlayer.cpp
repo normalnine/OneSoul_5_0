@@ -10,9 +10,13 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "Sound/SoundBase.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Item.h"
 #include "Weapon.h"
+#include "OneSoulHUD.h"
+#include "OneSoulOverlay.h"
+#include "NormalEnemy_YG.h"
 
 AOnsSoulPlayer::AOnsSoulPlayer()
       
@@ -46,9 +50,6 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	Camera -> SetupAttachment(SpringArm);
 	Camera -> bUsePawnControlRotation = false;
 
-	SetPlayerMaxSpeed(WalkSpeed);
-
-
 	SprintSpeed = 800.f;
 	WalkSpeed = 400.f;
 
@@ -56,23 +57,29 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	CurrentStamina = 100.f;
 	MinStamina = 0.f;
 
-	bIsTargeting = false;
-	TargetingDistance = 900.f;
-	TargetingRadius = 100.f;
-	TargetRotationInterpSpeed = 9.f;
-
 	IsAttacking = false;
 	bLMBDown = false;
 	ComboCnt = 0;
 	bIsAttackButton = false;
 
+	bCanHitReact = false;
+
+	bIsTargeting = false;
+	TargetingDistance = 900.f;
+	TargetingRadius = 100.f;
+	TargetRotationInterpSpeed = 9.f;
+
+
 	Health = 100.f;
 	MaxHealth = 100.f;
+
+	SetPlayerMaxSpeed(WalkSpeed);
 }
 
 void AOnsSoulPlayer::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	
 	Tags.Add(FName("OneSoulCharacter"));
 
@@ -82,6 +89,7 @@ void AOnsSoulPlayer::BeginPlay()
 		AnimInstance->Montage_Play(LevelStartMontage);
 
 	}
+
 
 	switch (RotationMode)
 	{
@@ -129,6 +137,83 @@ void AOnsSoulPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &AOnsSoulPlayer::EKeyPressed);
 }
 
+float AOnsSoulPlayer::TakeDamage(
+                      float Damage,
+					  struct FDamageEvent const& DamageEvent,
+					  AController* EventInstigator,
+					  AActor* DamageCauser)
+{
+	if (Health - Damage <= 0.f)
+	{
+	  Health = 0.f;
+	  Die();
+
+	}
+	else
+	{
+	  bCanHitReact= true;
+	  DirectionalHitReact(GetActorLocation());
+	  HitReactSounds();
+	  ReceiveDamage(Damage);
+	}
+
+	return Damage;
+}
+
+void AOnsSoulPlayer::SetOverlappongItem(class AItem* Item)
+{
+  OverlappingItem = Item;
+}
+
+void AOnsSoulPlayer::AddSouls(class ASoul* Soul)
+{
+
+}
+
+void AOnsSoulPlayer::DirectionalHitReact(const FVector& ImpactPoint)
+{
+   
+   if(bCanHitReact == false) return;
+
+	const FVector Forward = GetActorForwardVector();
+	// Lower Impact Point to the Enemy's Actor Location Z
+	const FVector ImpactLowered(ImpactPoint.X, ImpactPoint.Y, GetActorLocation().Z);
+	const FVector ToHit = (ImpactLowered - GetActorLocation()).GetSafeNormal();
+
+	// Forward * ToHit = |Forward||ToHit| * cos(theta)
+	// |Forward| = 1, |ToHit| = 1, so Forward * ToHit = cos(theta)
+	const double CosTheta = FVector::DotProduct(Forward, ToHit);
+	// Take the inverse cosine (arc-cosine) of cos(theta) to get theta
+	double Theta = FMath::Acos(CosTheta);
+	// convert from radians to degrees
+	Theta = FMath::RadiansToDegrees(Theta);
+
+	// if CrossProduct points down, Theta should be negative
+	const FVector CrossProduct = FVector::CrossProduct(Forward, ToHit);
+	if (CrossProduct.Z < 0)
+	{
+		Theta *= -1.f;
+	}
+
+	FName Section("FromBack");
+
+	if (Theta >= -45.f && Theta < 45.f)
+	{
+		Section = FName("FromFront");
+	}
+	else if (Theta >= -135.f && Theta < -45.f)
+	{
+		Section = FName("FromLeft");
+	}
+	else if (Theta >= 45.f && Theta < 135.f)
+	{
+		Section = FName("FromRight");
+	}
+
+	  PlayHitReactMontage();
+
+}
+
 void AOnsSoulPlayer::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnable)
 {
 	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
@@ -140,7 +225,7 @@ void AOnsSoulPlayer::SetWeaponCollisionEnabled(ECollisionEnabled::Type Collision
 
 void AOnsSoulPlayer::MoveForward(float Value)
 {
-    if(ActionState == EActionState::ECS_Attacking) return;
+    if(ActionState != EActionState::ECS_Unoccipied) return;
 	if (Controller && (Value != 0.f))
 	{
 	   const FRotator ControlRotation = GetControlRotation();
@@ -153,7 +238,7 @@ void AOnsSoulPlayer::MoveForward(float Value)
 
 void AOnsSoulPlayer::MoveRight(float Value)
 {
-	if (ActionState == EActionState::ECS_Attacking) return;
+	if (ActionState != EActionState::ECS_Unoccipied) return;
 	if (Controller && (Value != 0.f))
 	{
 	 const FRotator ControlRotation = GetControlRotation();
@@ -216,25 +301,37 @@ void AOnsSoulPlayer::ToggleLockOn()
 	}
 }
 
-void AOnsSoulPlayer::Attack()
+void AOnsSoulPlayer::PlayHitReactMontage()
 {
-	bLMBDown = true;
 
-	UAnimInstance* AnimInstance = (GetMesh()->GetAnimInstance());
-	IsAttacking = true;
+	 UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	 if (AnimInstance && HitReactMontage && IsAttacking ==false)
+	 { 
+		AnimInstance->Montage_Play(HitReactMontage);
 
-	const char* Attackist[] = { "Attack1","Attack2","Attack3" };
+        bCanHitReact = true;
+	 }
 
-	if (!(AnimInstance->Montage_IsPlaying(AttackMontage)) && CanAttack())
-	{
-		AnimInstance->Montage_Play(AttackMontage);
-	}
-	else if ((AnimInstance->Montage_IsPlaying(AttackMontage)) && CanAttack())
-	{
+}
 
-		AnimInstance->Montage_Play(AttackMontage);
-		AnimInstance->Montage_JumpToSection(FName(Attackist[ComboCnt]));
-	}
+void AOnsSoulPlayer::Attack()
+{ 
+
+		UAnimInstance* AnimInstance = (GetMesh()->GetAnimInstance());
+		IsAttacking = true;
+
+		const char* Attackist[] = { "Attack1","Attack2","Attack3" };
+
+		if (!(AnimInstance->Montage_IsPlaying(AttackMontage)) && CanAttack())
+		{
+			AnimInstance->Montage_Play(AttackMontage);
+		}
+		else if ((AnimInstance->Montage_IsPlaying(AttackMontage)) && CanAttack())
+		{
+			AnimInstance->Montage_Play(AttackMontage);
+			AnimInstance->Montage_JumpToSection(FName(Attackist[ComboCnt]));
+		}
+ 
 }
 
 void AOnsSoulPlayer::EKeyPressed()
@@ -244,21 +341,25 @@ void AOnsSoulPlayer::EKeyPressed()
 
  if (OverlappingWeapon)
  {
-	 OverlappingWidget->PickupWidget->SetVisibility(false);
+	 if (EquippedWeapon)
+	 {
+		 EquippedWeapon -> Destroy();
+	 }
+     OverlappingWidget->PickupWidget->SetVisibility(false);
 	 EquipWeapon(OverlappingWeapon);
  }
  else
  {
-	 if (CanDisarm())
-	 {
-	  PlayEquipMontage(FName("UnEquip"));
-	  CharacterState = ECharacterState::ECS_Unequipped;
+	 if (CanArm())
+	 {  
+		 Arm();
 	 }
-	 else if (CanArm())
+	 else if(CanDisarm())
 	 {
-	  PlayEquipMontage(FName("Equip"));
-	  CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+		 Disarm();
+		   
 	 }
+	 
  }
 }
 
@@ -368,38 +469,27 @@ void AOnsSoulPlayer::UpdateTargetingControlRotation()
 
 bool AOnsSoulPlayer::CanAttack()
 {
- return ActionState == EActionState::ECS_Unoccipied && CharacterState != ECharacterState::ECS_Unequipped;
-}
 
-bool AOnsSoulPlayer::CanDisarm()
-{
-  return ActionState == EActionState::ECS_Unoccipied && CharacterState != ECharacterState::ECS_Unequipped;
-}
-
-bool AOnsSoulPlayer::CanArm()
-{
-  return ActionState == EActionState::ECS_Unoccipied && CharacterState == ECharacterState::ECS_Unequipped && EquippedWeapon;
+	return ActionState == EActionState::ECS_Unoccipied &&
+	       CharacterState != ECharacterState::ECS_Unequipped;
 }
 
 void AOnsSoulPlayer::EquipWeapon(AWeapon* Weapon)
 {
 	Weapon->Equip(GetMesh(), FName("RightHandSoket"), this, this);
 	CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+	OverlappingItem = nullptr;
 	EquippedWeapon = Weapon;
 }
 
-void AOnsSoulPlayer::PlayEquipMontage(const FName& SectionName)
+void AOnsSoulPlayer::ReceiveDamage(float Damge)
 {
- UAnimInstance* AnimInstance = GetMesh() -> GetAnimInstance();
- if (AnimInstance && EquipMontage)
- {
-	 AnimInstance -> Montage_Play(EquipMontage);
-	 AnimInstance -> Montage_JumpToSection(SectionName,EquipMontage);
- }
+  Health = FMath:: Clamp(Health - Damge,0.f,MaxHealth);
 }
 
 void AOnsSoulPlayer::LMBDown()
 {
+   
 	bLMBDown = true;
 	if (IsAttacking == false && CanAttack())
 	{
@@ -419,8 +509,8 @@ void AOnsSoulPlayer::LMBUP()
 
 void AOnsSoulPlayer::EndAttacking()
 	{
-		IsAttacking = false;
 		ActionState = EActionState::ECS_Unoccipied;
+		IsAttacking = false;
 	}
 
 void AOnsSoulPlayer::AttackHitCheck()
@@ -429,10 +519,95 @@ void AOnsSoulPlayer::AttackHitCheck()
 		{
 			ComboCnt = 0;
 		}
-		if (bIsAttackButton == true && CanAttack())
+		if (bIsAttackButton == true)
 		{
 			ComboCnt += 1;
 			bIsAttackButton = false;
 			Attack();
 		}
 	}
+
+void AOnsSoulPlayer::Die()
+{
+
+	Tags.Add(FName("Dead"));
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && DeathMontage)
+	{
+		AnimInstance->Montage_Play(DeathMontage);
+
+		UGameplayStatics::PlaySoundAtLocation(
+		                   GetWorld(),
+						   DeadSound,
+						   GetActorLocation());
+	}
+	UGameplayStatics::GetPlayerController(this, 0)->SetInputMode(FInputModeUIOnly());
+	EquippedWeapon -> Destroy(true);
+}
+
+bool AOnsSoulPlayer::CanDisarm()
+{
+	return ActionState == EActionState::ECS_Unoccipied &&
+		CharacterState != ECharacterState::ECS_Unequipped;
+}
+
+bool AOnsSoulPlayer::CanArm()
+{
+	return ActionState == EActionState::ECS_Unoccipied&&
+		   CharacterState == ECharacterState::ECS_Unequipped &&
+		   EquippedWeapon;
+}
+
+void AOnsSoulPlayer::Disarm()
+{
+	PlayEquipMontage(FName("UnEquip"));
+	CharacterState = ECharacterState::ECS_Unequipped;
+	ActionState = EActionState::EAS_EquippingWeapon;
+}
+
+void AOnsSoulPlayer::Arm()
+{
+	PlayEquipMontage(FName("Equip"));
+	CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+	ActionState = EActionState::EAS_EquippingWeapon;
+}
+
+void AOnsSoulPlayer::PlayEquipMontage(const FName& SectionName)
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && EquipMontage)
+	{
+		AnimInstance->Montage_Play(EquipMontage);
+		AnimInstance->Montage_JumpToSection(SectionName, EquipMontage);
+	}
+}
+
+void AOnsSoulPlayer::AttachWeaponToBack()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->AttachMeshToSocket(GetMesh(), FName("SpineSocket"));
+	}
+}
+
+void AOnsSoulPlayer::AttachWeaponToHand()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->AttachMeshToSocket(GetMesh(), FName("RightHandSoket"));
+	}
+}
+
+void AOnsSoulPlayer::FinishEquipping()
+{
+	ActionState = EActionState::ECS_Unoccipied;
+}
+
+void AOnsSoulPlayer::HitReactSounds()
+{
+	UGameplayStatics::PlaySoundAtLocation(
+		              GetWorld(),
+		              HitReactSound,
+		              GetActorLocation());
+}
