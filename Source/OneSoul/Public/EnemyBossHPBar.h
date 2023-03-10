@@ -26,9 +26,9 @@ public:
 
 public:
 	UFUNCTION()
-	void UpdateCurrHP(int32 curr, int32 max);
+	void UpdateCurrHP(float curr, float max);
 
 	UFUNCTION()
-	void UpdateAccumulatedDamage(int32 damage);
+	void UpdateAccumulatedDamage(float damage);
 
 };

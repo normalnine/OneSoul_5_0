@@ -103,7 +103,7 @@ public:
 	float attackDelayTime = 1.5f;
 
 	//피격 대기 시간
-	float damageDelayTime = 2.0f;
+	float damageDelayTime = 5.0f;
 
 	//회전 대기 시간
 	float rotateDelayTime = 2.0f;
@@ -118,17 +118,17 @@ public:
 	bool bSpawnGhost = true;
 
 	//현재 체력
-	int32 currHP;
+	float currHP;
 	//최대 체력
-	int32 maxHP = 1500;
+	float maxHP = 15000;
 	//누적 데미지
-	int32 accumulatedDamage;
+	float accumulatedDamage;
 	//누적 상태
 	bool bDamageDealtRecently = false;
 	//그로기 데미지
-	int32 groggyDamage = 500;
+	float groggyDamage = 5000;
 	//소울
-	int32 soul = 150000;
+	float soul = 150000;
 	//넉백 수치
 	float enemyAttackForce = 2000.0f;
 
@@ -171,7 +171,7 @@ public:
 	void ChangeState(EEnemyBossState state);
 
 	//공격 받았을 때 처리하는 함수
-	void ReceiveDamage(int32 damage);
+	void ReceiveDamage(float damage);
 
 	//Delay 함수
 	bool IsWaitComplete(float delayTime);

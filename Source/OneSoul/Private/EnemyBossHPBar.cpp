@@ -11,7 +11,7 @@ void UEnemyBossHPBar::NativeConstruct()
 	currHPBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("_bossHPBar")));
 }
 
-void UEnemyBossHPBar::UpdateCurrHP(int32 curr, int32 max)
+void UEnemyBossHPBar::UpdateCurrHP(float curr, float max)
 {
 	//hp 를 0 ~ 1 사이로 표현
 	float hp = curr / max;
@@ -20,7 +20,7 @@ void UEnemyBossHPBar::UpdateCurrHP(int32 curr, int32 max)
 	currHPBar->SetPercent(hp);
 }
 
-void UEnemyBossHPBar::UpdateAccumulatedDamage(int32 damage)
+void UEnemyBossHPBar::UpdateAccumulatedDamage(float damage)
 {
 	if (damage == 0)
 	{

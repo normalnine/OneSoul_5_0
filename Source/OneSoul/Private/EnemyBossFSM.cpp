@@ -206,6 +206,9 @@ void UEnemyBossFSM::UpdateDamaged()
 	if (IsWaitComplete(damageDelayTime))
 	{
 		//Move 상태
+		me->PlayAnimMontage(damageMontage, 1.0f, FName(TEXT("Damage0")));
+		anim->Montage_Stop(5.0f, damageMontage);
+
 		ChangeState(EEnemyBossState::Idle);
 	}
 }
@@ -213,14 +216,14 @@ void UEnemyBossFSM::UpdateDamaged()
 void UEnemyBossFSM::UpdateDie()
 {
 	//만약에 bDieMove 가 false 라면 함수를 나가라
-	if (bDieMove == false) return;
+	//if (bDieMove == false) return;
 
 	//P = P0 + vt
 	//1. 아래로 내려가는 위치를 구한다.
 	FVector p0 = me->GetActorLocation();
 	FVector vt = FVector::DownVector * dieSpeed * GetWorld()->DeltaTimeSeconds;
 	FVector p = p0 + vt;
-
+	//me->Destroy();
 	//2. 만약에 p.Z 가 -200 보다 작으면 파괴한다
 	if (p.Z < -200)
 	{
@@ -323,12 +326,12 @@ void UEnemyBossFSM::ChangeState(EEnemyBossState state)
 		//me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 		me->PlayAnimMontage(damageMontage, 1.0f, FName(TEXT("Damage0")));
 
-		FTimerHandle WaitHandle;
-		float WaitTime = 20.0f; //시간을 설정하고
-		GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
-			{
-				ChangeState(EEnemyBossState::Idle);
-			}), WaitTime, false);
+// 		FTimerHandle WaitHandle;
+// 		float WaitTime = 5.0f; //시간을 설정하고
+// 		GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+// 			{
+// 				ChangeState(EEnemyBossState::Idle);
+// 			}), WaitTime, false);
 	}
 	break;
 	case EEnemyBossState::Die:
@@ -340,7 +343,7 @@ void UEnemyBossFSM::ChangeState(EEnemyBossState state)
 	}
 }
 
-void UEnemyBossFSM::ReceiveDamage(int32 damage)
+void UEnemyBossFSM::ReceiveDamage(float damage)
 {
 	//피를 줄이자
 	currHP -= damage;
