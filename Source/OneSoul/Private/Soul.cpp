@@ -17,11 +17,13 @@ void ASoul::OnSphereOverlap(
 	if (PickupInterface)
 	{
 		PickupInterface -> AddSouls(this);
+		
+		SpawnPickupSystem();
+		SpawnPickupSound();
+
+		Destroy();
+
+		bSoulDie = true;
 	}
 
-     SpawnPickupSystem();
-
-     SpawnPickupSound();
-
-     Destroy();
 }

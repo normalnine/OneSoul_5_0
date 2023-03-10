@@ -24,8 +24,6 @@ enum class EEnemyState : uint8
 	EES_Engaged UMETA(DisplayName = "Engaged"),
 
 	EES_NoState UMETA(DisplayName = "NoState")
-
-
 };
 
 class UAnimMontage;
@@ -65,6 +63,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = Combat)
 	float ChasingSpeed;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	TSubclassOf<class ASoul> SoulClass;
 
 	void StartPatrolling();
 	void ChaseTarget();
@@ -119,6 +120,10 @@ public:
 	void UpdateHitNumbers();
 
 	void PatrolTimerFinished();
+
+	void SpawnSoul();
+
+	void DieSound();
 
 protected:
 	virtual void BeginPlay() override;

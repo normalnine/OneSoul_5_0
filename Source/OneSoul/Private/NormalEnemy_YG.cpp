@@ -2,19 +2,20 @@
 
 
 #include "NormalEnemy_YG.h"
+#include "OnsSoulPlayer.h"
+#include "Soul.h"
+#include "AIController.h"
+#include "Perception/PawnSensingComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "AttributeComponent.h"
+#include "HealthBarComponent.h"
+#include "Components/ProgressBar.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/BoxComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
-#include "AttributeComponent.h"
-#include "Components/WidgetComponent.h"
-#include "HealthBarComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "AIController.h"
-#include "Components/ProgressBar.h"
-#include "Perception/PawnSensingComponent.h"
-#include "Components/BoxComponent.h"
-#include "OnsSoulPlayer.h"
 
 ANormalEnemy_YG::ANormalEnemy_YG() 
 {
@@ -202,6 +203,24 @@ void ANormalEnemy_YG::PatrolTimerFinished()
   MoveToTarget(PartrolTarget);
 }
 
+void ANormalEnemy_YG::SpawnSoul()
+{
+	UWorld* World = GetWorld();
+	if (World && SoulClass)
+	{
+		const FVector SpawnLocation = GetActorLocation() + FVector(0.f, 0.f, 0.75f);
+		ASoul* SpawnSoul = World->SpawnActor<ASoul>(SoulClass, SpawnLocation, GetActorRotation());
+	}
+}
+
+void ANormalEnemy_YG::DieSound()
+{
+	UGameplayStatics::PlaySoundAtLocation(
+		              GetWorld(),
+		              DeadSound,
+		              GetActorLocation());
+}
+
 void ANormalEnemy_YG::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -236,12 +255,9 @@ void ANormalEnemy_YG::GetHit(const FVector& ImpactPoint)
       DirectionalHitReact(ImpactPoint);
 	}
 	else
-	{
+	{   
 		Die();
-		UGameplayStatics::PlaySoundAtLocation(
-			              GetWorld(),
-			              DeadSound,
-		 	              GetActorLocation());
+        DieSound();
 	}
 
   if (HitSound)
@@ -275,7 +291,7 @@ float ANormalEnemy_YG::TakeDamage(
 	}
 	else if (IsOutsideAttackRadius())
 	{
-		ChaseTarget();
+		ChaseTarget(); 
 	}
 
 	return Damage;
@@ -560,11 +576,14 @@ void ANormalEnemy_YG::Die()
 		DeathPose = EDeathPose::EDP_Death;
 
 	}
+
+	 SpawnSoul();
+
 	ClearAttackTimer();
 	HideHealthBar();
 	DisableCapsule();
-	SetLifeSpan(DeathLifeSpan);
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 
+    SetLifeSpan(DeathLifeSpan);
 
 }
