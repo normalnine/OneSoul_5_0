@@ -37,6 +37,8 @@ class UPawnSensingComponent;
 class UBoxComponent;
 class AAIController;
 class ASoul;
+class AItem;
+class AOnsSoulPlayer;
 
 UCLASS()
 class ONESOUL_API ANormalEnemy_YG : public ACharacter, public IHitInterface
@@ -152,6 +154,8 @@ public:
 
 	void DieSound();
 
+	bool SoulDestroy();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -199,6 +203,12 @@ private:
 	UAttributeComponent* Attributes;
 
 	UPROPERTY(VisibleAnywhere, Category = "AI Navigation", meta = (AllowPrivateAccess = "true"))
+	AOnsSoulPlayer* Player;
+
+	UPROPERTY(EditInstanceOnly, Category = "AI Navigation", meta = (AllowPrivateAccess = "true"))
+	AItem* SoulItem;
+
+	UPROPERTY(VisibleAnywhere, Category = "AI Navigation", meta = (AllowPrivateAccess = "true"))
 	AActor* CombatTarget;
 
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation", meta = (AllowPrivateAccess = "true"))
@@ -206,6 +216,9 @@ private:
 
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation", meta = (AllowPrivateAccess = "true"))
 	TArray <AActor* > PatrolTargets;
+
+	UPROPERTY(EditInstanceOnly, Category = "AI Navigation", meta = (AllowPrivateAccess = "true"))
+	ASoul* Soul;
 
 	UPROPERTY(VisibleAnywhere, Category = "AI Navigation", meta = (AllowPrivateAccess = "true"))
 	UPawnSensingComponent* PawnSensing;

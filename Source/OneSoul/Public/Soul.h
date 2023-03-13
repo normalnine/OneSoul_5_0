@@ -23,15 +23,17 @@ protected:
 		         bool bFromSweep,
 	             const FHitResult& SweepResult) override;
 
+
 private:
+
     UPROPERTY(EditAnywhere,Category = "Souls")
 	int32 Souls;
 
-	UPROPERTY(EditAnywhere, Category = "Souls")
-	bool bSoulDie = false;
 
 public:
      FORCEINLINE int32 GetSouls() const {return Souls;}
 	 FORCEINLINE void SetSouls(int32 Numberofsouls) {Souls = Numberofsouls;}
 	
+	UPROPERTY(EditAnywhere, Category = "Souls")
+	bool bSoulDie = false;
 };

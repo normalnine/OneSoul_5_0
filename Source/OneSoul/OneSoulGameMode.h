@@ -13,6 +13,15 @@ class AOneSoulGameMode : public AGameModeBase
 
 public:
 	AOneSoulGameMode();
+    
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 CurrentCoins = 0;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int32 BestCoins;
+
+	void AddCoins(int32 point);
+
 };
 
 

@@ -16,6 +16,7 @@ class ASoul;
 class UOneSoulOverlay;
 class USoundBase;
 class ANormalEnemy_YG;
+class UParticleSystem;
 
 UENUM(BlueprintType)
 enum class EActionState : uint8
@@ -96,6 +97,8 @@ public:
 	float MaxHealth;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Heal")
 	float Potion;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Heal")
+	float PotionNum;
 
 	FTimerHandle HitReactTimer;
 
@@ -223,6 +226,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sounds, meta = (AllowPrivateAccess = "true"))
 	USoundBase* HitReactSound;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effect, meta = (AllowPrivateAccess = "true"))
+	UParticleSystem* PotionHealEffect;
 
 	UPROPERTY()
 	UOneSoulOverlay* OneSoulOverlay;

@@ -10,6 +10,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Sound/SoundBase.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Item.h"
@@ -72,7 +73,7 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	Health = 100.f;
 	MaxHealth = 100.f;
 
-	Potion = 20.f;
+	PotionNum = 5.f;
 
 	SetPlayerMaxSpeed(WalkSpeed);
 }
@@ -545,7 +546,7 @@ void AOnsSoulPlayer::Die()
 						   GetActorLocation());
 	}
 	UGameplayStatics::GetPlayerController(this, 0)->SetInputMode(FInputModeUIOnly());
-	EquippedWeapon -> Destroy(true);
+	EquippedWeapon -> Destroy();
 }
 
 bool AOnsSoulPlayer::CanDisarm()
@@ -566,6 +567,7 @@ void AOnsSoulPlayer::Disarm()
 	PlayEquipMontage(FName("UnEquip"));
 	CharacterState = ECharacterState::ECS_Unequipped;
 	ActionState = EActionState::EAS_EquippingWeapon;
+	IsAttacking = false;
 }
 
 void AOnsSoulPlayer::Arm()
@@ -573,6 +575,7 @@ void AOnsSoulPlayer::Arm()
 	PlayEquipMontage(FName("Equip"));
 	CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
 	ActionState = EActionState::EAS_EquippingWeapon;
+	IsAttacking = false;
 }
 
 void AOnsSoulPlayer::PlayEquipMontage(const FName& SectionName)
@@ -616,22 +619,33 @@ void AOnsSoulPlayer::HitReactSounds()
 
 void AOnsSoulPlayer::PotionHP(float PotionHP)
 {
-	if (Health != 0)
+	if (Health > 0 && Health < 100.f)
 	{
 		Health += PotionHP;
+		PotionHP = FMath::Clamp(Health, 0.f, MaxHealth);
     }
 
 }
 
 void AOnsSoulPlayer::PotionDrinking()
 {
-	   
-	    IsAttacking = true;
-		Potion = FMath::Clamp(Health, 0.f, MaxHealth);
-		PotionHP(Potion);
-		PlayPotionHealMontage();
-		SetPlayerMaxSpeed(300.f);
-		GetWorldTimerManager().SetTimer(PotionDrinkingTimer, this, &AOnsSoulPlayer::PotionAttakTimer, 1.5f);
+
+        if(Health >= 100) return;
+
+	    if (PotionNum > 0)
+	    {
+			IsAttacking = true;
+			PotionNum -= 1;
+			Potion = 20.f;
+			PotionHP(Potion);
+			PlayPotionHealMontage();
+			SetPlayerMaxSpeed(300.f);
+			GetWorldTimerManager().SetTimer(PotionDrinkingTimer, this, &AOnsSoulPlayer::PotionAttakTimer, 1.5f);
+		}
+		else
+		{
+			IsAttacking = false;
+		}
 
 }
 
@@ -642,6 +656,11 @@ void AOnsSoulPlayer::PlayPotionHealMontage()
 	{
 		AnimInstance->Montage_Play(PotionHealMontage);
 	}
+
+	UGameplayStatics::SpawnEmitterAtLocation(
+		              this,
+		              PotionHealEffect,
+		              GetActorLocation());
 }
 
 void AOnsSoulPlayer::PotionAttakTimer()

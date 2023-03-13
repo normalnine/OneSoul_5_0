@@ -13,3 +13,12 @@ AOneSoulGameMode::AOneSoulGameMode()
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
 }
+
+void AOneSoulGameMode::AddCoins(int32 point)
+{
+	CurrentCoins += point;
+	if (CurrentCoins > BestCoins)
+	{
+		BestCoins = CurrentCoins;
+	}
+}

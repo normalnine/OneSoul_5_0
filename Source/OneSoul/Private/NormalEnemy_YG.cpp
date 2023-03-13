@@ -2,6 +2,7 @@
 
 
 #include "NormalEnemy_YG.h"
+#include "OneSoulGameModeBase.h"
 #include "OnsSoulPlayer.h"
 #include "Soul.h"
 #include "AIController.h"
@@ -221,6 +222,12 @@ void ANormalEnemy_YG::DieSound()
 		              GetActorLocation());
 }
 
+bool ANormalEnemy_YG::SoulDestroy()
+{
+  return Soul -> bSoulDie = false;
+}
+
+
 void ANormalEnemy_YG::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -250,14 +257,26 @@ void ANormalEnemy_YG::GetHit(const FVector& ImpactPoint)
 {
 	ShowHealthBar();
 
+	AGameModeBase* CurrentMode = GetWorld()->GetAuthGameMode();
+
+	AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(CurrentMode);
+
 	if (IsAlive())
 	{
       DirectionalHitReact(ImpactPoint);
 	}
 	else
 	{   
+
 		Die();
         DieSound();
+
+		if (CurrentGameModeBase != nullptr)
+		{
+		  CurrentGameModeBase->AddCoins(10);
+		}
+
+		
 	}
 
   if (HitSound)
@@ -398,6 +417,7 @@ void ANormalEnemy_YG::HandleDamage(float Damage)
 void ANormalEnemy_YG::DisableCapsule()
 {
  GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+ GetMesh() -> SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ANormalEnemy_YG::ActivateWeapon()
@@ -576,12 +596,11 @@ void ANormalEnemy_YG::Die()
 		DeathPose = EDeathPose::EDP_Death;
 
 	}
-
 	ClearAttackTimer();
 	HideHealthBar();
 	DisableCapsule();
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	SpawnSoul();
     SetLifeSpan(DeathLifeSpan);
-
+	
 }
