@@ -16,7 +16,10 @@ class ASoul;
 class UOneSoulOverlay;
 class USoundBase;
 class ANormalEnemy_YG;
+class AOneSoulGameMode;
 class UParticleSystem;
+class AReSpawn;
+class USphereComponent;
 
 UENUM(BlueprintType)
 enum class EActionState : uint8
@@ -55,10 +58,19 @@ public:
 	AOnsSoulPlayer();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	UFUNCTION()
+    virtual void OnSphereOverlap(
+			     UPrimitiveComponent* OverlappedComponent,
+			     AActor* OthrActor,
+			     UPrimitiveComponent* OtherComp,
+			     int32 OtherBodyIndex,
+			     bool bFromSweep,
+			     const FHitResult& SweepResult);
 
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void SetOverlappongItem(class AItem* Item) override;
 	virtual void AddSouls(class ASoul* Soul) override;
+	virtual void Destroyed();
 
 	UFUNCTION(BlueprintCallable, Category = "Attack")
 	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnable);
@@ -99,10 +111,16 @@ public:
 	float Potion;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Heal")
 	float PotionNum;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EKey")
+	bool Ekey = false;
 
 	FTimerHandle HitReactTimer;
 
 	FTimerHandle PotionDrinkingTimer;
+
+	FTimerHandle DieTimer;
+
+	FTimerHandle SpawnTimer;
 
 	bool bCanHitReact;
 
@@ -165,6 +183,14 @@ public:
 	void PlayPotionHealMontage();
 	UFUNCTION(BlueprintCallable, Category = "Heal")
 	void PotionAttakTimer();
+	UFUNCTION(BlueprintCallable, Category = "Dead")
+	void PlayerDie();
+	UFUNCTION(BlueprintCallable, Category = "Dead")
+	void PlayerDieTimer();
+	UFUNCTION(BlueprintCallable, Category = "Spawn")
+	void PlayerSpawn();
+	UFUNCTION(BlueprintCallable, Category = "Spawn")
+	void PlayerSpawnTimer();
 
 protected:
 	virtual void BeginPlay() override;
@@ -180,6 +206,8 @@ protected:
 	void LMBUP();
 	void EKeyPressed();
 	void PotionDrinking();
+	void WeaponChange();
+
 private:
     
     ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
@@ -192,6 +220,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* Camera;
+
+	UPROPERTY(VisibleAnywhere)
+	USphereComponent* Sphere;
 
 	UPROPERTY(VisibleAnywhere)
 	class AActor* TargetActor;
@@ -220,20 +251,35 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montages, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* PotionHealMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montages, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* SpawnMontage;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sounds, meta = (AllowPrivateAccess = "true"))
 	USoundBase* DeadSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sounds, meta = (AllowPrivateAccess = "true"))
 	USoundBase* HitReactSound;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sounds, meta = (AllowPrivateAccess = "true"))
+	USoundBase* SpawnSound;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effect, meta = (AllowPrivateAccess = "true"))
 	UParticleSystem* PotionHealEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effect, meta = (AllowPrivateAccess = "true"))
+	UParticleSystem* SpawnEffect;
 
 	UPROPERTY()
 	UOneSoulOverlay* OneSoulOverlay;
 
 	UPROPERTY()
 	ANormalEnemy_YG* Taget;
+
+	UPROPERTY()
+	AReSpawn* SpawnTarget;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AReSpawn> SpawnRe;
 
 public:
    FORCEINLINE ECharacterState GetCharacterState() const {return CharacterState;}

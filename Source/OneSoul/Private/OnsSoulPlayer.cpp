@@ -2,10 +2,12 @@
 
 
 #include "OnsSoulPlayer.h"
+#include "OneSoul/OneSoulGameMode.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -18,6 +20,7 @@
 #include "OneSoulHUD.h"
 #include "OneSoulOverlay.h"
 #include "NormalEnemy_YG.h"
+#include "ReSpawn.h"
 
 AOnsSoulPlayer::AOnsSoulPlayer()
       
@@ -41,6 +44,9 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	GetMesh() -> SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility,ECollisionResponse::ECR_Block);
 	GetMesh() -> SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic,ECollisionResponse::ECR_Overlap);
 	GetMesh() -> SetGenerateOverlapEvents(true);
+
+	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollision"));
+	Sphere -> SetupAttachment(GetRootComponent());
 
     SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring"));
 	SpringArm -> SetupAttachment(GetRootComponent());
@@ -85,11 +91,22 @@ void AOnsSoulPlayer::BeginPlay()
 	
 	Tags.Add(FName("OneSoulCharacter"));
 
+	Sphere -> OnComponentBeginOverlap.AddDynamic(this,&AOnsSoulPlayer::OnSphereOverlap);
+
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && LevelStartMontage)
 	{
 		AnimInstance->Montage_Play(LevelStartMontage);
 
+	}
+
+	AGameModeBase* CurrentMode = GetWorld()->GetAuthGameMode();
+
+	AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(CurrentMode);
+	
+	if (CurrentGameModeBase != nullptr)
+	{
+	  CurrentGameModeBase -> SpawnTransform = GetActorTransform();
 	}
 
 
@@ -138,6 +155,37 @@ void AOnsSoulPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Attack", IE_Released, this, &AOnsSoulPlayer::LMBUP);
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &AOnsSoulPlayer::EKeyPressed);
 	PlayerInputComponent->BindAction("Healing", IE_Pressed, this, &AOnsSoulPlayer::PotionDrinking);
+	PlayerInputComponent->BindAction("WeaponChange", IE_Pressed, this, &AOnsSoulPlayer::WeaponChange);
+}
+
+void AOnsSoulPlayer::OnSphereOverlap(
+                     UPrimitiveComponent* OverlappedComponent,
+					 AActor* OthrActor,
+					 UPrimitiveComponent* OtherComp,
+					 int32 OtherBodyIndex,
+					 bool bFromSweep,
+					 const FHitResult& SweepResult)
+{
+  SpawnTarget = Cast<AReSpawn>(OthrActor);
+
+  Ekey= true;
+
+  if (SpawnTarget != nullptr)
+  {
+	  UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	  if (AnimInstance && SpawnMontage)
+	  {
+		  AnimInstance->Montage_Play(SpawnMontage);
+
+		  UGameplayStatics::PlaySoundAtLocation(
+			                GetWorld(),
+			                SpawnSound,
+			                GetActorLocation());
+
+		PlayerSpawnTimer();
+	  }
+  }
+
 }
 
 float AOnsSoulPlayer::TakeDamage(
@@ -150,7 +198,7 @@ float AOnsSoulPlayer::TakeDamage(
 	{
 	  Health = 0.f;
 	  Die();
-
+	  PlayerDieTimer();
 	}
 	else
 	{
@@ -165,6 +213,24 @@ float AOnsSoulPlayer::TakeDamage(
 void AOnsSoulPlayer::SetOverlappongItem(class AItem* Item)
 {
   OverlappingItem = Item;
+}
+
+void AOnsSoulPlayer::Destroyed()
+{
+  Super::Destroyed();
+
+  if (UWorld* World = GetWorld())
+  {
+	if (AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(World->GetAuthGameMode()))
+	{
+	  CurrentGameModeBase-> ReSpawnPlayer(this); 
+
+      UGameplayStatics:: GetPlayerController(this,0) -> SetShowMouseCursor(false);
+      UGameplayStatics:: GetPlayerController(this, 0) -> SetInputMode(FInputModeGameOnly());
+	}
+
+  }
+  
 }
 
 void AOnsSoulPlayer::AddSouls(class ASoul* Soul)
@@ -351,19 +417,8 @@ void AOnsSoulPlayer::EKeyPressed()
      OverlappingWidget->PickupWidget->SetVisibility(false);
 	 EquipWeapon(OverlappingWeapon);
  }
- else
- {
-	 if (CanArm())
-	 {  
-		 Arm();
-	 }
-	 else if(CanDisarm())
-	 {
-		 Disarm();
-		   
-	 }
-	 
- }
+
+ Ekey = true;
 }
 
 void AOnsSoulPlayer::SetPlayerMaxSpeed(float MaxSpeed)
@@ -649,6 +704,19 @@ void AOnsSoulPlayer::PotionDrinking()
 
 }
 
+void AOnsSoulPlayer::WeaponChange()
+{
+	if (CanArm())
+	{
+		Arm();
+	}
+	else if (CanDisarm())
+	{
+		Disarm();
+
+	}
+}
+
 void AOnsSoulPlayer::PlayPotionHealMontage()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -667,3 +735,26 @@ void AOnsSoulPlayer::PotionAttakTimer()
 {
   IsAttacking = false;
 }
+
+void AOnsSoulPlayer::PlayerDie()
+{
+  Destroy();
+}
+
+void AOnsSoulPlayer::PlayerDieTimer()
+{
+ GetWorldTimerManager().SetTimer(DieTimer,this, &AOnsSoulPlayer::PlayerDie, 1.f);
+}
+
+
+
+void AOnsSoulPlayer::PlayerSpawn()
+{
+UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SpawnEffect,SpawnTarget ->GetActorLocation());
+}
+
+void AOnsSoulPlayer::PlayerSpawnTimer()
+{
+ GetWorldTimerManager().SetTimer(SpawnTimer,this,&AOnsSoulPlayer::PlayerSpawn,0.5f);
+}
+

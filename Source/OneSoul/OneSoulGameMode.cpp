@@ -3,6 +3,9 @@
 #include "OneSoulGameMode.h"
 #include "OneSoulCharacter.h"
 #include "UObject/ConstructorHelpers.h"
+#include "OneSoulOverlay.h"
+#include "OnsSoulPlayer.h"
+#include "Kismet/GameplayStatics.h"
 
 AOneSoulGameMode::AOneSoulGameMode()
 {
@@ -14,6 +17,13 @@ AOneSoulGameMode::AOneSoulGameMode()
 	}
 }
 
+void AOneSoulGameMode::BeginPlay()
+{
+ Super:: BeginPlay();
+
+
+}
+
 void AOneSoulGameMode::AddCoins(int32 point)
 {
 	CurrentCoins += point;
@@ -21,4 +31,14 @@ void AOneSoulGameMode::AddCoins(int32 point)
 	{
 		BestCoins = CurrentCoins;
 	}
+}
+
+void AOneSoulGameMode::ReSpawnPlayer(ACharacter* player)
+{
+ 
+  UClass* Class = UGameplayStatics::GetObjectClass(player);
+
+  GetWorld() -> GetFirstPlayerController() -> Possess(
+                                              GetWorld()->SpawnActor<AOnsSoulPlayer>(Class, SpawnTransform));
+  
 }
