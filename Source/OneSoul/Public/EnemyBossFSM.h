@@ -124,8 +124,10 @@ public:
 	bool bSpawnGhost = true;
 
 	//현재 체력
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	float currHP;
 	//최대 체력
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float maxHP = 1000;
 	//누적 데미지
 	float accumulatedDamage;

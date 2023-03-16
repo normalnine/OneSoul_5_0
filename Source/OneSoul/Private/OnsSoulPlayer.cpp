@@ -223,6 +223,7 @@ void AOnsSoulPlayer::OnSphereOverlap(
 					 const FHitResult& SweepResult)
 {
   SpawnTarget = Cast<AReSpawn>(OthrActor);
+  ANPC* NPC = Cast<ANPC>(OthrActor);
 }
 
 void AOnsSoulPlayer::DirectionalHitReact(const FVector& ImpactPoint)
@@ -433,7 +434,7 @@ void AOnsSoulPlayer::EKeyPressed()
 
 		 PlayerSpawnTimer();
 
-		 ActionState = EActionState::ECS_Unoccipied;
+		 return;
 
 	 }
  }

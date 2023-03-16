@@ -7,6 +7,7 @@
 #include "Weapon.generated.h"
 
 class UBoxComponent;
+class USphereComponent;
 
 UCLASS()
 class ONESOUL_API AWeapon : public AItem
@@ -17,7 +18,9 @@ public:
     AWeapon();
     void Equip(USceneComponent* InParent, FName InSocketName,AActor* NewOwner,APawn* NewInstigator);
 	void AttachMeshToSocket(USceneComponent* InParent,const FName& InSocketName);
+	virtual void Tick(float DeltaTime) override;
 
+	 FHitResult BoxHit_;
 protected:
    
     virtual void BeginPlay() override;
@@ -31,8 +34,19 @@ protected:
 		             bool bFromSweep,
 		             const FHitResult& SweepResult);
 
+	UFUNCTION()
+	void OnBossSphereOverlap(
+			UPrimitiveComponent* OverlappedComponent,
+			AActor* OthrActor,
+			UPrimitiveComponent* OtherComp,
+			int32 OtherBodyIndex,
+			bool bFromSweep,
+			const FHitResult& SweepResult);
+
     UFUNCTION(BlueprintImplementableEvent)
 	void CreateFields(const FVector& FieldLocation);
+
+
 private:
      
 	 UPROPERTY(VisibleAnywhere,Category = "Weapon")
@@ -43,6 +57,9 @@ private:
 
 	 UPROPERTY(VisibleAnywhere)
 	 USceneComponent* BoxTraceEnd;
+
+	 UPROPERTY(VisibleAnywhere)
+	 USphereComponent*BossWeaponBox;
 
 	 UPROPERTY(EditAnywhere, Category = "Weapon")
 	 float Damage = 20.f;
@@ -55,6 +72,8 @@ private:
 	 void BoxTrace(FHitResult& BoxHit);
 
 	 void ExecuteGetHit(FHitResult& BoxHit);
+
+	 void BoxTraceSingle();
 
 	 UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	 FVector BoxTraceExtent = FVector(5.f);
