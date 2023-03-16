@@ -21,8 +21,12 @@ public:
 
 	void Roll();
 	void onColl();
+	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montages)
 		UAnimMontage* Rolling;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montages)
+		UAnimMontage* BackStep;
+
 
 };

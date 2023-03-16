@@ -14,10 +14,12 @@ enum class EEnemyState4 : uint8
 	Attack0,
 	Attack1,
 	Attack2,
+	Attack3,
 	AttackDelay,
 	Damage,
 	Die,
-	ReturnPos
+	ReturnPos,
+	Groggy
 };
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ONESOUL_API UEnemy_Titan_FSM : public UActorComponent
@@ -48,6 +50,8 @@ public:
 	void AttackState1();
 	//공격상태
 	void AttackState2();
+	//공격상태
+	void AttackState3();
 	//공격 대기
 	void BlockAttack();
 
@@ -145,4 +149,6 @@ public:
 	//슈퍼아머 상태를 만들어줄라고 
 	bool superArmor = true;
 		
+	//스턴상태
+	void groggy();
 };

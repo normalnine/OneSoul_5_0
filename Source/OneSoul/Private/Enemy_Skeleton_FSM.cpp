@@ -19,7 +19,11 @@ UEnemy_Skeleton_FSM::UEnemy_Skeleton_FSM()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
+	ConstructorHelpers::FObjectFinder<UAnimMontage> tempMontage(TEXT("AnimMontage'/Game/LJW/Enemys/SimpleSkeleton/anim/AM_Enemy_Skeleton.AM_Enemy_Skeleton'"));
+	if (tempMontage.Succeeded())
+	{
+		damageMontage = tempMontage.Object;
+	}
 }
 
 
@@ -74,6 +78,9 @@ void UEnemy_Skeleton_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	case EEnemyState1::ReturnPos:
 		UpdateReturnPos();
 		break;
+	case EEnemyState1::Groggy:
+		groggy();
+		break;
 	}
 }
 
@@ -115,7 +122,11 @@ void UEnemy_Skeleton_FSM::MoveState()
 		//만약에 target - me 거리가 공격범위보다 작으면
 		if (dir.Length() < attackRange)
 		{
-			int32 index = FMath::RandRange(0, 1);
+			if (fight)
+			{
+				index = FMath::RandRange(0, 1);
+			}
+			
 			if (index == 0)
 			{
 				ChangeState(EEnemyState1::Attack);
@@ -143,15 +154,23 @@ void UEnemy_Skeleton_FSM::MoveState()
 
 void UEnemy_Skeleton_FSM::AttackState()
 {
-	FVector des = target->GetActorLocation();
+	me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
-	FVector dir = des - me->GetActorLocation();
+	anim->animState = mState;
 
-	FRotator dirx = dir.Rotation();
+	currTime += GetWorld()->DeltaTimeSeconds;
+	if (me->changeGroggy)
+	{	me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		ChangeState(EEnemyState1::Groggy);
+	}
+	if (currTime > 2)
+	{
 
-	me->SetActorRotation(dirx);
-
-	ChangeState(EEnemyState1::AttackDelay);
+		currTime = 0;
+		me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		ChangeState(EEnemyState1::AttackDelay);
+	}
+	
 }
 
 void UEnemy_Skeleton_FSM::BlockAttack()
@@ -190,44 +209,38 @@ void UEnemy_Skeleton_FSM::UpdaetAttackDelay()
 		else
 		{
 
-			ChangeState(EEnemyState1::Idle);
+			ChangeState(EEnemyState1::Move);
 		}
 	}
 }
 void UEnemy_Skeleton_FSM::DamageState()
-{
+{	
+	
 	//damageDelayTime 이 지나면
 	if (IsWaitComplete(damageDelayTime))
 	{
 		//Move 상태
-		ChangeState(EEnemyState1::Idle);
+		ChangeState(EEnemyState1::Attack);
 	}
 }
 void UEnemy_Skeleton_FSM::DieState()
 {
 
-	//아직 죽음 애니메이션이 끝나지 않았다면
-	//바닥내려가지 않도록 처리
-	/*if (anim->bDieDone == false)
-	{
-		return;
-	}*/
-
 	//계속 아래로 내려가고 싶다.
 	//동속ㅇ운동ㅇ 공식 피=피제+브이티
-	FVector p0 = me->GetActorLocation();
-	FVector vt = FVector::DownVector * dieSpeed * GetWorld()->DeltaTimeSeconds;
-	FVector p = p0 + vt;
+	//FVector p0 = me->GetActorLocation();
+	//FVector vt = FVector::DownVector * dieSpeed * GetWorld()->DeltaTimeSeconds;
+	//FVector p = p0 + vt;
 	//2. 만약에 p.Z 가 -200 보다 작으면 파괴한다
-	if (p.Z < -200)
-	{
+	/*if (p.Z < -200)*/
+	//{
 		me->Destroy();
-	}
-	//3. 그렇지 않으면 해당 위치로 셋팅한다
-	else
-	{
-		me->SetActorLocation(p);
-	}
+	//}
+	////3. 그렇지 않으면 해당 위치로 셋팅한다
+	//else
+	//{
+	//	me->SetActorLocation(p);
+	//}
 
 
 }
@@ -235,33 +248,68 @@ void UEnemy_Skeleton_FSM::UpdateReturnPos()
 {
 	MoveToPos(originPos);
 }
+
+
+
 void UEnemy_Skeleton_FSM::OnDamageProcess()
 {
+	
+
 	if (isShield)
 	{
-		anim->PlayDamageAnim(TEXT("Block"));
+		UE_LOG(LogTemp, Warning, TEXT("imGuard"));
+		FString sectionName = FString::Printf(TEXT("Block"));
+		me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 		mState = EEnemyState1::Shield;
 	}
-
 	else
 	{
+
+		//현재공격이 뒤잡인지 확인하는 거
+		FVector Ddir = target->GetActorLocation() - me->GetActorLocation();
+		FVector DdirSize = Ddir;
+		Ddir.Normalize();
+		float Ddotvalue = FVector::DotProduct(me->GetActorLocation(), Ddir);
+		float Dangle = UKismetMathLibrary::DegAcos(Ddotvalue);
+
 		//체력감소
 		//hp -= damage;
 		hp--;
-		//체력이 남아있다면
 		if (hp > 0)
 		{
-			//상태를 피격으로 전환
-			mState = EEnemyState1::Damage;
-			currentTime = 0;
-			//피격 애니메이션 재생
-			FString sectionName = FString::Printf(TEXT("Damage0"));
-			anim->PlayDamageAnim(FName(*sectionName));
+			if (cri)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("criattack"));
+				
+				FString sectionName = FString::Printf(TEXT("Cri"));
+				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+				mState = EEnemyState1::Damage;
+			}
+			else if (Dangle>155 && DdirSize.Size() < 500)
+			{
+				
+			
 
+				UE_LOG(LogTemp, Warning, TEXT("backattack%f"),Dangle);
+			
+				FString sectionName = FString::Printf(TEXT("BackAttack"));
+				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+				mState = EEnemyState1::Damage;
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("defultattack"));
+				
+			
+				currentTime = 0;
+				//피격 애니메이션 재생
+				FString sectionName = FString::Printf(TEXT("Damage0"));
+				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+				
+				mState = EEnemyState1::Damage;
+			}
 
 		}
-
-
 		else
 		{
 			//상태를 죽음으로 전환
@@ -291,6 +339,25 @@ bool UEnemy_Skeleton_FSM::GetRandomPositionInNavMesh(FVector centerLocation, flo
 	bool result = ns->GetRandomReachablePointInRadius(centerLocation, radius, loc);
 	dest = loc.Location;
 	return result;
+}
+
+void UEnemy_Skeleton_FSM::groggy()
+{
+	cri = true;
+	anim->animState = mState;
+
+	currTime += GetWorld()->DeltaTimeSeconds;
+
+	me->changeGroggy=false;
+
+	if (currTime > 3)
+	{
+
+		currTime = 0;
+		cri = false;
+		ChangeState(EEnemyState1::Move);
+	}
+
 }
 
 bool UEnemy_Skeleton_FSM::IsTargetTrace()
@@ -378,7 +445,12 @@ void UEnemy_Skeleton_FSM::ChangeState(EEnemyState1 state)
 	switch (mState)
 	{
 	case EEnemyState1::Attack:
-		//currTime = attackDelayTime;
+		{//공격할때 한번만 플레이어를 확인해서 플레이어 방향으로 설정
+		//FVector des = target->GetActorLocation();
+		//FVector dir = des - me->GetActorLocation();
+		//FRotator dirx = dir.Rotation();
+		//me->SetActorRotation(dirx);
+		}
 		break;
 	case EEnemyState1::Move:
 	{

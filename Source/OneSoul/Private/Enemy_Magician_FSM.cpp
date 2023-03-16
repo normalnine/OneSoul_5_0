@@ -18,7 +18,12 @@ UEnemy_Magician_FSM::UEnemy_Magician_FSM()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	ConstructorHelpers::FObjectFinder<UAnimMontage> tempMontage(TEXT("AnimMontage'/Game/LJW/Enemys/SimpleSkeleton/anim-m/AM_Enemy_Maizc.AM_Enemy_Maizc'"));
+	ConstructorHelpers::FObjectFinder<UAnimMontage> tempattackMontage(TEXT("AnimMontage'/Game/LJW/Enemys/SimpleSkeleton/anim-m/AM_Enemy_Maizc.AM_Enemy_Maizc'"));
+	if (tempattackMontage.Succeeded())
+	{
+		AttackMontage = tempattackMontage.Object;
+	}
+	ConstructorHelpers::FObjectFinder<UAnimMontage> tempMontage(TEXT("AnimMontage'/Game/LJW/Enemys/SimpleSkeleton/anim/AM_Enemy_Skeleton.AM_Enemy_Skeleton'"));
 	if (tempMontage.Succeeded())
 	{
 		damageMontage = tempMontage.Object;
@@ -155,7 +160,21 @@ void UEnemy_Magician_FSM::AttackState()
 	FRotator dirx = dir.Rotation();
 
 	me->SetActorRotation(dirx);
-	ChangeState(EEnemyState3::AttackDelay);	
+
+	
+
+
+
+	//2초 뒤에 바닥에서 공격이 나오도록 추가
+	currTime += GetWorld()->DeltaTimeSeconds;
+	if (currTime > 2)
+	{
+
+		currTime = 0;
+
+		ChangeState(EEnemyState3::AttackDelay);
+	}
+
 	
 }
 
@@ -224,19 +243,19 @@ void UEnemy_Magician_FSM::DieState()
 
 	//계속 아래로 내려가고 싶다.
 	//동속ㅇ운동ㅇ 공식 피=피제+브이티
-	FVector p0 = me->GetActorLocation();
-	FVector vt = FVector::DownVector * dieSpeed * GetWorld()->DeltaTimeSeconds;
-	FVector p = p0 + vt;
-	//2. 만약에 p.Z 가 -200 보다 작으면 파괴한다
-	if (p.Z < -200)
-	{
+	//FVector p0 = me->GetActorLocation();
+	//FVector vt = FVector::DownVector * dieSpeed * GetWorld()->DeltaTimeSeconds;
+	//FVector p = p0 + vt;
+	////2. 만약에 p.Z 가 -200 보다 작으면 파괴한다
+	//if (p.Z < -200)
+	//{
 		me->Destroy();
-	}
-	//3. 그렇지 않으면 해당 위치로 셋팅한다
-	else
-	{
-		me->SetActorLocation(p);
-	}
+	//}
+	////3. 그렇지 않으면 해당 위치로 셋팅한다
+	//else
+	//{
+	//	me->SetActorLocation(p);
+	//}
 
 
 }
@@ -247,46 +266,69 @@ void UEnemy_Magician_FSM::UpdateReturnPos()
 void UEnemy_Magician_FSM::OnDamageProcess()
 {
 
+	UE_LOG(LogTemp, Warning, TEXT("magicHit"));
+	//현재공격이 뒤잡인지 확인하는 거
+	FVector Ddir = target->GetActorLocation() - me->GetActorLocation();
+	FVector DdirSize = Ddir;
+	Ddir.Normalize();
+	float Ddotvalue = FVector::DotProduct(me->GetActorLocation(), Ddir);
+	float Dangle = UKismetMathLibrary::DegAcos(Ddotvalue);
 
+	//체력감소
+	//hp -= damage;
+	hp--;
+	if (hp > 0)
+	{
+		/*	if (cri)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("criattack"));
 
-	
-		//체력감소
-		//hp -= damage;
-		hp--;
-		//체력이 남아있다면
-		if (hp > 0)
+				FString sectionName = FString::Printf(TEXT("Cri"));
+				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+				mState = EEnemyState3::Damage;
+			}*/
+		//else
+		if (Dangle > 155 && DdirSize.Size() < 500)
 		{
-			//상태를 피격으로 전환
+
+
+
+			UE_LOG(LogTemp, Warning, TEXT("backattack%f"), Dangle);
+
+			FString sectionName = FString::Printf(TEXT("BackAttack"));
+			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 			mState = EEnemyState3::Damage;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("defultattack"));
+
+
 			currentTime = 0;
 			//피격 애니메이션 재생
 			FString sectionName = FString::Printf(TEXT("Damage0"));
-			anim->PlayDamageAnim(FName(*sectionName));
+			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 
-
+			mState = EEnemyState3::Damage;
 		}
 
-
-		else
-		{
-			//상태를 죽음으로 전환
-			mState = EEnemyState3::Die;
-			//캡슐 충돌체 비활성화
-			me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			//죽음 애니메이션 재생
-			anim->PlayDamageAnim(TEXT("Die"));
-
-
-		}
-		//애니메이션 상태 동기화
-		anim->animState = mState;
-		ai->StopMovement();
-	
+	}
+	else
+	{
+		//상태를 죽음으로 전환
+		mState = EEnemyState3::Die;
+		//캡슐 충돌체 비활성화
+		me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		//죽음 애니메이션 재생
+		anim->PlayDamageAnim(TEXT("Die"));
 
 
-
-
+	}
+	//애니메이션 상태 동기화
+	anim->animState = mState;
+	ai->StopMovement();
 }
+
 
 
 bool UEnemy_Magician_FSM::GetRandomPositionInNavMesh(FVector centerLocation, float radius, FVector& dest)
@@ -308,10 +350,28 @@ void UEnemy_Magician_FSM::mazic()
 
 	FActorSpawnParameters params;
 	params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	if (mazicattack==0)
+	{
+		//공격투사체 발사
+		GetWorld()->SpawnActor<AActor>(MazicFactory, me->GetMesh()->GetSocketLocation(TEXT("Socket")), dirx, params);
+		//공격이펙트 생성
+		GetWorld()->SpawnActor<AActor>(MazicAttackEffectFactory, me->GetMesh()->GetSocketLocation(TEXT("Socket")), dirx, params);
+	}
+	else
+	{
+		//공격 마법진 생성
+		GetWorld()->SpawnActor<AActor>(MazicAttackFactory, attackZone, target->GetActorRotation());
+	}
 
-	//총알을  소켓 에서 스폰한다
-	GetWorld()->SpawnActor<AActor>(MazicFactory, me->GetMesh()->GetSocketLocation(TEXT("Socket")), dirx, params);
+	
+
 	ChangeState(EEnemyState3::AttackDelay);
+}
+
+void UEnemy_Magician_FSM::groggy()
+{
+	ai->StopMovement();
+	ChangeState(EEnemyState3::Idle);
 }
 
 bool UEnemy_Magician_FSM::IsTargetTrace()
@@ -401,19 +461,29 @@ void UEnemy_Magician_FSM::ChangeState(EEnemyState3 state)
 	case EEnemyState3::Attack:
 		{
 		//1. 랜덤한 값을 뽑는다 (0, 1 중)
-		int32 mazic = FMath::RandRange(0, 1);
+		mazicattack = FMath::RandRange(0, 1);
 		//2. Damage0, Damage1 이란 문자열을 만든다.
-		FString mazicName = FString::Printf(TEXT("Attack%d"), mazic);
+		FString mazicName = FString::Printf(TEXT("Attack%d"), mazicattack);
 		//3. 몽타주를 플레이한다.
-		me->PlayAnimMontage(damageMontage, 1.0f, FName(*mazicName));
+		me->PlayAnimMontage(AttackMontage, 1.0f, FName(*mazicName));
 
+		if (mazicattack==1)
+		{
+			//플레이어 바닥에 공격을 할거라는 경고표시를 스폰한다
+			attackZone=target->GetActorLocation() - FVector(0, 0, 80);
+			GetWorld()->SpawnActor<AActor>(MazicReadyFactory,attackZone,target->GetActorRotation());
 
-
-
-		FTimerHandle ddd;
-		GetWorld()->GetTimerManager().SetTimer(ddd, this, &UEnemy_Magician_FSM::mazic, 1.0f, false);
-
-
+			//2초후에 바다에서 나오는 불 공격 생성
+			FTimerHandle ddd;
+			GetWorld()->GetTimerManager().SetTimer(ddd, this, &UEnemy_Magician_FSM::mazic, 1.0f, false);
+				
+			
+		}
+		else
+		{   //1초뒤에 투사체 발사
+			FTimerHandle ddd;
+			GetWorld()->GetTimerManager().SetTimer(ddd, this, &UEnemy_Magician_FSM::mazic, 1.0f, false);
+		}
 		}
 		break;
 	case EEnemyState3::Move:

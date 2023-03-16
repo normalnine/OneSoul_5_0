@@ -16,7 +16,8 @@ enum class EEnemyState1 : uint8
 	Shield,
 	Damage,
 	Die,
-	ReturnPos
+	ReturnPos,
+	Groggy
 };
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class ONESOUL_API UEnemy_Skeleton_FSM : public UActorComponent
@@ -107,10 +108,10 @@ public:
 		float attackDelayTime = 2.0f;
 	//체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FSM)
-		int32 hp = 3;
+		int32 hp = 100;
 	//피격 대기 시간
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
-		float damageDelayTime = 2.0f;
+		float damageDelayTime = 3.0f;
 	//아래로 사라지는 속도
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
 		float dieSpeed = 50.0f;
@@ -136,5 +137,18 @@ public:
 	//방어 중인지
 	bool isShield = false;
 
+	//그로기 상태
+	void groggy();
 
+	//크리티컬 데미지 애니메이션 재생여부 함수
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	bool cri = false;
+
+	UPROPERTY(EditAnywhere)
+		class UAnimMontage* damageMontage;
+
+	//피격당했을때부터 방어를 시전하도록 하는거
+	bool fight = false;
+
+	int32 index =0;
 };
