@@ -40,8 +40,6 @@ void AReSpawn::OnBoxOverlap(
 
   if (Player != nullptr)
   {
-    Player -> PotionHP(Player -> MaxHealth);
-
 	AGameModeBase* CurrentMode = GetWorld()->GetAuthGameMode();
 
 	AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(CurrentMode);

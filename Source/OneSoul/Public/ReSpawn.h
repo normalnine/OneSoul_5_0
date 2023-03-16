@@ -37,5 +37,8 @@ private:
     UPROPERTY(VisibleAnywhere)
     UBoxComponent* BoxCollision;
 
+public:
+
+	FORCEINLINE UBoxComponent* GetReSpawnBox() const { return BoxCollision; }
 
 };

@@ -40,5 +40,8 @@ void AOneSoulGameMode::ReSpawnPlayer(ACharacter* player)
 
   GetWorld() -> GetFirstPlayerController() -> Possess(
                                               GetWorld()->SpawnActor<AOnsSoulPlayer>(Class, SpawnTransform));
+
+  CurrentCoins;
+  PotionNum;
   
 }

@@ -31,11 +31,18 @@ public:
 	void AddCoins(int32 point);
 
 	void ReSpawnPlayer(ACharacter* player);
+	
+	UPROPERTY(VisibleAnywhere)
+	AOnsSoulPlayer* Player;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Heal")
+	float PotionNum = 5.f;
 
 	private:
 
 	UPROPERTY(VisibleAnywhere)
     UOneSoulOverlay* OverlayWidget;
+
 
 };
 

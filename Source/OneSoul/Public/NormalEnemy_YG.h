@@ -39,6 +39,7 @@ class AAIController;
 class ASoul;
 class AItem;
 class AOnsSoulPlayer;
+class UWidgetComponent;
 
 UCLASS()
 class ONESOUL_API ANormalEnemy_YG : public ACharacter, public IHitInterface
@@ -61,6 +62,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EEnemyState EnemyState = EEnemyState::EES_Patrolling;
 
+	UPROPERTY(VisibleAnywhere, Category = "AI Navigation")
+	UWidgetComponent* LookOnWidget;
 
 	UPROPERTY(EditAnywhere, Category = Combat)
 	TSubclassOf<class ASoul> SoulClass;
@@ -189,7 +192,6 @@ protected:
 	void PawnSeen(APawn* SeenPawn);
     
 	void DirectionalHitReact(const FVector& ImpactPoint);
-
 
 private:
 

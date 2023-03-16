@@ -58,19 +58,20 @@ public:
 	AOnsSoulPlayer();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	UFUNCTION()
-    virtual void OnSphereOverlap(
-			     UPrimitiveComponent* OverlappedComponent,
-			     AActor* OthrActor,
-			     UPrimitiveComponent* OtherComp,
-			     int32 OtherBodyIndex,
-			     bool bFromSweep,
-			     const FHitResult& SweepResult);
 
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void SetOverlappongItem(class AItem* Item) override;
 	virtual void AddSouls(class ASoul* Soul) override;
 	virtual void Destroyed();
+
+	UFUNCTION()
+	virtual void OnSphereOverlap(
+			UPrimitiveComponent* OverlappedComponent,
+			AActor* OthrActor,
+			UPrimitiveComponent* OtherComp,
+			int32 OtherBodyIndex,
+			bool bFromSweep,
+			const FHitResult& SweepResult);
 
 	UFUNCTION(BlueprintCallable, Category = "Attack")
 	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnable);
@@ -109,10 +110,14 @@ public:
 	float MaxHealth;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Heal")
 	float Potion;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Heal")
-	float PotionNum;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EKey")
 	bool Ekey = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
+	bool IsSpawn = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Soul")
+	int32 SoulNum;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Move")
+	bool IsMoving= false;
 
 	FTimerHandle HitReactTimer;
 
@@ -283,4 +288,5 @@ private:
 
 public:
    FORCEINLINE ECharacterState GetCharacterState() const {return CharacterState;}
+
 };

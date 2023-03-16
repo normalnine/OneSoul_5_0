@@ -57,6 +57,9 @@ ANormalEnemy_YG::ANormalEnemy_YG()
 	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("Box Collision"));
 	BoxCollision -> SetupAttachment(GetMesh(), FName("hand_rSocket"));
 
+	LookOnWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("LookOn"));
+	LookOnWidget -> SetupAttachment(GetMesh(),FName("spine_02Socket"));
+
 	HealthBarWidget = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HealthBar"));
 	HealthBarWidget -> SetupAttachment(GetRootComponent());
 
@@ -87,6 +90,8 @@ void ANormalEnemy_YG::BeginPlay()
 	BoxCollision -> SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 	BoxCollision -> SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	BoxCollision -> SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn,ECollisionResponse::ECR_Overlap);
+
+	LookOnWidget -> SetVisibility(false);
 
 	Tags.Add(FName("Enemy"));
 }
