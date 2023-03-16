@@ -17,6 +17,7 @@
 #include <GameFramework/CharacterMovementComponent.h>
 #include "EnemyBossLaser.h"
 #include "EnemyBossGhost.h"
+#include "EnemyBossDieUI.h"
 
 // Sets default values for this component's properties
 UEnemyBossFSM::UEnemyBossFSM()
@@ -207,7 +208,7 @@ void UEnemyBossFSM::UpdateDamaged()
 	{
 		//Move 상태
 		me->PlayAnimMontage(damageMontage, 1.0f, FName(TEXT("Damage0")));
-		anim->Montage_Stop(5.0f, damageMontage);
+		//anim->Montage_Stop(5.0f, damageMontage);
 
 		ChangeState(EEnemyBossState::Idle);
 	}
@@ -337,6 +338,15 @@ void UEnemyBossFSM::ChangeState(EEnemyBossState state)
 	case EEnemyBossState::Die:
 		//충돌안되게 설정
 		me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		
+		EnemyBossHPBar->RemoveFromParent();
+
+		EnemyBossDieUI = CreateWidget<UEnemyBossDieUI>(GetWorld(), EnemyBossDieUIFactory);
+		if (EnemyBossDieUI != nullptr)
+		{
+			EnemyBossDieUI->AddToViewport();
+		}
+
 		//Die 몽타주 실행
 		me->PlayAnimMontage(damageMontage, 1.0f, FName(TEXT("Die")));
 		break;
@@ -552,15 +562,17 @@ void UEnemyBossFSM::SpawnGhost()
 	float WaitTime = 0.05f; //시간을 설정하고
 	GetWorld()->GetTimerManager().SetTimer(GhostHandle, FTimerDelegate::CreateLambda([&]()
 		{			
-			ghost = GetWorld()->SpawnActor<AEnemyBossGhost>(GhostFactory, me->GetActorLocation()+FVector(0,i*150,0), me->GetActorRotation());			
-			ghost = GetWorld()->SpawnActor<AEnemyBossGhost>(GhostFactory, me->GetActorLocation()+FVector(0,-i*150,0), me->GetActorRotation());
+			FVector OffsetVector = FVector::CrossProduct(me->GetActorRotation().Vector(), FVector::UpVector).GetSafeNormal() * ghostDistance;
 
-			i += 1;
+			ghost = GetWorld()->SpawnActor<AEnemyBossGhost>(GhostFactory, me->GetActorLocation() + OffsetVector, me->GetActorRotation());
+			ghost = GetWorld()->SpawnActor<AEnemyBossGhost>(GhostFactory, me->GetActorLocation() - OffsetVector, me->GetActorRotation());
 
-			if (i > 15)
+			ghostDistance += 150;
+
+			if (ghostDistance > 1950)
 			{
 				GetWorld()->GetTimerManager().ClearTimer(GhostHandle);
-				i = 5;
+				ghostDistance = 450;
 			}
 			
 		}), WaitTime, true);

@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "EnemyBossFireSpread.generated.h"
+#include "EnemyBossFireCollision.generated.h"
 
 UCLASS()
-class ONESOUL_API AEnemyBossFireSpread : public AActor
+class ONESOUL_API AEnemyBossFireCollision : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	AEnemyBossFireSpread();
+	AEnemyBossFireCollision();
 
 protected:
 	// Called when the game starts or when spawned
@@ -23,24 +23,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UBoxComponent* compBox;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class USceneComponent* compScene;
-
 	UPROPERTY(EditAnywhere)
-		class AEnemyBoss* enemy;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf <class AActor> collision;
+	class USphereComponent* shpereComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UNiagaraComponent* niagara;
+	class AEnemyBossFireSpread* fireSpread;
 
-	float currTime = 0;
-	float stopTime = 4.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector dir;
 
-	float delayTime = 0;
-		
 };

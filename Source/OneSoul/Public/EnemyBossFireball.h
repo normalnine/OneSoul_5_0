@@ -26,16 +26,29 @@ public:
 	UPROPERTY(EditAnywhere)
 		class USphereComponent* sphereComp;
 
-	UPROPERTY(EditAnywhere)
-		class UStaticMeshComponent* meshComp;
+// 	UPROPERTY(EditAnywhere)
+// 		class UStaticMeshComponent* meshComp;
 
 	UPROPERTY(EditAnywhere)
 		class AOnsSoulPlayer* target;
+
+	UPROPERTY(EditAnywhere)
+	class UParticleSystemComponent* particleComp;
 
 	UPROPERTY(EditAnywhere)
 		FVector dir;
 
 	UPROPERTY(EditAnywhere)
 		float fireballSpeed = 3.0f;
+
+	UPROPERTY(EditAnywhere)
+	bool bOverlap;
+
+
+	UFUNCTION()
+	void BeginOverlapFireball(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResul);
+
+	UFUNCTION()
+	void EndOverlapFireball(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 };

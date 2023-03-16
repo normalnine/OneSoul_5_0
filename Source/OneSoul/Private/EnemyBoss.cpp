@@ -7,6 +7,7 @@
 #include <Components/CapsuleComponent.h>
 #include <GameFramework/CharacterMovementComponent.h>
 #include <Components/SphereComponent.h>
+#include "OnsSoulPlayer.h"
 
 // Sets default values
 AEnemyBoss::AEnemyBoss()
@@ -123,6 +124,11 @@ void AEnemyBoss::BeginOverlapHead(UPrimitiveComponent* OverlappedComponent, AAct
 	if (bOverlap)
 	{
 		// 플레이어 캐스팅 & 데미지 함수 호출
+		target = Cast<AOnsSoulPlayer>(OtherActor);
+		if (target != nullptr)
+		{
+			target->ReceiveDamage(10);
+		}
 		bOverlap = false;
 	}
 }
@@ -132,6 +138,11 @@ void AEnemyBoss::BeginOverlapLeftHand(UPrimitiveComponent* OverlappedComponent, 
 	if (bOverlap)
 	{
 		// 플레이어 캐스팅 & 데미지 함수 호출
+		target = Cast<AOnsSoulPlayer>(OtherActor);
+		if (target != nullptr)
+		{
+			target->ReceiveDamage(10);
+		}
 		bOverlap = false;
 	}
 }
@@ -141,6 +152,11 @@ void AEnemyBoss::BeginOverlapRightHand(UPrimitiveComponent* OverlappedComponent,
 	if (bOverlap)
 	{
 		// 플레이어 캐스팅 & 데미지 함수 호출
+		target = Cast<AOnsSoulPlayer>(OtherActor);
+		if (target != nullptr)
+		{
+			target->ReceiveDamage(10);
+		}
 		bOverlap = false;
 	}
 }

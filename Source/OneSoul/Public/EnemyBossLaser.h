@@ -26,10 +26,21 @@ public:
 	UPROPERTY(EditAnywhere)
 	class USceneComponent* rootComp;
 
-	UPROPERTY(EditAnywhere)
-	class UStaticMeshComponent* meshComp;
+// 	UPROPERTY(EditAnywhere)
+// 	class UStaticMeshComponent* meshComp;
 
 	UPROPERTY(EditAnywhere)
 	class AEnemyBoss* enemy;
 
+	UPROPERTY(EditAnywhere)
+	class UParticleSystemComponent* particleComp;
+
+	UPROPERTY(EditAnywhere)
+	class UCapsuleComponent* capsuleComp;
+	
+	UPROPERTY(EditAnywhere)
+	class AOnsSoulPlayer* target;
+
+	UFUNCTION()
+	void BeginOverlapLaser(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResul);
 };

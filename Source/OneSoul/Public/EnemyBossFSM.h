@@ -85,6 +85,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	class AEnemyBossGhost* ghost;
 
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<class UEnemyBossDieUI> EnemyBossDieUIFactory;
+
+	UPROPERTY(EditAnywhere)
+		class UEnemyBossDieUI* EnemyBossDieUI;
+
 	//현재시간
 	float currTime = 0;
 	//대기 상태 기다리는 시간
@@ -112,7 +118,7 @@ public:
 	float currrotateDelayTime = 2.0f;
 
 	//고스트 스폰 위치
-	double i = 5;
+	double ghostDistance = 450;
 
 	//고스트 스폰 타이머 반복/정지
 	bool bSpawnGhost = true;
@@ -120,7 +126,7 @@ public:
 	//현재 체력
 	float currHP;
 	//최대 체력
-	float maxHP = 15000;
+	float maxHP = 1000;
 	//누적 데미지
 	float accumulatedDamage;
 	//누적 상태
