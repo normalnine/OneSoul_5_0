@@ -140,7 +140,10 @@ public:
 	UPROPERTY(EditAnywhere)
 		class UAnimMontage* damageMontage;
 
+	
 	void mazic();
+	//스턴상태
+	void groggy();
 };
 
 	

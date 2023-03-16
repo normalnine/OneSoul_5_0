@@ -178,6 +178,13 @@ void UEnemy_Archer_FSM::BackRun()
 
 void UEnemy_Archer_FSM::UpdaetAttackDelay()
 {
+	//계속플레이어 방향을 바라보도록
+
+	FVector dira = target->GetActorLocation() - me->GetActorLocation();
+	FRotator dirx = dira.Rotation();
+	me->SetActorRotation(dirx);
+
+
 	if (IsWaitComplete(attackDelayTime))
 	{
 
@@ -212,14 +219,7 @@ void UEnemy_Archer_FSM::DamageState()
 void UEnemy_Archer_FSM::DieState()
 {
 
-	//아직 죽음 애니메이션이 끝나지 않았다면
-	//바닥내려가지 않도록 처리
-	/*if (anim->bDieDone == false)
-	{
-		return;
-	}*/
 
-	//계속 아래로 내려가고 싶다.
 	//동속ㅇ운동ㅇ 공식 피=피제+브이티
 	FVector p0 = me->GetActorLocation();
 	FVector vt = FVector::DownVector * dieSpeed * GetWorld()->DeltaTimeSeconds;
@@ -311,6 +311,15 @@ void UEnemy_Archer_FSM::mazic()
 	ChangeState(EEnemyState5::AttackDelay);
 }
 
+void UEnemy_Archer_FSM::groggy()
+{
+	ai->StopMovement();
+
+	//애니메이션 또는 몽타주 를 실행
+
+	ChangeState(EEnemyState5::Idle);
+}
+
 bool UEnemy_Archer_FSM::IsTargetTrace()
 {
 
@@ -325,8 +334,8 @@ bool UEnemy_Archer_FSM::IsTargetTrace()
 
 	//acos
 	float angle = UKismetMathLibrary::DegAcos(dotvalue);
-
-	//구한 값이 40보다 작고 적과 플레이어와의 거리가 지정한 거리보다 작으면
+	//UE_LOG(LogTemp, Warning, TEXT("%f"),angle);
+	//구한 값이 70보다 작고 적과 플레이어와의 거리가 지정한 거리보다 작으면
 	if (angle < 70 && dirSize.Size() < traceRange)
 	{
 
@@ -390,7 +399,7 @@ void UEnemy_Archer_FSM::ChangeState(EEnemyState5 state)
 	{
 
 		FTimerHandle ddd;
-		GetWorld()->GetTimerManager().SetTimer(ddd, this, &UEnemy_Archer_FSM::mazic, 1.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(ddd, this, &UEnemy_Archer_FSM::mazic, 0.1f, false);
 
 
 	}

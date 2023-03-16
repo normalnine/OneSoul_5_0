@@ -16,13 +16,14 @@ class ONESOUL_API AEnemy_Skeleton : public AEnemy_A
 public:
 	AEnemy_Skeleton();
 
+	virtual void BeginPlay() override;
 
 	// Ä® ½ºÅÂÆ½¸Å½¬
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		class UStaticMeshComponent* SwordMeshComp;
 
 	// ¹æÆÐ ½ºÅÂÆ½¸Å½¬
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		class UStaticMeshComponent* ShieldMeshComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = FSMComponent)
@@ -39,4 +40,8 @@ public:
 	UFUNCTION()
 		void OnOverlapBeginsword(class UPrimitiveComponent* selfComp, class AActor* otherActor, UPrimitiveComponent* otherComp,
 			int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool changeGroggy = false;
+
 };

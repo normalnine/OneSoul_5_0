@@ -21,6 +21,8 @@ void UJW_PlayerBaseComponent::BeginPlay()
 	Super::BeginPlay();
 
 	me = Cast<AOnsSoulPlayer>(GetOwner());
+
+	playerAnim = Cast<UOneSoulPlayerAnimInstance>(me->GetMesh()->GetAnimInstance());
 	
 }
 

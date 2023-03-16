@@ -63,6 +63,9 @@ void UEnemy_Titan_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	case EEnemyState4::Attack2:
 		AttackState2();
 		break;
+	case EEnemyState4::Attack3:
+		AttackState3();
+		break;
 	case EEnemyState4::AttackDelay:
 		UpdaetAttackDelay();
 		break;
@@ -73,6 +76,9 @@ void UEnemy_Titan_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 		DieState();
 		break;
 	case EEnemyState4::ReturnPos:
+		UpdateReturnPos();
+		break;
+	case EEnemyState4::Groggy:
 		UpdateReturnPos();
 		break;
 	}
@@ -151,7 +157,23 @@ void UEnemy_Titan_FSM::AttackState()
 	FRotator dirx = dir.Rotation();
 	me->SetActorRotation(dirx);
 
-	ChangeState(EEnemyState4::AttackDelay);
+	me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
+	if (me->changeGroggy)
+	{
+		me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		ChangeState(EEnemyState4::Groggy);
+	}
+	currTime += GetWorld()->DeltaTimeSeconds;
+	if (currTime > 2)
+	{
+
+		currTime = 0;
+
+		ChangeState(EEnemyState4::AttackDelay);
+	}
 }
 
 void UEnemy_Titan_FSM::AttackState1()
@@ -159,10 +181,13 @@ void UEnemy_Titan_FSM::AttackState1()
 	superArmor = false;
 
 	//몬스터가 플레이어 방향으로 공격하도록 하는 거
-	FVector des = target->GetActorLocation();
-	FVector dir = des - me->GetActorLocation();
-	FRotator dirx = dir.Rotation();
-	me->SetActorRotation(dirx);
+	//FVector des = target->GetActorLocation();
+	//FVector dir = des - me->GetActorLocation();
+	//FRotator dirx = dir.Rotation();
+	//me->SetActorRotation(dirx);
+
+	me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
 	currTime += GetWorld()->DeltaTimeSeconds;
 
@@ -182,10 +207,13 @@ void UEnemy_Titan_FSM::AttackState2()
 	superArmor=false;
 
 	//몬스터가 플레이어 방향으로 공격하도록 하는 거
-	FVector des = target->GetActorLocation();
-	FVector dir = des - me->GetActorLocation();
-	FRotator dirx = dir.Rotation();
-	me->SetActorRotation(dirx);
+	//FVector des = target->GetActorLocation();
+	//FVector dir = des - me->GetActorLocation();
+	//FRotator dirx = dir.Rotation();
+	//me->SetActorRotation(dirx);
+
+	me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
 	currTime += GetWorld()->DeltaTimeSeconds;
 
@@ -200,10 +228,36 @@ void UEnemy_Titan_FSM::AttackState2()
 
 
 }
+void UEnemy_Titan_FSM::AttackState3()
+{
+	superArmor = false;
 
+	//몬스터가 플레이어 방향으로 공격하도록 하는 거
+	//FVector des = target->GetActorLocation();
+	//FVector dir = des - me->GetActorLocation();
+	//FRotator dirx = dir.Rotation();
+	//me->SetActorRotation(dirx);
+
+	me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
+	currTime += GetWorld()->DeltaTimeSeconds;
+
+
+	if (currTime > 2)
+	{
+
+		currTime = 0;
+
+		ChangeState(EEnemyState4::AttackDelay);
+	}
+
+
+}
 void UEnemy_Titan_FSM::UpdaetAttackDelay()
 {
-	
+	me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	if (IsWaitComplete(attackDelayTime))
 	{
 		
@@ -226,11 +280,11 @@ void UEnemy_Titan_FSM::UpdaetAttackDelay()
 
 			//공격패턴 실행
 			if (index == 0)
-			{ChangeState(EEnemyState4::Attack0);}
-			else if(index ==1)
 			{ChangeState(EEnemyState4::Attack1);}
-			else
+			else if(index ==1)
 			{ChangeState(EEnemyState4::Attack2);}
+			else
+			{ChangeState(EEnemyState4::Attack3);}
 			
 		}
 		else
@@ -328,6 +382,19 @@ bool UEnemy_Titan_FSM::GetRandomPositionInNavMesh(FVector centerLocation, float 
 	bool result = ns->GetRandomReachablePointInRadius(centerLocation, radius, loc);
 	dest = loc.Location;
 	return result;
+}
+
+void UEnemy_Titan_FSM::groggy()
+{
+	UE_LOG(LogTemp, Warning, TEXT("groggy"));
+	anim->animState = mState;
+
+	me->changeGroggy = false;
+
+	ai->StopMovement();
+	
+	ChangeState(EEnemyState4::Idle);
+
 }
 
 bool UEnemy_Titan_FSM::IsTargetTrace()

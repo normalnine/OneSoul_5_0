@@ -33,13 +33,33 @@ AEnemy_Titan::AEnemy_Titan()
 	fsm = CreateDefaultSubobject<UEnemy_Titan_FSM>(TEXT("FSM"));
 }
 
+
+
+void AEnemy_Titan::BeginPlay()
+{
+	Super::BeginPlay();
+
+	RcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	LcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+}
+
 void AEnemy_Titan::OnOverlapBegin(class UPrimitiveComponent* selfComp, class AActor* otherActor, UPrimitiveComponent* otherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	AOnsSoulPlayer* target = Cast<AOnsSoulPlayer>(otherActor);
 	
 	if (target != nullptr)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("OverLap 1"));
+		if (target->parrying)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("parryGood"));
+			changeGroggy = true;
+		}
+		else
+		{
+			target->ReceiveDamage(1);
+		}
 
 
 	}

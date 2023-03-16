@@ -14,7 +14,12 @@ class ONESOUL_API AEnemy_Titan : public AEnemy_A
 {
 	GENERATED_BODY()
 public:
+
+
 	AEnemy_Titan();
+
+	virtual void BeginPlay() override;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = FSMComponent)
 		class UEnemy_Titan_FSM* fsm;
 
@@ -33,4 +38,7 @@ public:
 		void OnOverlapBegin(class UPrimitiveComponent* selfComp, class AActor* otherActor, UPrimitiveComponent* otherComp,
 			int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool changeGroggy = false;
 };

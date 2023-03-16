@@ -133,12 +133,36 @@ public:
 	//이동할수있는 범위
 	float moveRange = 2000;
 
-
+	//공격
 	UPROPERTY(EditDefaultsOnly, Category = BulletFactory)
 		TSubclassOf<class AActor> MazicFactory;
 
-	UPROPERTY(EditAnywhere)
-		class UAnimMontage* damageMontage;
-
 		void mazic();
+
+		//스턴상태
+		void groggy();
+		//공격준비
+		UPROPERTY(EditDefaultsOnly, Category = BulletFactory)
+			TSubclassOf<class AEnemy_Magician_ReadyAttack> MazicReadyFactory;
+		//불기둥 공격
+		UPROPERTY(EditDefaultsOnly, Category = BulletFactory)
+			TSubclassOf<class AActor> MazicAttackFactory;
+
+		FVector attackZone;
+
+		int32 mazicattack;
+
+		//불기둥 공격
+		UPROPERTY(EditDefaultsOnly, Category = BulletFactory)
+			TSubclassOf<class AActor> MazicAttackEffectFactory;
+
+		UPROPERTY(EditAnywhere)
+			class UAnimMontage* AttackMontage;
+
+		UPROPERTY(EditAnywhere)
+			class UAnimMontage* damageMontage;
+
+		////크리티컬 데미지 애니메이션 재생여부 함수
+		//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		//	bool cri = false;
 };

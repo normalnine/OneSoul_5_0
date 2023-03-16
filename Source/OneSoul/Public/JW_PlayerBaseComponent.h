@@ -28,4 +28,7 @@ public:
 public:
 	UPROPERTY()
 		class AOnsSoulPlayer* me;
+
+	UPROPERTY()
+		class UOneSoulPlayerAnimInstance* playerAnim;
 };
