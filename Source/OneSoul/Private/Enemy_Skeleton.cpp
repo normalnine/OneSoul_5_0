@@ -77,38 +77,38 @@ void AEnemy_Skeleton::OnOverlapBeginsword(class UPrimitiveComponent* selfComp, c
 	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 	{
 
-		AOnsSoulPlayer* target = Cast<AOnsSoulPlayer>(otherActor);
-		
-		if (target != nullptr)
-		{
-			if (target->parrying)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("parryGood"));
-				changeGroggy = true;
-			}
-			else
-			{
-				//플레이어가 가등중일때
-				if (target->compPlayerGuard->imguard)
-				{
-					
-					FString sectionName = FString::Printf(TEXT("thing"));
-					PlayAnimMontage(fsm->damageMontage, 1.0f, FName(*sectionName));
-
-					//플레이어를 넉백시킨다
-					FVector imp = -1 * target->GetActorForwardVector() * 1000.0f;
-					target->GetCharacterMovement()->AddImpulse(imp, true);
-
-					//플레이어의 기력 감소
-					target->CurrentStamina = FMath::Clamp(target->CurrentStamina - 10.f, target->MinStamina, target->MaxStamina);
-				}
-				else
-				{
-					target->ReceiveDamage(1);
-				}
-
-			}
-		
-
-		}
+// 		AOnsSoulPlayer* target = Cast<AOnsSoulPlayer>(otherActor);
+// 		
+// 		if (target != nullptr)
+// 		{
+// 			if (target->parrying)
+// 			{
+// 				UE_LOG(LogTemp, Warning, TEXT("parryGood"));
+// 				changeGroggy = true;
+// 			}
+// 			else
+// 			{
+// 				//플레이어가 가등중일때
+// 				if (target->compPlayerGuard->imguard)
+// 				{
+// 					
+// 					FString sectionName = FString::Printf(TEXT("thing"));
+// 					PlayAnimMontage(fsm->damageMontage, 1.0f, FName(*sectionName));
+// 
+// 					//플레이어를 넉백시킨다
+// 					FVector imp = -1 * target->GetActorForwardVector() * 1000.0f;
+// 					target->GetCharacterMovement()->AddImpulse(imp, true);
+// 
+// 					//플레이어의 기력 감소
+// 					target->CurrentStamina = FMath::Clamp(target->CurrentStamina - 10.f, target->MinStamina, target->MaxStamina);
+// 				}
+// 				else
+// 				{
+// 					target->ReceiveDamage(1);
+// 				}
+// 
+// 			}
+// 		
+// 
+// 		}
 	}

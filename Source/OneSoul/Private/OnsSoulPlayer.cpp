@@ -22,6 +22,7 @@
 #include "OneSoulOverlay.h"
 #include "NormalEnemy_YG.h"
 #include "ReSpawn.h"
+#include "NPC.h"
 
 AOnsSoulPlayer::AOnsSoulPlayer()
       
@@ -397,6 +398,12 @@ void AOnsSoulPlayer::Attack()
 
 void AOnsSoulPlayer::EKeyPressed()
 {
+	ANPC* npc = Cast<ANPC>(UGameplayStatics::GetActorOfClass(GetWorld(), ANPC::StaticClass()));
+	if (IsOverlappingActor(npc))
+	{
+		npc->OpenMenuUI();
+		return;
+	}
  AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
  AItem* OverlappingWidget = Cast<AItem>(OverlappingItem);
 
