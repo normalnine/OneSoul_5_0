@@ -8,6 +8,8 @@
 #include "Components/WidgetComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
+#include "JW_PlayerRollComponent.h"
+#include "JW_ParryGuardComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -84,6 +86,9 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	SoulNum = 0;
 
 	SetPlayerMaxSpeed(WalkSpeed);
+
+	compPlayerRoll = CreateDefaultSubobject<UJW_PlayerRollComponent>(TEXT("Roll"));
+	compPlayerGuard = CreateDefaultSubobject<UJW_ParryGuardComponent>(TEXT("ParryGuard"));
 }
 
 void AOnsSoulPlayer::BeginPlay()
@@ -158,6 +163,14 @@ void AOnsSoulPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &AOnsSoulPlayer::EKeyPressed);
 	PlayerInputComponent->BindAction("Healing", IE_Pressed, this, &AOnsSoulPlayer::PotionDrinking);
 	PlayerInputComponent->BindAction("WeaponChange", IE_Pressed, this, &AOnsSoulPlayer::WeaponChange);
+
+	PlayerInputComponent->BindAction("MoveW", IE_Released, this, &AOnsSoulPlayer::notMoveF);
+	PlayerInputComponent->BindAction("MoveA", IE_Released, this, &AOnsSoulPlayer::notMoveR);
+	PlayerInputComponent->BindAction("MoveS", IE_Released, this, &AOnsSoulPlayer::notMoveF);
+	PlayerInputComponent->BindAction("MoveD", IE_Released, this, &AOnsSoulPlayer::notMoveR);
+
+	compPlayerRoll->SetupInputBinding(PlayerInputComponent);
+	compPlayerGuard->SetupInputBinding(PlayerInputComponent);
 }
 
 float AOnsSoulPlayer::TakeDamage(
@@ -291,6 +304,7 @@ void AOnsSoulPlayer::MoveForward(float Value)
 	   AddMovementInput(Direction, Value);
 
 	   IsMoving = true;
+	   isMoveF = true;
     }
 }
 
@@ -306,6 +320,7 @@ void AOnsSoulPlayer::MoveRight(float Value)
 	 AddMovementInput(Direction, Value);
 
 	 IsMoving = true;
+	 isMoveR = true;
     }
 }
 
@@ -779,3 +794,11 @@ void AOnsSoulPlayer::PlayerSpawnTimer()
  GetWorldTimerManager().SetTimer(SpawnTimer,this,&AOnsSoulPlayer::PlayerSpawn,0.5f);
 }
 
+void AOnsSoulPlayer::notMoveF()
+{
+	isMoveF = false;
+}
+void AOnsSoulPlayer::notMoveR()
+{
+	isMoveR = false;
+}

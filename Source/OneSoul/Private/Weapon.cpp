@@ -120,7 +120,7 @@ void AWeapon::BoxTrace(FHitResult& BoxHit)
 		ETraceTypeQuery::TraceTypeQuery1,
 		false,
 		ActorsToIgnore,
-		bShowBoxDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None,
+		bShowBoxDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::ForDuration,
 		BoxHit,
 		true
 	);

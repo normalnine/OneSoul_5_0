@@ -288,5 +288,18 @@ private:
 
 public:
    FORCEINLINE ECharacterState GetCharacterState() const {return CharacterState;}
+   UPROPERTY(EditAnywhere)
+	   class UJW_PlayerRollComponent* compPlayerRoll;
+   UPROPERTY(EditAnywhere)
+	   class UJW_ParryGuardComponent* compPlayerGuard;
+   UPROPERTY(EditAnywhere)
+	   bool isMoveF = false;
+   UPROPERTY(EditAnywhere)
+	   bool isMoveR = false;
 
+   void notMoveF();
+   void notMoveR();
+
+   UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	   bool parrying = false;
 };
