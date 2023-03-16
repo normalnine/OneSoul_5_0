@@ -23,12 +23,24 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UBoxComponent* compBox;
 
-	UPROPERTY(EditAnywhere)
-		class UStaticMeshComponent* meshComp;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USceneComponent* compScene;
 
 	UPROPERTY(EditAnywhere)
 		class AEnemyBoss* enemy;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf <class AActor> collision;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UNiagaraComponent* niagara;
+
+	float currTime = 0;
+	float stopTime = 4.0f;
+
+	float delayTime = 0;
+		
 };
