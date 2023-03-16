@@ -6,6 +6,9 @@
 #include "GameFramework/GameModeBase.h"
 #include "OneSoulGameMode.generated.h"
 
+class UOneSoulOverlay;
+class AOnsSoulPlayer;
+
 UCLASS(minimalapi)
 class AOneSoulGameMode : public AGameModeBase
 {
@@ -13,6 +16,34 @@ class AOneSoulGameMode : public AGameModeBase
 
 public:
 	AOneSoulGameMode();
+
+	virtual void BeginPlay();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 CurrentCoins = 0;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int32 BestCoins;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FTransform SpawnTransform;
+
+	void AddCoins(int32 point);
+
+	void ReSpawnPlayer(ACharacter* player);
+	
+	UPROPERTY(VisibleAnywhere)
+	AOnsSoulPlayer* Player;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Heal")
+	float PotionNum = 5.f;
+
+	private:
+
+	UPROPERTY(VisibleAnywhere)
+    UOneSoulOverlay* OverlayWidget;
+
+
 };
 
 
