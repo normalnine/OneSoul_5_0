@@ -17,7 +17,11 @@ UEnemy_Titan_FSM::UEnemy_Titan_FSM()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
+	ConstructorHelpers::FObjectFinder<UAnimMontage> tempMontage(TEXT("AnimMontage'/Game/LJW/Enemys/Titan/anim/AM_Enemy_Titan.AM_Enemy_Titan'"));
+	if (tempMontage.Succeeded())
+	{
+		damageMontage = tempMontage.Object;
+	}
 }
 
 
@@ -82,11 +86,26 @@ void UEnemy_Titan_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 		UpdateReturnPos();
 		break;
 	}
+
+	FVector Ddir = target->GetActorLocation() - me->GetActorLocation();
+	FVector DdirSize = Ddir;
+	Ddir.Normalize();
+	float Ddotvalue = FVector::DotProduct(me->GetActorLocation(), Ddir);
+	float Dangle = UKismetMathLibrary::DegAcos(Ddotvalue);
+	if (Dangle > 155 && DdirSize.Size() < 500)
+	{
+		Hitback = true;
+	}
+	else
+	{
+		Hitback = false;
+	}
+
 }
 void UEnemy_Titan_FSM::IdleState()
 {
 	
-	superArmor=true;
+	superArmor=false;
 
 	//시야에 들어오면 움직이기 시작
 	if (IsTargetTrace())
@@ -178,7 +197,7 @@ void UEnemy_Titan_FSM::AttackState()
 
 void UEnemy_Titan_FSM::AttackState1()
 {
-	superArmor = false;
+	superArmor = true;
 
 	//몬스터가 플레이어 방향으로 공격하도록 하는 거
 	//FVector des = target->GetActorLocation();
@@ -204,7 +223,7 @@ void UEnemy_Titan_FSM::AttackState1()
 }
 void UEnemy_Titan_FSM::AttackState2()
 {
-	superArmor=false;
+	superArmor=true;
 
 	//몬스터가 플레이어 방향으로 공격하도록 하는 거
 	//FVector des = target->GetActorLocation();
@@ -230,7 +249,7 @@ void UEnemy_Titan_FSM::AttackState2()
 }
 void UEnemy_Titan_FSM::AttackState3()
 {
-	superArmor = false;
+	superArmor = true;
 
 	//몬스터가 플레이어 방향으로 공격하도록 하는 거
 	//FVector des = target->GetActorLocation();
@@ -255,7 +274,8 @@ void UEnemy_Titan_FSM::AttackState3()
 
 }
 void UEnemy_Titan_FSM::UpdaetAttackDelay()
-{
+{	
+	superArmor=true;
 	me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	if (IsWaitComplete(attackDelayTime))
@@ -315,19 +335,19 @@ void UEnemy_Titan_FSM::DieState()
 
 	//계속 아래로 내려가고 싶다.
 	//동속ㅇ운동ㅇ 공식 피=피제+브이티
-	FVector p0 = me->GetActorLocation();
-	FVector vt = FVector::DownVector * dieSpeed * GetWorld()->DeltaTimeSeconds;
-	FVector p = p0 + vt;
-	//2. 만약에 p.Z 가 -200 보다 작으면 파괴한다
-	if (p.Z < -200)
-	{
-		me->Destroy();
-	}
+	//FVector p0 = me->GetActorLocation();
+	//FVector vt = FVector::DownVector * dieSpeed * GetWorld()->DeltaTimeSeconds;
+	//FVector p = p0 + vt;
+	////2. 만약에 p.Z 가 -200 보다 작으면 파괴한다
+	//if (p.Z < -200)
+	//{
+	//	me->Destroy();
+	//}
 	//3. 그렇지 않으면 해당 위치로 셋팅한다
-	else
-	{
-		me->SetActorLocation(p);
-	}
+	//else
+	//{
+	//	me->SetActorLocation(p);
+	//}
 
 
 }
@@ -338,20 +358,29 @@ void UEnemy_Titan_FSM::UpdateReturnPos()
 void UEnemy_Titan_FSM::OnDamageProcess()
 {
 	hp--;
-
-	if (superArmor)
-	{
+	
 	
 		//체력이 남아있다면
 		if (hp > 0)
 		{
+			if (Hitback)
+			{
+				//몽타주실행
+				FString sectionName = FString::Printf(TEXT("Cri"));
+				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+				//상태변경
+				mState = EEnemyState4::Damage;
+			}
+			if (!(superArmor))
+			{
+			
+			FString sectionName = FString::Printf(TEXT("Damage0"));
+			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+
 			//상태를 피격으로 전환
 			mState = EEnemyState4::Damage;
 			currentTime = 0;
-			//피격 애니메이션 재생
-			FString sectionName = FString::Printf(TEXT("Damage0"));
-			anim->PlayDamageAnim(FName(*sectionName));
-
+			}
 		}
 
 		else
@@ -361,14 +390,13 @@ void UEnemy_Titan_FSM::OnDamageProcess()
 			//캡슐 충돌체 비활성화
 			me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			//죽음 애니메이션 재생
-			anim->PlayDamageAnim(TEXT("Die"));
-
+			FString sectionName = FString::Printf(TEXT("Die"));
+			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 
 		}
 		//애니메이션 상태 동기화
 		anim->animState = mState;
 		ai->StopMovement();
-	}
 	
 		
 }

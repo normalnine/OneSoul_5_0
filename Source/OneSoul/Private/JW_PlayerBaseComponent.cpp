@@ -39,3 +39,8 @@ void UJW_PlayerBaseComponent::SetupInputBinding(class UInputComponent* PlayerInp
 {
 
 }
+
+void UJW_PlayerBaseComponent::CriAttack()
+{
+	playerAnim->Montage_Play(criattack);
+}

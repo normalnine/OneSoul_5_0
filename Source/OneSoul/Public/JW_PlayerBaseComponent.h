@@ -31,4 +31,9 @@ public:
 
 	UPROPERTY()
 		class UOneSoulPlayerAnimInstance* playerAnim;
+
+		void CriAttack();
+
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montages)
+			UAnimMontage* criattack;
 };

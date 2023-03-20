@@ -83,6 +83,19 @@ void UEnemy_Magician_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FA
 		UpdateReturnPos();
 		break;
 	}
+	FVector Ddir = target->GetActorLocation() - me->GetActorLocation();
+	FVector DdirSize = Ddir;
+	Ddir.Normalize();
+	float Ddotvalue = FVector::DotProduct(me->GetActorLocation(), Ddir);
+	float Dangle = UKismetMathLibrary::DegAcos(Ddotvalue);
+	if (Dangle > 155 && DdirSize.Size() < 500)
+	{
+		Hitback = true;
+	}
+	else
+	{
+		Hitback = false;
+	}
 }
 
 void UEnemy_Magician_FSM::IdleState()
@@ -124,14 +137,14 @@ void UEnemy_Magician_FSM::MoveState()
 		if (dir.Length() < attackRange)
 		{
 			
-			if (dir.Length() < 500)
-			{
-				ChangeState(EEnemyState3::Run);
-			}
-			else
-			{
+			/*	if (dir.Length() < 500)
+				{
+					ChangeState(EEnemyState3::Run);
+				}
+				else
+				{*/
 				ChangeState(EEnemyState3::Attack);
-			}
+			//}
 			
 			
 		}
@@ -206,12 +219,12 @@ void UEnemy_Magician_FSM::UpdaetAttackDelay()
 		FVector dir = target->GetActorLocation() - me->GetActorLocation();
 		float dist = dir.Length();
 
-		if (dist < 500)
+	/*	if (dist < 500)
 		{
 			EEnemyState3::Run;
 			anim->animState = mState;
 		}
-		else if(dist < attackRange)
+		else*/ if(dist < attackRange)
 		{
 		
 			ChangeState(EEnemyState3::Attack);
@@ -224,6 +237,10 @@ void UEnemy_Magician_FSM::UpdaetAttackDelay()
 }
 void UEnemy_Magician_FSM::DamageState()
 {
+	if (Hitback)
+	{
+		Hitback = false;
+	}
 	//damageDelayTime 이 지나면
 	if (IsWaitComplete(damageDelayTime))
 	{
@@ -265,35 +282,15 @@ void UEnemy_Magician_FSM::UpdateReturnPos()
 }
 void UEnemy_Magician_FSM::OnDamageProcess()
 {
-
-	UE_LOG(LogTemp, Warning, TEXT("magicHit"));
-	//현재공격이 뒤잡인지 확인하는 거
-	FVector Ddir = target->GetActorLocation() - me->GetActorLocation();
-	FVector DdirSize = Ddir;
-	Ddir.Normalize();
-	float Ddotvalue = FVector::DotProduct(me->GetActorLocation(), Ddir);
-	float Dangle = UKismetMathLibrary::DegAcos(Ddotvalue);
-
+	UE_LOG(LogTemp, Warning, TEXT("IMHIT"));
 	//체력감소
 	//hp -= damage;
 	hp--;
 	if (hp > 0)
 	{
-		/*	if (cri)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("criattack"));
-
-				FString sectionName = FString::Printf(TEXT("Cri"));
-				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
-				mState = EEnemyState3::Damage;
-			}*/
-		//else
-		if (Dangle > 155 && DdirSize.Size() < 500)
+		if (Hitback)
 		{
-
-
-
-			UE_LOG(LogTemp, Warning, TEXT("backattack%f"), Dangle);
+			UE_LOG(LogTemp, Warning, TEXT("backattack"));
 
 			FString sectionName = FString::Printf(TEXT("BackAttack"));
 			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
@@ -302,9 +299,6 @@ void UEnemy_Magician_FSM::OnDamageProcess()
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("defultattack"));
-
-
-			currentTime = 0;
 			//피격 애니메이션 재생
 			FString sectionName = FString::Printf(TEXT("Damage0"));
 			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
@@ -372,6 +366,11 @@ void UEnemy_Magician_FSM::groggy()
 {
 	ai->StopMovement();
 	ChangeState(EEnemyState3::Idle);
+}
+
+void UEnemy_Magician_FSM::moveBack()
+{
+
 }
 
 bool UEnemy_Magician_FSM::IsTargetTrace()
@@ -518,22 +517,6 @@ void UEnemy_Magician_FSM::ChangeState(EEnemyState3 state)
 		//me->PlayAnimMontage(damageMontage, 1.0f, FName(TEXT("Die")));
 
 		break;
-	}
-}
-void UEnemy_Magician_FSM::ReceiveDamage()
-{
-	//피를 줄이자
-	hp--;
-	//hp 가 0보다 크면 Damage 상태로 전환
-	if (hp > 0)
-	{
-		ChangeState(EEnemyState3::Damage);
-	}
-	//그렇지 않으면 Die 상태로 전환
-	else
-	{
-
-		ChangeState(EEnemyState3::Die);
 	}
 }
 

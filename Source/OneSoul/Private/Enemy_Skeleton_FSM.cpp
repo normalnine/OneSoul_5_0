@@ -5,6 +5,7 @@
 #include "Enemy_Skeleton.h"
 #include "Enemy_Skeleton_Anim.h"
 #include <Kismet/GameplayStatics.h>
+#include "GameFramework/CharacterMovementComponent.h"
 #include <Components/CapsuleComponent.h>
 #include <AIController.h>
 #include <NavigationSystem.h>
@@ -82,6 +83,21 @@ void UEnemy_Skeleton_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FA
 		groggy();
 		break;
 	}
+
+	FVector Ddir = target->GetActorLocation() - me->GetActorLocation();
+	FVector DdirSize = Ddir;
+	Ddir.Normalize();
+	float Ddotvalue = FVector::DotProduct(me->GetActorLocation(), Ddir);
+	float Dangle = UKismetMathLibrary::DegAcos(Ddotvalue);
+	if (Dangle > 155 && DdirSize.Size() < 500)
+	{
+		Hitback = true;
+	}
+	else
+	{
+		Hitback = false;
+	}
+
 }
 
 void UEnemy_Skeleton_FSM::IdleState()
@@ -215,11 +231,20 @@ void UEnemy_Skeleton_FSM::UpdaetAttackDelay()
 }
 void UEnemy_Skeleton_FSM::DamageState()
 {	
-	
+	if (cri)
+	{
+		cri = false;
+		moveBack();
+	}
+	if (Hitback)
+	{
+		Hitback = false;
+	}
 	//damageDelayTime 이 지나면
 	if (IsWaitComplete(damageDelayTime))
 	{
-		//Move 상태
+		me->SetActorEnableCollision(ECollisionEnabled::QueryOnly);
+		
 		ChangeState(EEnemyState1::Attack);
 	}
 }
@@ -234,7 +259,7 @@ void UEnemy_Skeleton_FSM::DieState()
 	//2. 만약에 p.Z 가 -200 보다 작으면 파괴한다
 	/*if (p.Z < -200)*/
 	//{
-		me->Destroy();
+	//	me->Destroy();
 	//}
 	////3. 그렇지 않으면 해당 위치로 셋팅한다
 	//else
@@ -264,34 +289,23 @@ void UEnemy_Skeleton_FSM::OnDamageProcess()
 	}
 	else
 	{
-
-		//현재공격이 뒤잡인지 확인하는 거
-		FVector Ddir = target->GetActorLocation() - me->GetActorLocation();
-		FVector DdirSize = Ddir;
-		Ddir.Normalize();
-		float Ddotvalue = FVector::DotProduct(me->GetActorLocation(), Ddir);
-		float Dangle = UKismetMathLibrary::DegAcos(Ddotvalue);
-
 		//체력감소
 		//hp -= damage;
 		hp--;
 		if (hp > 0)
 		{
 			if (cri)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("criattack"));
-				
+			{	
+				//몽타주실행
 				FString sectionName = FString::Printf(TEXT("Cri"));
 				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+				FTimerHandle aaa;
+				GetWorld()->GetTimerManager().SetTimer(aaa, this, &UEnemy_Skeleton_FSM::moveBack, 1.0f, false);
+				//상태변경
 				mState = EEnemyState1::Damage;
 			}
-			else if (Dangle>155 && DdirSize.Size() < 500)
+			else if (Hitback)
 			{
-				
-			
-
-				UE_LOG(LogTemp, Warning, TEXT("backattack%f"),Dangle);
-			
 				FString sectionName = FString::Printf(TEXT("BackAttack"));
 				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 				mState = EEnemyState1::Damage;
@@ -317,7 +331,8 @@ void UEnemy_Skeleton_FSM::OnDamageProcess()
 			//캡슐 충돌체 비활성화
 			me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			//죽음 애니메이션 재생
-			anim->PlayDamageAnim(TEXT("Die"));
+			FString sectionName = FString::Printf(TEXT("Die"));
+			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 
 
 		}
@@ -349,14 +364,29 @@ void UEnemy_Skeleton_FSM::groggy()
 	currTime += GetWorld()->DeltaTimeSeconds;
 
 	me->changeGroggy=false;
+	if (currTime>2)
+	{
+		cri = false;
+	}
 
 	if (currTime > 3)
 	{
 
 		currTime = 0;
-		cri = false;
+		
 		ChangeState(EEnemyState1::Move);
 	}
+
+}
+
+void UEnemy_Skeleton_FSM::moveBack()
+{
+
+		UE_LOG(LogTemp, Warning, TEXT("qweasd"));
+		//뒤로살짝밀려가게
+		FVector imp = -1 * me->GetActorForwardVector() * 5000.0f;
+		me->GetCharacterMovement()->AddImpulse(imp, true);
+	
 
 }
 
