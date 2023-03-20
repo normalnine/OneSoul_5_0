@@ -216,6 +216,9 @@ public:
 	void ReSpawnRemoveWidget();
 	UFUNCTION(BlueprintCallable, Category = "Dead")
 	void YouDieRemoveWidget();
+	UFUNCTION(BlueprintCallable, Category = "Sprint")
+	void StopSprint();
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -225,7 +228,6 @@ protected:
 	void LookUp(float Value);
 	void Turn(float Value);
 	void StartSprint();
-	void StopSprint();
 	void ToggleLockOn();
 	void LMBDown();
 	void LMBUP();
@@ -319,4 +321,7 @@ public:
 
    UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	   bool parrying = false;
+
+   bool bTalking = false;
+   class ANPC* npc;
 };

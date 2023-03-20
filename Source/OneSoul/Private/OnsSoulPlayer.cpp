@@ -407,11 +407,28 @@ void AOnsSoulPlayer::Attack()
 
 void AOnsSoulPlayer::EKeyPressed()
 {
-	ANPC* npc = Cast<ANPC>(UGameplayStatics::GetActorOfClass(GetWorld(), ANPC::StaticClass()));
-	if (IsOverlappingActor(npc))
+	if (bTalking)
 	{
-		npc->OpenMenuUI();
+		//UE_LOG(LogTemp,Warning,TEXT("TextUpdate"));
+		npc->Dialogue();
 		return;
+	}
+
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANPC::StaticClass(), FoundActors);
+
+
+	for (AActor* Actor : FoundActors)
+	{
+		npc = Cast<ANPC>(Actor);
+		if (npc != nullptr)
+		{
+			if (IsOverlappingActor(npc))
+			{
+				npc->OpenMenuUI();
+				return;
+			}
+		}
 	}
  AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
  AItem* OverlappingWidget = Cast<AItem>(OverlappingItem);
