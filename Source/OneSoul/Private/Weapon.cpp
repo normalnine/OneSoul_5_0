@@ -19,6 +19,8 @@
 #include "Enemy_Archer_FSM.h"
 #include "Enemy_Titan.h"
 #include "Enemy_Titan_FSM.h"
+#include "EnemyBossFSM.h"
+#include "JW_PlayerBaseComponent.h"
 
 
 
@@ -67,7 +69,6 @@ void AWeapon::Tick(float DeltaTime)
 {
   Super::Tick(DeltaTime);
 
-  BoxTrace(BoxHit_);
 }
 
 void AWeapon::BeginPlay()
@@ -86,6 +87,7 @@ void AWeapon::OnBoxOverlap(
               bool bFromSweep,
               const FHitResult& SweepResult)
 {
+		UE_LOG(LogTemp,Warning,TEXT("ovelapweapon"));
    
 		//if (ActorIsSameType(OthrActor)) return;
 
@@ -96,6 +98,7 @@ void AWeapon::OnBoxOverlap(
 		  AEnemy_Magician* Enemy2 = Cast<AEnemy_Magician>(OthrActor);
 		  AEnemy_Archer* Enemy3 = Cast<AEnemy_Archer>(OthrActor);
 		  AEnemy_Titan* Enemy4 = Cast<AEnemy_Titan>(OthrActor);
+
 		  if (Enemy4 != nullptr)
 		  {
 			  Enemy4->fsm->OnDamageProcess();
@@ -162,19 +165,30 @@ void AWeapon::OnBoxOverlap(
 		  Enemy->ShowHitNumer(Damage, BoxHit_.Location,false);
 		}
 
-		AEnemyBoss* Boss = Cast<AEnemyBoss>(BoxHit_.GetActor());
+// 		AEnemyBoss* Boss = Cast<AEnemyBoss>(BoxHit_.GetActor());
+// 
+// 		if(Boss)
+// 		{
+// 		 
+// 			UGameplayStatics::ApplyDamage(
+// 				              Boss,
+// 				              100.f,
+// 				              GetInstigator()->GetController(),
+// 				              this,
+// 				              UDamageType::StaticClass());
+// 		  }
+		AEnemyBoss* Boss = Cast<AEnemyBoss>(OthrActor);
 
-		if(Boss)
+		if (Boss != nullptr)
 		{
-		 
-			UGameplayStatics::ApplyDamage(
-				              Boss,
-				              100.f,
-				              GetInstigator()->GetController(),
-				              this,
-				              UDamageType::StaticClass());
-		  }
+			Boss->fsm->ReceiveDamage(100);
+		}
+		if (Boss == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("bossisnull"));
 
+		}
+	
 }
 
 

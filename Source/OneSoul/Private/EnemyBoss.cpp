@@ -90,19 +90,19 @@ void AEnemyBoss::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 }
 
-float AEnemyBoss::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	if (fsm->currHP - Damage <= 0.f)
-	{
-		fsm-> currHP = 0.f;
-	}
-	else
-	{
-		fsm-> ReceiveDamage(Damage);
-	}
-
-	return Damage;
-}
+// float AEnemyBoss::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+// {
+// 	if (fsm->currHP - Damage <= 0.f)
+// 	{
+// 		fsm-> currHP = 0.f;
+// 	}
+// 	else
+// 	{
+// 		fsm-> ReceiveDamage(Damage);
+// 	}
+// 
+// 	return Damage;
+// }
 
 void AEnemyBoss::SetActive(bool bActive)
 {

@@ -474,7 +474,7 @@ void UEnemyBossFSM::DecideAttackPattern()
 	}
 	else
 	{
-		randPattern = FMath::RandRange(0, 6);
+		randPattern = FMath::RandRange(0, 8);
 		UE_LOG(LogTemp, Warning, TEXT("1pase"));
 
 	}
