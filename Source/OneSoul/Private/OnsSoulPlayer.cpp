@@ -422,7 +422,7 @@ void AOnsSoulPlayer::EKeyPressed()
 	 {
 		 EquippedWeapon -> Destroy();
 	 }
-     OverlappingWidget->PickupWidget->SetVisibility(false);
+     OverlappingWidget->GetPickupWiget()->SetVisibility(false);
 	 EquipWeapon(OverlappingWeapon);
  }
 

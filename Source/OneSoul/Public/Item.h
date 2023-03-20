@@ -31,8 +31,6 @@ public:
 	AItem();
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Item)
-	UWidgetComponent* PickupWidget;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -41,10 +39,10 @@ protected:
 	virtual void SpawnPickupSound();
 
 	//ÁøÆø
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Sine, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Sine)
 	float Amplitude;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Sine, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Sine)
 	float TimeConstant;
 
 	UFUNCTION(BlueprintPure)
@@ -66,25 +64,40 @@ protected:
 			                UPrimitiveComponent* OtherComp,
 			                int32 OtherBodyIndex);
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Item)
-	UStaticMeshComponent* ItemMesh;
 
 	EItemState ItemState = EItemState::EIS_Hovering;
 
-	UPROPERTY(VisibleAnywhere)
-	USphereComponent* Sphere;
-
-	UPROPERTY(EditAnywhere)
-	UNiagaraComponent *ItemEffect;
 
 private:
-    UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category= Sine,meta= (AllowPrivateAccess = "true"))
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Item, meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* ItemMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Item, meta = (AllowPrivateAccess = "true"))
+	UWidgetComponent* PickupWidget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Item, meta = (AllowPrivateAccess = "true"))
+	USphereComponent* SphereCollison;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Item, meta = (AllowPrivateAccess = "true"))
+	FString ItemName;
+   
+    UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category= Sine, meta= (AllowPrivateAccess = "true"))
     float RunningTime;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Effect, meta = (AllowPrivateAccess = "true"))
+	UNiagaraComponent *ItemEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Effect, meta = (AllowPrivateAccess = "true"))
 	UNiagaraSystem* PickupEffect;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Sound, meta = (AllowPrivateAccess = "true"))
     USoundBase* PickupSound;
 
+public:
+    
+	FORCEINLINE USphereComponent* GetSphereCollision() const {return SphereCollison;}
+	FORCEINLINE UWidgetComponent* GetPickupWiget() const {return PickupWidget;}
+	FORCEINLINE UStaticMeshComponent* GetItemMesh() const {return ItemMesh;}
+    
 };

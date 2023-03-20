@@ -38,18 +38,18 @@ void AWeapon::Equip(USceneComponent* InParent, FName InSocketName, AActor* NewOw
    SetOwner(NewOwner);
    SetInstigator(NewInstigator);
    FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
-   ItemMesh->AttachToComponent(InParent,TransformRules,InSocketName);
+   GetItemMesh()->AttachToComponent(InParent,TransformRules,InSocketName);
    ItemState = EItemState::EIS_Equipped;
- if (Sphere)
+ if (GetSphereCollision())
  {
-     Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+     GetSphereCollision()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
  }
 }
 
 void AWeapon::AttachMeshToSocket(USceneComponent* InParent, const FName& InSocketName)
 {
  FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
- ItemMesh -> AttachToComponent(InParent,TransformRules,InSocketName);
+ GetItemMesh() -> AttachToComponent(InParent,TransformRules,InSocketName);
 }
 
 void AWeapon::Tick(float DeltaTime)
