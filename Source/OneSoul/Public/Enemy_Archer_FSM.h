@@ -144,6 +144,13 @@ public:
 	void mazic();
 	//스턴상태
 	void groggy();
+
+	//뒤로밀려가는 함수
+	UFUNCTION(BlueprintCallable)
+		void moveBack();
+
+	//뒤잡상태에서 피격을 맞았을때 true 로 플레이어한테 전달할 값
+	bool Hitback = false;
 };
 
 	

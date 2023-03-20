@@ -147,8 +147,14 @@ public:
 	bool shout = true;
 
 	//슈퍼아머 상태를 만들어줄라고 
-	bool superArmor = true;
+	bool superArmor = false;
 		
 	//스턴상태
 	void groggy();
+
+	UPROPERTY(EditAnywhere)
+		class UAnimMontage* damageMontage;
+
+	//뒤잡상태에서 피격을 맞았을때 true 로 플레이어한테 전달할 값
+	bool Hitback = false;
 };

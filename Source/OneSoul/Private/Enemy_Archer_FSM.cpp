@@ -17,7 +17,11 @@ UEnemy_Archer_FSM::UEnemy_Archer_FSM()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
+	ConstructorHelpers::FObjectFinder<UAnimMontage> tempMontage(TEXT("AnimMontage'/Game/LJW/Enemys/SimpleSkeleton/anim/AM_Enemy_Skeleton.AM_Enemy_Skeleton'"));
+	if (tempMontage.Succeeded())
+	{
+		damageMontage = tempMontage.Object;
+	}
 }
 
 
@@ -220,20 +224,20 @@ void UEnemy_Archer_FSM::DieState()
 {
 
 
-	//동속ㅇ운동ㅇ 공식 피=피제+브이티
-	FVector p0 = me->GetActorLocation();
-	FVector vt = FVector::DownVector * dieSpeed * GetWorld()->DeltaTimeSeconds;
-	FVector p = p0 + vt;
-	//2. 만약에 p.Z 가 -200 보다 작으면 파괴한다
-	if (p.Z < -200)
-	{
+	////동속ㅇ운동ㅇ 공식 피=피제+브이티
+	//FVector p0 = me->GetActorLocation();
+	//FVector vt = FVector::DownVector * dieSpeed * GetWorld()->DeltaTimeSeconds;
+	//FVector p = p0 + vt;
+	////2. 만약에 p.Z 가 -200 보다 작으면 파괴한다
+	//if (p.Z < -200)
+	//{
 		me->Destroy();
-	}
-	//3. 그렇지 않으면 해당 위치로 셋팅한다
-	else
-	{
-		me->SetActorLocation(p);
-	}
+	//}
+	////3. 그렇지 않으면 해당 위치로 셋팅한다
+	//else
+	//{
+	//	me->SetActorLocation(p);
+	//}
 
 
 }
@@ -244,26 +248,31 @@ void UEnemy_Archer_FSM::UpdateReturnPos()
 void UEnemy_Archer_FSM::OnDamageProcess()
 {
 
-
-
-
+	UE_LOG(LogTemp, Warning, TEXT("IMHIT"));
 	//체력감소
 	//hp -= damage;
 	hp--;
-	//체력이 남아있다면
 	if (hp > 0)
 	{
-		//상태를 피격으로 전환
-		mState = EEnemyState5::Damage;
-		currentTime = 0;
-		//피격 애니메이션 재생
-		FString sectionName = FString::Printf(TEXT("Damage0"));
-		anim->PlayDamageAnim(FName(*sectionName));
+		if (Hitback)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("backattack"));
 
+			FString sectionName = FString::Printf(TEXT("BackAttack"));
+			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+			mState = EEnemyState5::Damage;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("defultattack"));
+			//피격 애니메이션 재생
+			FString sectionName = FString::Printf(TEXT("Damage0"));
+			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+
+			mState = EEnemyState5::Damage;
+		}
 
 	}
-
-
 	else
 	{
 		//상태를 죽음으로 전환
@@ -278,7 +287,6 @@ void UEnemy_Archer_FSM::OnDamageProcess()
 	//애니메이션 상태 동기화
 	anim->animState = mState;
 	ai->StopMovement();
-
 
 
 
@@ -318,6 +326,11 @@ void UEnemy_Archer_FSM::groggy()
 	//애니메이션 또는 몽타주 를 실행
 
 	ChangeState(EEnemyState5::Idle);
+}
+
+void UEnemy_Archer_FSM::moveBack()
+{
+
 }
 
 bool UEnemy_Archer_FSM::IsTargetTrace()
@@ -417,11 +430,11 @@ void UEnemy_Archer_FSM::ChangeState(EEnemyState5 state)
 	case EEnemyState5::Damage:
 	{
 		//1. 랜덤한 값을 뽑는다 (0, 1 중)
-		int32 rand = FMath::RandRange(0, 1);
+		//int32 rand = FMath::RandRange(0, 1);
 		//2. Damage0, Damage1 이란 문자열을 만든다.
-		FString sectionName = FString::Printf(TEXT("Damage%d"), rand);
+		//FString sectionName = FString::Printf(TEXT("Damage%d"), rand);
 		//3. 몽타주를 플레이한다.
-		me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+		//me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 	}
 	break;
 	case EEnemyState5::Die:
