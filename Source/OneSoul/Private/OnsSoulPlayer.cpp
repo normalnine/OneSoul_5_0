@@ -95,6 +95,9 @@ void AOnsSoulPlayer::BeginPlay()
 
 	Sphere -> OnComponentBeginOverlap.AddDynamic(this,&AOnsSoulPlayer::OnSphereOverlap);
 
+	ReSpawnWiget = CreateWidget<UUserWidget>(GetWorld(), Respawn);
+	YouDieWiget = CreateWidget<UUserWidget>(GetWorld(),YouDie);
+
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && LevelStartMontage)
 	{
@@ -135,6 +138,10 @@ void AOnsSoulPlayer::Tick(float DeltaTime)
 	if (bIsTargeting)
 	{
 	  UpdateTargetingControlRotation();
+	}
+	else
+	{
+		DisableLockOn();
 	}
 
 }
@@ -204,8 +211,9 @@ void AOnsSoulPlayer::Destroyed()
 	if (AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(World->GetAuthGameMode()))
 	{
 	  CurrentGameModeBase-> ReSpawnPlayer(this); 
-	  EquipWeapon(EquippedWeapon);
 
+
+	  
       UGameplayStatics:: GetPlayerController(this,0) -> SetShowMouseCursor(false);
       UGameplayStatics:: GetPlayerController(this, 0) -> SetInputMode(FInputModeGameOnly());
 	}
@@ -223,7 +231,7 @@ void AOnsSoulPlayer::OnSphereOverlap(
 					 const FHitResult& SweepResult)
 {
   SpawnTarget = Cast<AReSpawn>(OthrActor);
-  ANPC* NPC = Cast<ANPC>(OthrActor);
+
 }
 
 void AOnsSoulPlayer::DirectionalHitReact(const FVector& ImpactPoint)
@@ -418,28 +426,33 @@ void AOnsSoulPlayer::EKeyPressed()
 	 EquipWeapon(OverlappingWeapon);
  }
 
- if (SpawnTarget && SpawnTarget -> GetReSpawnBox() && IsMoving)
- {
-	 UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	 if (AnimInstance && SpawnMontage)
-	 {
-		 AnimInstance->Montage_Play(SpawnMontage);
+ if (SpawnTarget && SpawnTarget -> GetReSpawnBox())
+ {   
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance && SpawnMontage)
+		{
+			AnimInstance->Montage_Play(SpawnMontage);
 
-		 UGameplayStatics::PlaySoundAtLocation(
-			               GetWorld(),
-			               SpawnSound,
-			               GetActorLocation());
-        
-		 PotionHP(MaxHealth);
+			UGameplayStatics::PlaySoundAtLocation(
+				              GetWorld(),
+				              SpawnSound,
+				              GetActorLocation());
 
-		 PlayerSpawnTimer();
+			PotionHP(MaxHealth);
 
-		 return;
+			PlayerSpawnTimer();
 
-	 }
+         if(ReSpawnWiget == nullptr) return;
+ 
+		  ReSpawnWiget-> AddToViewport();
+
+	      GetWorld() -> GetTimerManager().SetTimer(SpawnWigetTimer,this,&AOnsSoulPlayer::ReSpawnRemoveWidget,2.f);
+		   
+	   }
+	}
+
  }
-}
-
+   
 void AOnsSoulPlayer::SetPlayerMaxSpeed(float MaxSpeed)
 {
  GetCharacterMovement()->MaxWalkSpeed = MaxSpeed;
@@ -620,8 +633,16 @@ void AOnsSoulPlayer::Die()
 						   DeadSound,
 						   GetActorLocation());
 	}
+
+	YouDieWiget->AddToViewport();
+
+	GetWorld()->GetTimerManager().SetTimer(YouDieTimer, this, &AOnsSoulPlayer::YouDieRemoveWidget, 3.f);
+
 	UGameplayStatics::GetPlayerController(this, 0)->SetInputMode(FInputModeUIOnly());
-	EquippedWeapon -> Destroy();
+	if (EquippedWeapon != nullptr)
+	{
+	 EquippedWeapon -> Destroy();
+	}
 }
 
 bool AOnsSoulPlayer::CanDisarm()
@@ -767,7 +788,7 @@ void AOnsSoulPlayer::PlayerDie()
 
 void AOnsSoulPlayer::PlayerDieTimer()
 {
- GetWorldTimerManager().SetTimer(DieTimer,this, &AOnsSoulPlayer::PlayerDie, 1.f);
+ GetWorldTimerManager().SetTimer(DieTimer,this, &AOnsSoulPlayer::PlayerDie, 3.2f);
 }
 
 void AOnsSoulPlayer::PlayerSpawn()
@@ -780,3 +801,21 @@ void AOnsSoulPlayer::PlayerSpawnTimer()
  GetWorldTimerManager().SetTimer(SpawnTimer,this,&AOnsSoulPlayer::PlayerSpawn,0.5f);
 }
 
+void AOnsSoulPlayer::ReSpawnRemoveWidget()
+{
+	if (ReSpawnWiget != nullptr)
+	{
+		ReSpawnWiget->RemoveFromParent();
+
+		ReSpawnWiget = nullptr;
+	}
+}
+
+void AOnsSoulPlayer::YouDieRemoveWidget()
+{
+	if (YouDieWiget != nullptr)
+	{
+	   YouDieWiget -> RemoveFromParent();
+    }
+
+}

@@ -98,7 +98,7 @@ float AEnemyBoss::TakeDamage(float Damage, struct FDamageEvent const& DamageEven
 	}
 	else
 	{
-		ReceiveDamage(Damage);
+		fsm-> ReceiveDamage(Damage);
 	}
 
 	return Damage;
@@ -175,10 +175,6 @@ void AEnemyBoss::BeginOverlapRightHand(UPrimitiveComponent* OverlappedComponent,
 	}
 }
 
-void AEnemyBoss::ReceiveDamage(float Damage)
-{
-	fsm->currHP = FMath::Clamp(fsm -> currHP - Damage, 0.f, fsm -> maxHP);
-}
 
 // void AEnemyBoss::EndOverlapHead(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 // {

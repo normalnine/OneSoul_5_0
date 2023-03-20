@@ -20,6 +20,7 @@ class AOneSoulGameMode;
 class UParticleSystem;
 class AReSpawn;
 class USphereComponent;
+class UUserWidget;
 
 UENUM(BlueprintType)
 enum class EActionState : uint8
@@ -76,6 +77,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Attack")
 	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnable);
 
+	UPROPERTY(EditAnywhere)
+	AWeapon* EquippedWeapon;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> Respawn;
+	UPROPERTY(EditAnywhere)
+	UUserWidget* ReSpawnWiget;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> YouDie;
+	UPROPERTY(EditAnywhere)
+	UUserWidget* YouDieWiget;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sprint")
 	float SprintSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sprint")
@@ -126,6 +138,10 @@ public:
 	FTimerHandle DieTimer;
 
 	FTimerHandle SpawnTimer;
+
+	FTimerHandle SpawnWigetTimer;
+
+	FTimerHandle YouDieTimer;
 
 	bool bCanHitReact;
 
@@ -196,6 +212,10 @@ public:
 	void PlayerSpawn();
 	UFUNCTION(BlueprintCallable, Category = "Spawn")
 	void PlayerSpawnTimer();
+	UFUNCTION(BlueprintCallable, Category = "Spawn")
+	void ReSpawnRemoveWidget();
+	UFUNCTION(BlueprintCallable, Category = "Dead")
+	void YouDieRemoveWidget();
 
 protected:
 	virtual void BeginPlay() override;
@@ -234,9 +254,6 @@ private:
 
 	UPROPERTY(VisibleInstanceOnly)
 	AItem* OverlappingItem;
-
-	UPROPERTY(VisibleAnywhere)
-	AWeapon* EquippedWeapon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montages, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* LevelStartMontage;

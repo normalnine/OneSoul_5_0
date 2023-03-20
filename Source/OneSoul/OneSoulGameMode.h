@@ -8,6 +8,7 @@
 
 class UOneSoulOverlay;
 class AOnsSoulPlayer;
+class AWeapon;
 
 UCLASS(minimalapi)
 class AOneSoulGameMode : public AGameModeBase
@@ -37,6 +38,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Heal")
 	float PotionNum = 5.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LevelUp")
+	int32 Level = 1;
 
 	private:
 
