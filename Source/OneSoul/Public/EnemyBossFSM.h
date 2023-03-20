@@ -126,13 +126,13 @@ public:
 	//현재 체력
 	float currHP;
 	//최대 체력
-	float maxHP = 1000;
+	float maxHP = 5000;
 	//누적 데미지
 	float accumulatedDamage;
 	//누적 상태
 	bool bDamageDealtRecently = false;
 	//그로기 데미지
-	float groggyDamage = 5000;
+	float groggyDamage = 500;
 	//소울
 	float soul = 150000;
 	//넉백 수치

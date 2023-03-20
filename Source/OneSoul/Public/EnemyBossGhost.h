@@ -24,14 +24,28 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere)
-	class UStaticMeshComponent* meshComp;
+	class USphereComponent* sphereComp;
+
+// 	UPROPERTY(EditAnywhere)
+// 	class UStaticMeshComponent* meshComp;
 
 	UPROPERTY(EditAnywhere)
 	class AOnsSoulPlayer* target;
+
+	UPROPERTY(EditAnywhere)
+	class UParticleSystemComponent* particle;
+
+
 
 	FVector dir;
 
 	float traceTime = 3.0f;
 
 	float currTime = 0;
+
+	UFUNCTION()
+	void BeginOverlapGhost(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResul);
+
+	UFUNCTION()
+	void EndOverlapGhost(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 };

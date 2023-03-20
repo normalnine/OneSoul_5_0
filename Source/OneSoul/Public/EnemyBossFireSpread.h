@@ -35,8 +35,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf <class AActor> collision;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UNiagaraComponent* niagara;
+// 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+// 	class UNiagaraComponent* niagara;
 
 	float currTime = 0;
 	float stopTime = 4.0f;

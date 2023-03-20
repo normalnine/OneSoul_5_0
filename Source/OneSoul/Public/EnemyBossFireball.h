@@ -30,7 +30,7 @@ public:
 // 		class UStaticMeshComponent* meshComp;
 
 	UPROPERTY(EditAnywhere)
-		class AOnsSoulPlayer* target;
+	class AOnsSoulPlayer* target;
 
 	UPROPERTY(EditAnywhere)
 	class UParticleSystemComponent* particleComp;
@@ -42,7 +42,7 @@ public:
 		float fireballSpeed = 3.0f;
 
 	UPROPERTY(EditAnywhere)
-	bool bOverlap;
+	bool bOverlap = true;
 
 
 	UFUNCTION()

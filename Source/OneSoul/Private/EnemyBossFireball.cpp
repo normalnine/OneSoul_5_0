@@ -65,8 +65,8 @@ void AEnemyBossFireball::BeginOverlapFireball(UPrimitiveComponent* OverlappedCom
 		if (target != nullptr)
 		{
 			target->ReceiveDamage(10);
-		}
-		bOverlap = false;
+			bOverlap = false;
+		}		
 	}
 }
 
