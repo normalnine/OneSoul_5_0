@@ -312,6 +312,8 @@ public:
    UPROPERTY(EditAnywhere)
 	   class UJW_ParryGuardComponent* compPlayerGuard;
    UPROPERTY(EditAnywhere)
+	   class UJW_PlayerBaseComponent* compPlayerBase;
+   UPROPERTY(EditAnywhere)
 	   bool isMoveF = false;
    UPROPERTY(EditAnywhere)
 	   bool isMoveR = false;
