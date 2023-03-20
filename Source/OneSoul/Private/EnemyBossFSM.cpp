@@ -470,10 +470,13 @@ void UEnemyBossFSM::DecideAttackPattern()
 	if (currHP / maxHP < 0.5f)
 	{
 		randPattern = FMath::RandRange(0, 8);
+		UE_LOG(LogTemp, Warning, TEXT("2pase"));
 	}
 	else
 	{
-		randPattern = FMath::RandRange(0, 8);
+		randPattern = FMath::RandRange(0, 6);
+		UE_LOG(LogTemp, Warning, TEXT("1pase"));
+
 	}
 	
 	//UE_LOG(LogTemp, Warning, TEXT("attackNum : %d"), randPattern);

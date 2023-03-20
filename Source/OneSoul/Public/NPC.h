@@ -46,6 +46,12 @@ public:
 
 	class APlayerController* PlayerController;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FString> dialogueText;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 dialogueIndex = 0;
+
 	UFUNCTION()
 	void BeginOverlapTriggerBox(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResul);
 
@@ -54,7 +60,10 @@ public:
 
 	UFUNCTION()
 	void OpenMenuUI();
-
+	
 	UFUNCTION()
-	void CloseMenuUI();
+	void PlayerInputDisable();
+	
+	UFUNCTION()
+	void Dialogue();
 };

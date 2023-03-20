@@ -22,8 +22,8 @@ AEnemyBossFireSpread::AEnemyBossFireSpread()
 	compScene = CreateDefaultSubobject<USceneComponent>(TEXT("Scene Component"));
 	compScene->SetupAttachment(RootComponent);
 	
-	niagara = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Niagara Component"));
-	niagara->SetupAttachment(RootComponent);
+// 	niagara = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Niagara Component"));
+// 	niagara->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -54,9 +54,5 @@ void AEnemyBossFireSpread::Tick(float DeltaTime)
 			GetWorld()->SpawnActor<AActor>(collision, GetActorTransform());
 			delayTime = 0;
 		}
-	}
-
-
-
-	
+	}	
 }

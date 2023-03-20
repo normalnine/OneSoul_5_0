@@ -8,6 +8,10 @@
 #include "NPC_MenuUI.h"
 #include "OnsSoulPlayer.h"
 #include <Kismet/GameplayStatics.h>
+#include <GameFramework/PlayerController.h>
+#include <Components/TextBlock.h>
+#include <Components/VerticalBox.h>
+#include <Components/Image.h>
 
 // Sets default values
 ANPC::ANPC()
@@ -30,7 +34,9 @@ void ANPC::BeginPlay()
 	boxComp->OnComponentEndOverlap.AddDynamic(this, &ANPC::EndOverlapTriggerBox);
 
 	player = Cast<AOnsSoulPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AOnsSoulPlayer::StaticClass()));
-
+	PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+	interactiveUI = CreateWidget<UNPC_InteractiveUI>(GetWorld(), interactiveUIFactory);
+	npcMenuUI = CreateWidget<UNPC_MenuUI>(GetWorld(), npcMenuUIFactory);
 }
 
 // Called every frame
@@ -51,7 +57,6 @@ void ANPC::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void ANPC::BeginOverlapTriggerBox(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResul)
 {
 	
-	interactiveUI = CreateWidget<UNPC_InteractiveUI>(GetWorld(), interactiveUIFactory);
 	if (interactiveUI != nullptr)
 	{
 		interactiveUI->AddToViewport();
@@ -71,26 +76,48 @@ void ANPC::OpenMenuUI()
 {
 	if (npcMenuUI != nullptr)
 	{
-		return;
-	}
-
-	npcMenuUI = CreateWidget<UNPC_MenuUI>(GetWorld(), npcMenuUIFactory);
-	if (npcMenuUI != nullptr)
-	{
+		if (npcMenuUI->IsVisible() == true)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("menu is not null"));
+			return;
+		}
+		
+		if (interactiveUI != nullptr)
+		{
+			if (interactiveUI->IsVisible() == true)
+			{
+				interactiveUI->RemoveFromViewport();
+			}
+		}
+		
 		npcMenuUI->AddToViewport();
-		interactiveUI->RemoveFromViewport();
-		PlayerController->bShowMouseCursor = true;
-		PlayerController->bEnableClickEvents = true;
-		PlayerController->bEnableMouseOverEvents = true;
-		PlayerController->SetIgnoreLookInput(true);
-	}
-	
+		npcMenuUI->text_dialogue->SetText(FText::FromString(dialogueText[dialogueIndex]));
+		PlayerInputDisable();
+	}	
 }
 
-void ANPC::CloseMenuUI()
+void ANPC::PlayerInputDisable()
 {
-	if (npcMenuUI != nullptr)
+// 	FInputModeUIOnly InputMode;
+// 	InputMode.SetWidgetToFocus(npcMenuUI->TakeWidget());
+// 	PlayerController->SetInputMode(InputMode);
+	PlayerController->bShowMouseCursor = true;
+	PlayerController->SetIgnoreLookInput(true);
+	PlayerController->SetIgnoreMoveInput(true);
+}
+
+void ANPC::Dialogue()
+{
+	dialogueIndex++;
+	if (dialogueIndex > dialogueText.Num() - 1)
 	{
-		npcMenuUI->RemoveFromViewport();
+		dialogueIndex = 0;
+		player->bTalking = false;
+		npcMenuUI->text_dialogue->SetVisibility(ESlateVisibility::Hidden);
+		npcMenuUI->text_dialogue->SetText(FText::FromString(dialogueText[dialogueIndex]));
+		npcMenuUI->vb_menuBox->SetVisibility(ESlateVisibility::Visible);
+		npcMenuUI->image_back->SetVisibility(ESlateVisibility::Visible);
+		return;
 	}
+	npcMenuUI->text_dialogue->SetText(FText::FromString(dialogueText[dialogueIndex]));
 }
