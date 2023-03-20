@@ -139,7 +139,7 @@ void AOnsSoulPlayer::Tick(float DeltaTime)
 	{
 	  UpdateTargetingControlRotation();
 	}
-	else
+	else if(!bIsTargeting && Taget == nullptr)
 	{
 		DisableLockOn();
 	}
