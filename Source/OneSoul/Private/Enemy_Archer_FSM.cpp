@@ -78,6 +78,7 @@ void UEnemy_Archer_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 		break;
 	}
 }
+
 void UEnemy_Archer_FSM::IdleState()
 {
 	anim->animState = mState;

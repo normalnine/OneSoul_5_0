@@ -11,9 +11,7 @@
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 
-AItem::AItem() :
-     Amplitude(0.25f),
-	 TimeConstant(5.f)
+AItem::AItem()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -22,22 +20,27 @@ AItem::AItem() :
 	ItemMesh -> SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SetRootComponent(ItemMesh);
 
-	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere"));
-	Sphere-> SetupAttachment(GetRootComponent());
+	SphereCollison = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollision"));
+	SphereCollison -> SetupAttachment(ItemMesh);
 
 	PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
 	PickupWidget -> SetupAttachment(GetRootComponent());
 
 	ItemEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Embers"));
 	ItemEffect -> SetupAttachment(GetRootComponent());
+
+	Amplitude = 0.25f;
+	TimeConstant = 5.f;
+
+	ItemName = FString("Default");
 }
 
 void AItem::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	Sphere -> OnComponentBeginOverlap.AddDynamic(this,&AItem::OnSphereOverlap);
-	Sphere -> OnComponentEndOverlap.AddDynamic(this,&AItem::OnSphereEndOverlap);
+	SphereCollison -> OnComponentBeginOverlap.AddDynamic(this,&AItem::OnSphereOverlap);
+	SphereCollison -> OnComponentEndOverlap.AddDynamic(this,&AItem::OnSphereEndOverlap);
 
 	PickupWidget -> SetVisibility(false);
 }

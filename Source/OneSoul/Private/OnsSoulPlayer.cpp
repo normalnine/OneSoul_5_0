@@ -8,8 +8,6 @@
 #include "Components/WidgetComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
-#include "JW_PlayerRollComponent.h"
-#include "JW_ParryGuardComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -86,9 +84,6 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	SoulNum = 0;
 
 	SetPlayerMaxSpeed(WalkSpeed);
-
-	compPlayerRoll = CreateDefaultSubobject<UJW_PlayerRollComponent>(TEXT("Roll"));
-	compPlayerGuard = CreateDefaultSubobject<UJW_ParryGuardComponent>(TEXT("ParryGuard"));
 }
 
 void AOnsSoulPlayer::BeginPlay()
@@ -99,6 +94,9 @@ void AOnsSoulPlayer::BeginPlay()
 	Tags.Add(FName("OneSoulCharacter"));
 
 	Sphere -> OnComponentBeginOverlap.AddDynamic(this,&AOnsSoulPlayer::OnSphereOverlap);
+
+	ReSpawnWiget = CreateWidget<UUserWidget>(GetWorld(), Respawn);
+	YouDieWiget = CreateWidget<UUserWidget>(GetWorld(),YouDie);
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && LevelStartMontage)
@@ -141,6 +139,10 @@ void AOnsSoulPlayer::Tick(float DeltaTime)
 	{
 	  UpdateTargetingControlRotation();
 	}
+	else if(!bIsTargeting && Taget == nullptr)
+	{
+		DisableLockOn();
+	}
 
 }
 
@@ -163,14 +165,6 @@ void AOnsSoulPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &AOnsSoulPlayer::EKeyPressed);
 	PlayerInputComponent->BindAction("Healing", IE_Pressed, this, &AOnsSoulPlayer::PotionDrinking);
 	PlayerInputComponent->BindAction("WeaponChange", IE_Pressed, this, &AOnsSoulPlayer::WeaponChange);
-
-	PlayerInputComponent->BindAction("MoveW", IE_Released, this, &AOnsSoulPlayer::notMoveF);
-	PlayerInputComponent->BindAction("MoveA", IE_Released, this, &AOnsSoulPlayer::notMoveR);
-	PlayerInputComponent->BindAction("MoveS", IE_Released, this, &AOnsSoulPlayer::notMoveF);
-	PlayerInputComponent->BindAction("MoveD", IE_Released, this, &AOnsSoulPlayer::notMoveR);
-
-	compPlayerRoll->SetupInputBinding(PlayerInputComponent);
-	compPlayerGuard->SetupInputBinding(PlayerInputComponent);
 }
 
 float AOnsSoulPlayer::TakeDamage(
@@ -217,8 +211,9 @@ void AOnsSoulPlayer::Destroyed()
 	if (AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(World->GetAuthGameMode()))
 	{
 	  CurrentGameModeBase-> ReSpawnPlayer(this); 
-	  EquipWeapon(EquippedWeapon);
 
+
+	  
       UGameplayStatics:: GetPlayerController(this,0) -> SetShowMouseCursor(false);
       UGameplayStatics:: GetPlayerController(this, 0) -> SetInputMode(FInputModeGameOnly());
 	}
@@ -236,6 +231,7 @@ void AOnsSoulPlayer::OnSphereOverlap(
 					 const FHitResult& SweepResult)
 {
   SpawnTarget = Cast<AReSpawn>(OthrActor);
+
 }
 
 void AOnsSoulPlayer::DirectionalHitReact(const FVector& ImpactPoint)
@@ -304,7 +300,6 @@ void AOnsSoulPlayer::MoveForward(float Value)
 	   AddMovementInput(Direction, Value);
 
 	   IsMoving = true;
-	   isMoveF = true;
     }
 }
 
@@ -320,7 +315,6 @@ void AOnsSoulPlayer::MoveRight(float Value)
 	 AddMovementInput(Direction, Value);
 
 	 IsMoving = true;
-	 isMoveR = true;
     }
 }
 
@@ -428,32 +422,37 @@ void AOnsSoulPlayer::EKeyPressed()
 	 {
 		 EquippedWeapon -> Destroy();
 	 }
-     OverlappingWidget->PickupWidget->SetVisibility(false);
+     OverlappingWidget->GetPickupWiget()->SetVisibility(false);
 	 EquipWeapon(OverlappingWeapon);
  }
 
- if (SpawnTarget && SpawnTarget -> GetReSpawnBox() && IsMoving)
- {
-	 UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	 if (AnimInstance && SpawnMontage)
-	 {
-		 AnimInstance->Montage_Play(SpawnMontage);
+ if (SpawnTarget && SpawnTarget -> GetReSpawnBox())
+ {   
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance && SpawnMontage)
+		{
+			AnimInstance->Montage_Play(SpawnMontage);
 
-		 UGameplayStatics::PlaySoundAtLocation(
-			               GetWorld(),
-			               SpawnSound,
-			               GetActorLocation());
-        
-		 PotionHP(MaxHealth);
+			UGameplayStatics::PlaySoundAtLocation(
+				              GetWorld(),
+				              SpawnSound,
+				              GetActorLocation());
 
-		 PlayerSpawnTimer();
+			PotionHP(MaxHealth);
 
-		 ActionState = EActionState::ECS_Unoccipied;
+			PlayerSpawnTimer();
 
-	 }
+         if(ReSpawnWiget == nullptr) return;
+ 
+		  ReSpawnWiget-> AddToViewport();
+
+	      GetWorld() -> GetTimerManager().SetTimer(SpawnWigetTimer,this,&AOnsSoulPlayer::ReSpawnRemoveWidget,2.f);
+		   
+	   }
+	}
+
  }
-}
-
+   
 void AOnsSoulPlayer::SetPlayerMaxSpeed(float MaxSpeed)
 {
  GetCharacterMovement()->MaxWalkSpeed = MaxSpeed;
@@ -634,8 +633,16 @@ void AOnsSoulPlayer::Die()
 						   DeadSound,
 						   GetActorLocation());
 	}
+
+	YouDieWiget->AddToViewport();
+
+	GetWorld()->GetTimerManager().SetTimer(YouDieTimer, this, &AOnsSoulPlayer::YouDieRemoveWidget, 3.f);
+
 	UGameplayStatics::GetPlayerController(this, 0)->SetInputMode(FInputModeUIOnly());
-	EquippedWeapon -> Destroy();
+	if (EquippedWeapon != nullptr)
+	{
+	 EquippedWeapon -> Destroy();
+	}
 }
 
 bool AOnsSoulPlayer::CanDisarm()
@@ -781,7 +788,7 @@ void AOnsSoulPlayer::PlayerDie()
 
 void AOnsSoulPlayer::PlayerDieTimer()
 {
- GetWorldTimerManager().SetTimer(DieTimer,this, &AOnsSoulPlayer::PlayerDie, 1.f);
+ GetWorldTimerManager().SetTimer(DieTimer,this, &AOnsSoulPlayer::PlayerDie, 3.2f);
 }
 
 void AOnsSoulPlayer::PlayerSpawn()
@@ -794,11 +801,21 @@ void AOnsSoulPlayer::PlayerSpawnTimer()
  GetWorldTimerManager().SetTimer(SpawnTimer,this,&AOnsSoulPlayer::PlayerSpawn,0.5f);
 }
 
-void AOnsSoulPlayer::notMoveF()
+void AOnsSoulPlayer::ReSpawnRemoveWidget()
 {
-	isMoveF = false;
+	if (ReSpawnWiget != nullptr)
+	{
+		ReSpawnWiget->RemoveFromParent();
+
+		ReSpawnWiget = nullptr;
+	}
 }
-void AOnsSoulPlayer::notMoveR()
+
+void AOnsSoulPlayer::YouDieRemoveWidget()
 {
-	isMoveR = false;
+	if (YouDieWiget != nullptr)
+	{
+	   YouDieWiget -> RemoveFromParent();
+    }
+
 }

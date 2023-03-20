@@ -22,4 +22,6 @@ class ONESOUL_API ISpawnInterface
 
 public:
 
+  virtual void ShowWiget();
+
 };

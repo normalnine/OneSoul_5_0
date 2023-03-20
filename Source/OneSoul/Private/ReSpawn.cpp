@@ -9,13 +9,10 @@
 
 AReSpawn::AReSpawn()
 {
- 	
 	PrimaryActorTick.bCanEverTick = true;
 
 	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("Box Collision"));
     BoxCollision -> SetupAttachment(RootComponent);
-
-
 }
 
 void AReSpawn::BeginPlay()

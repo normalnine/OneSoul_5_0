@@ -5,6 +5,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "OneSoulOverlay.h"
 #include "OnsSoulPlayer.h"
+#include "Weapon.h"
 #include "Kismet/GameplayStatics.h"
 
 AOneSoulGameMode::AOneSoulGameMode()
@@ -43,5 +44,6 @@ void AOneSoulGameMode::ReSpawnPlayer(ACharacter* player)
 
   CurrentCoins;
   PotionNum;
+  Level;
   
 }
