@@ -266,7 +266,7 @@ void UEnemy_Magician_FSM::DieState()
 	////2. 만약에 p.Z 가 -200 보다 작으면 파괴한다
 	//if (p.Z < -200)
 	//{
-		me->Destroy();
+		//me->Destroy();
 	//}
 	////3. 그렇지 않으면 해당 위치로 셋팅한다
 	//else
@@ -314,7 +314,8 @@ void UEnemy_Magician_FSM::OnDamageProcess()
 		//캡슐 충돌체 비활성화
 		me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		//죽음 애니메이션 재생
-		anim->PlayDamageAnim(TEXT("Die"));
+		FString sectionName = FString::Printf(TEXT("Die"));
+		me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 
 
 	}

@@ -44,4 +44,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool changeGroggy = false;
 
+	//Å¸±ê
+	UPROPERTY(VisibleAnywhere, Category = FSM)
+		class AOnsSoulPlayer* player;
+
 };

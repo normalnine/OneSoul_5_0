@@ -26,6 +26,7 @@
 #include "NormalEnemy_YG.h"
 #include "ReSpawn.h"
 #include "NPC.h"
+#include "Shield.h"
 
 AOnsSoulPlayer::AOnsSoulPlayer()
       
@@ -449,6 +450,12 @@ void AOnsSoulPlayer::EKeyPressed()
 	}
  AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
  AItem* OverlappingWidget = Cast<AItem>(OverlappingItem);
+ AShield* OverlappingShiled = Cast<AShield>(OverlappingItem);
+ if (OverlappingShiled)
+ {
+	EquipShield(OverlappingShiled);
+	OverlappingWidget->GetPickupWiget()->SetVisibility(false);
+ }
 
  if (OverlappingWeapon)
  {
@@ -860,4 +867,13 @@ void AOnsSoulPlayer::notMoveF()
 void AOnsSoulPlayer::notMoveR()
 {
 	isMoveR = false;
+}
+
+void AOnsSoulPlayer::EquipShield(AShield* shield)
+{
+
+	shield->Equip(GetMesh(), FName("hand_l"), this, this);
+	FVector NewScale = FVector(15.0f, 15.0f, 15.0f); // 크기를 두 배로 설정합니다.
+	shield->SetActorRelativeScale3D(NewScale);
+	
 }

@@ -35,7 +35,7 @@ void UJW_PlayerRollComponent::SetupInputBinding(class UInputComponent* PlayerInp
 	Super::SetupInputBinding(PlayerInputComponent);
 
 	//Space Bar
-	PlayerInputComponent->BindAction(TEXT("Roll"), IE_Released, this, &UJW_PlayerRollComponent::Roll);
+	PlayerInputComponent->BindAction(TEXT("Roll"), IE_Pressed, this, &UJW_PlayerRollComponent::Roll);
 	
 
 

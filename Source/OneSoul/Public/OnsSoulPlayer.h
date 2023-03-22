@@ -246,9 +246,6 @@ private:
 	USpringArmComponent* SpringArm;
 
 	UPROPERTY(VisibleAnywhere)
-	UCameraComponent* Camera;
-
-	UPROPERTY(VisibleAnywhere)
 	USphereComponent* Sphere;
 
 	UPROPERTY(VisibleAnywhere)
@@ -317,13 +314,19 @@ public:
 	   bool isMoveF = false;
    UPROPERTY(EditAnywhere)
 	   bool isMoveR = false;
-
+   UPROPERTY(VisibleAnywhere)
+	   UCameraComponent* Camera;
+   UPROPERTY(EditAnywhere)
+   bool imguard = false;
    void notMoveF();
    void notMoveR();
-
+   UFUNCTION(BlueprintCallable, Category = "Equip")
+   void EquipShield(AShield* shield);
    UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	   bool parrying = false;
 
    bool bTalking = false;
    class ANPC* npc;
+
+
 };

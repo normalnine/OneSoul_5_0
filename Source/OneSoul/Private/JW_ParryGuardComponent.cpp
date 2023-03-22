@@ -5,6 +5,7 @@
 #include "OnsSoulPlayer.h"
 #include "Components/CapsuleComponent.h"
 #include "OneSoulPlayerAnimInstance.h"
+#include "Shield.h"
 
 
 void UJW_ParryGuardComponent::BeginPlay()
@@ -43,8 +44,14 @@ void UJW_ParryGuardComponent::guard()
 {
 	if (!(playerAnim->Montage_IsPlaying(Guard)))
 	{
-		imguard = true;
+		me->imguard = true;
 		playerAnim->Montage_Play(Guard);
+		/*AShield* shield = Cast<AShield>(GetOwner());
+		if (shield !=nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("canblock"));
+			shield->shieldcomp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		}*/
 
 	}
 }
@@ -52,8 +59,13 @@ void UJW_ParryGuardComponent::guardOff()
 {
 	if (playerAnim->Montage_IsPlaying(Guard))
 	{
-		imguard = false;
+		me->imguard = false;
 		playerAnim->Montage_StopWithBlendOut(1.0,Guard);
+		/*AShield* shield = Cast<AShield>(GetOwner());
+		if (shield != nullptr)
+		{
+			shield->shieldcomp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}*/
 
 	}
 }

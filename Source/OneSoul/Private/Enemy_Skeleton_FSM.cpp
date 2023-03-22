@@ -134,14 +134,14 @@ void UEnemy_Skeleton_FSM::MoveState()
 	//시야에 들어왔다면
 	if (bTrace)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("trace"));
+		UE_LOG(LogTemp, Warning, TEXT("trace"));
 		//만약에 target - me 거리가 공격범위보다 작으면
 		if (dir.Length() < attackRange)
 		{
-			if (fight)
-			{
+		//	if (fight)
+			//{
 				index = FMath::RandRange(0, 1);
-			}
+			//}
 			
 			if (index == 0)
 			{
@@ -155,14 +155,14 @@ void UEnemy_Skeleton_FSM::MoveState()
 		//그렇지 않으면
 		else
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("movetotarget"));
+			UE_LOG(LogTemp, Warning, TEXT("movetotarget"));
 			ai->MoveToLocation(target->GetActorLocation());
 		}
 	}
 	//시야에 들어오지 않았다면
 	else
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("movetorandpos"));
+		UE_LOG(LogTemp, Warning, TEXT("movetorandpos"));
 		// 랜덤한 위치까지 도착한 후 Idle 상태로 전환
 		MoveToPos(randPos);
 	}
@@ -278,7 +278,7 @@ void UEnemy_Skeleton_FSM::UpdateReturnPos()
 
 void UEnemy_Skeleton_FSM::OnDamageProcess()
 {
-	
+	me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	if (isShield)
 	{

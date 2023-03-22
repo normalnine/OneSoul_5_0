@@ -38,4 +38,10 @@ public:
 	UFUNCTION()
 		void OnOverlapBeginMagic(class UPrimitiveComponent* selfComp, class AActor* otherActor, UPrimitiveComponent* otherComp,
 			int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	void Die();
+
+	//Å¸±ê
+	UPROPERTY(VisibleAnywhere, Category = FSM)
+		class AOnsSoulPlayer* player;
 };

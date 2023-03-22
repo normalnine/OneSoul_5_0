@@ -41,4 +41,5 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool changeGroggy = false;
+
 };
