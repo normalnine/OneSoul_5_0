@@ -27,6 +27,9 @@
 
 AWeapon::AWeapon()
 {
+
+PrimaryActorTick.bCanEverTick = true;
+
  WeaponBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Weapon Box"));
  WeaponBox -> SetupAttachment(GetRootComponent());
  WeaponBox -> SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -44,6 +47,9 @@ AWeapon::AWeapon()
 
  BoxTraceEnd = CreateDefaultSubobject<USceneComponent>(TEXT("Box Trace End"));
  BoxTraceEnd -> SetupAttachment(GetRootComponent());
+
+ ThrowWeaponTime = 0.7f;
+ bFalling = false;
 }
 
 void AWeapon::Equip(USceneComponent* InParent, FName InSocketName, AActor* NewOwner, APawn* NewInstigator)
@@ -52,7 +58,6 @@ void AWeapon::Equip(USceneComponent* InParent, FName InSocketName, AActor* NewOw
    SetInstigator(NewInstigator);
    FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
    GetItemMesh()->AttachToComponent(InParent,TransformRules,InSocketName);
-   ItemState = EItemState::EIS_Equipped;
  if (GetSphereCollision())
  {
      GetSphereCollision()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -68,6 +73,13 @@ void AWeapon::AttachMeshToSocket(USceneComponent* InParent, const FName& InSocke
 void AWeapon::Tick(float DeltaTime)
 {
   Super::Tick(DeltaTime);
+
+  if (GetItemState() == EItemState::EIS_Falling && bFalling)
+  {
+	  FRotator MeshRotation{0.f,GetItemMesh()->GetComponentRotation().Yaw,0.f};
+	  GetItemMesh() -> SetWorldRotation(MeshRotation,false,nullptr,ETeleportType::TeleportPhysics);
+
+  }
 
 }
 
@@ -213,6 +225,31 @@ void AWeapon::OnBossSphereOverlap(
 			this,
 			UDamageType::StaticClass());
 	}
+}
+
+void AWeapon::ThrowWeapon()
+{
+  FRotator MeshRotation{0.f, GetItemMesh()->GetComponentRotation().Yaw, 0.f};
+  GetItemMesh() -> SetWorldRotation(MeshRotation,false,nullptr,ETeleportType::TeleportPhysics);
+
+  const FVector MeshForward {GetItemMesh() -> GetForwardVector()};
+  const FVector MeshRight {GetItemMesh() -> GetRightVector()};
+  FVector ImpulseDirection = MeshRight.RotateAngleAxis(-20.f, MeshForward);
+
+  float RandomRotation {30.f};
+  ImpulseDirection = MeshRight.RotateAngleAxis(RandomRotation,FVector(0.f,0.f,1.f));
+  ImpulseDirection *= 20000.f;
+  GetItemMesh() -> AddImpulse(ImpulseDirection);
+
+  bFalling = true;
+  GetWorldTimerManager().SetTimer(ThrowWeaponTimer,this,&AWeapon::StopFalliong,ThrowWeaponTime);
+
+}
+
+void AWeapon::StopFalliong()
+{
+  bFalling = false;
+  SetItemState(EItemState::EIS_Hovering);
 }
 
 bool AWeapon::ActorIsSameType(AActor* otherActor)

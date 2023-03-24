@@ -21,6 +21,7 @@ class UParticleSystem;
 class AReSpawn;
 class USphereComponent;
 class UUserWidget;
+class UInventoryGrid;
 
 UENUM(BlueprintType)
 enum class EActionState : uint8
@@ -43,6 +44,8 @@ enum class ECharacterState : uint8
  ECS_EquippedTwoHandedWeapon UMETA(DisplayName = "EquippedTwoHandedWeapon")
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FEquipItemDelegate,int32, CurrentSlotIndex,int32,NewSlotIndex);
+
 UENUM(BlueprintType)
 enum class ERotationMode : uint8
 {
@@ -59,6 +62,7 @@ public:
 	AOnsSoulPlayer();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode) override;
 
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void SetOverlappongItem(class AItem* Item) override;
@@ -77,8 +81,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Attack")
 	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnable);
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category ="Combat")
 	AWeapon* EquippedWeapon;
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = "Combat")
+	TSubclassOf<AWeapon> DefaulWeaponClass;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> Respawn;
 	UPROPERTY(EditAnywhere)
@@ -130,6 +136,10 @@ public:
 	int32 SoulNum;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Move")
 	bool IsMoving= false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FallDamage")
+	float TmpDmg;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	int32 InventorySlots;
 
 	FTimerHandle HitReactTimer;
 
@@ -144,6 +154,9 @@ public:
 	FTimerHandle YouDieTimer;
 
 	bool bCanHitReact;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	bool IsPaused;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	ERotationMode RotationMode = ERotationMode::OrienttoMovement;
@@ -183,6 +196,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Equip")
 	void EquipWeapon(AWeapon* Weapon);
 	UFUNCTION(BlueprintCallable, Category = "Equip")
+	void DropWeapon();
+	UFUNCTION(BlueprintCallable, Category = "Equip")
 	bool CanArm();
 	UFUNCTION(BlueprintCallable, Category = "Equip")
 	void Disarm();
@@ -218,7 +233,12 @@ public:
 	void YouDieRemoveWidget();
 	UFUNCTION(BlueprintCallable, Category = "Sprint")
 	void StopSprint();
-
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void SpawnDefaultWeapon();
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void SwapWeapon(AWeapon* WeaponToSwap);
+	UFUNCTION(BlueprintCallable, Category = "Pickup")
+	void GetPickupItem(AItem* Item);
 
 protected:
 	virtual void BeginPlay() override;
@@ -234,6 +254,7 @@ protected:
 	void EKeyPressed();
 	void PotionDrinking();
 	void WeaponChange();
+	void ToggleInventory();
 
 private:
     
@@ -250,6 +271,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* Sphere;
+
+	UPROPERTY(EditAnywhere)
+	UUserWidget* MainInventory;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> MainInventorys;
 
 	UPROPERTY(VisibleAnywhere)
 	class AActor* TargetActor;
@@ -305,25 +332,39 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AReSpawn> SpawnRe;
 
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category=Inventory, meta = (AllowPrivateAccess = "true"))
+	TArray<AItem*>Inventory;
+
+	const int32 INVENTORY_CAPACITY{2};
+
+	UPROPERTY(BlueprintAssignable,Category = Delegates, meta = (AllowPrivateAccess = "true"))
+	FEquipItemDelegate EquipItemDelegate;
+
 public:
+
    FORCEINLINE ECharacterState GetCharacterState() const {return CharacterState;}
+
    UPROPERTY(EditAnywhere)
-	   class UJW_PlayerRollComponent* compPlayerRoll;
+   class UJW_PlayerRollComponent* compPlayerRoll;
    UPROPERTY(EditAnywhere)
-	   class UJW_ParryGuardComponent* compPlayerGuard;
+   class UJW_ParryGuardComponent* compPlayerGuard;
    UPROPERTY(EditAnywhere)
-	   class UJW_PlayerBaseComponent* compPlayerBase;
+   class UJW_PlayerBaseComponent* compPlayerBase;
    UPROPERTY(EditAnywhere)
-	   bool isMoveF = false;
+   bool isMoveF = false;
    UPROPERTY(EditAnywhere)
-	   bool isMoveR = false;
+   bool isMoveR = false;
 
    void notMoveF();
    void notMoveR();
 
    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	   bool parrying = false;
+   bool parrying = false;
 
    bool bTalking = false;
    class ANPC* npc;
+
+   AController* MeController;
+
+   void ExchangeInventoryItems(int32 CurrentItemIndex, int32 NewItemIndex);
 };

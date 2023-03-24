@@ -32,6 +32,8 @@ AItem::AItem()
 	Amplitude = 0.25f;
 	TimeConstant = 5.f;
 
+	SloatIndex = 0;
+
 	ItemName = FString("Default");
 }
 
@@ -43,6 +45,8 @@ void AItem::BeginPlay()
 	SphereCollison -> OnComponentEndOverlap.AddDynamic(this,&AItem::OnSphereEndOverlap);
 
 	PickupWidget -> SetVisibility(false);
+
+	SetItemProperties(ItemState);
 }
 
 void AItem::SpawnPickupSystem()
@@ -99,6 +103,13 @@ void AItem::OnSphereEndOverlap(
 		PickupWidget->SetVisibility(false);
 	}
 }
+
+void AItem::SetItemState(EItemState State)
+{
+ ItemState = State;
+ SetItemProperties(State);
+}
+
 void AItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -111,6 +122,63 @@ void AItem::Tick(float DeltaTime)
 	}
 
 
+}
 
+void AItem::SetItemProperties(EItemState State)
+{
+	switch (State)
+	{
+	    case EItemState::EIS_Hovering:
+
+		ItemMesh->SetSimulatePhysics(false);
+		ItemMesh->SetEnableGravity(false);
+		ItemMesh->SetVisibility(true);
+		ItemMesh->SetCollisionResponseToChannels(ECollisionResponse::ECR_Ignore);
+		ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		break;
+
+	    case EItemState::EIS_Equipped:
+
+		ItemMesh->SetSimulatePhysics(false);
+		ItemMesh->SetEnableGravity(false);
+		ItemMesh->SetVisibility(true);
+		ItemMesh->SetCollisionResponseToChannels(ECollisionResponse::ECR_Ignore);
+		ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		break;
+
+		case EItemState::EIS_Falling:
+
+		ItemMesh -> SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		ItemMesh -> SetSimulatePhysics(true);
+		ItemMesh -> SetEnableGravity(true);
+		ItemMesh -> SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		ItemMesh -> SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic,ECollisionResponse::ECR_Block);
+
+		break;
+
+		case EItemState::EIS_EquipInterping:
+
+		PickupWidget -> SetVisibility(false);
+
+		ItemMesh->SetSimulatePhysics(false);
+		ItemMesh->SetEnableGravity(false);
+		ItemMesh->SetVisibility(true);
+		ItemMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		break;
+
+		case EItemState::EIS_PickUp:
+
+			ItemMesh->SetSimulatePhysics(false);
+			ItemMesh->SetEnableGravity(false);
+			ItemMesh->SetVisibility(false);
+			ItemMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+			ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		break;
+	}
 }
 

@@ -18,8 +18,12 @@ UENUM(BlueprintType)
 enum class EItemState : uint8
 {
 	EIS_Hovering UMETA(DisplayName = "Hovering"),
-	EIS_Equipped UMETA(DisplayName = "Equipped")
+	EIS_EquipInterping UMETA(DisplayName = "EquipInterping"),
+	EIS_Equipped UMETA(DisplayName = "Equipped"),
+	EIS_PickUp UMETA(DisplayName = "PickUp"),
+	EIS_Falling UMETA(DisplayName = "Falling"),
 
+	EIS_MAX UMETA(DisplayName = "DefaultMax")
 };
 
 UCLASS()
@@ -31,7 +35,10 @@ public:
 	AItem();
 	virtual void Tick(float DeltaTime) override;
 
-	
+	void SetItemProperties(EItemState State);
+
+	FTimerHandle ItemInterpTimer;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -65,8 +72,6 @@ protected:
 			                int32 OtherBodyIndex);
 
 
-	EItemState ItemState = EItemState::EIS_Hovering;
-
 
 private:
 
@@ -79,7 +84,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Item, meta = (AllowPrivateAccess = "true"))
 	USphereComponent* SphereCollison;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Item, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Item, meta = (AllowPrivateAccess = "true"))
 	FString ItemName;
    
     UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category= Sine, meta= (AllowPrivateAccess = "true"))
@@ -94,10 +99,22 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Sound, meta = (AllowPrivateAccess = "true"))
     USoundBase* PickupSound;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sound, meta = (AllowPrivateAccess = "true"))
+	EItemState ItemState = EItemState::EIS_Hovering;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly,Category = Inventroy, meta = (AllowPrivateAccess = "true"))
+	UTexture2D* IconBackGround;
+
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = Inventroy, meta = (AllowPrivateAccess = "true"))
+	int32 SloatIndex;
+
 public:
     
 	FORCEINLINE USphereComponent* GetSphereCollision() const {return SphereCollison;}
 	FORCEINLINE UWidgetComponent* GetPickupWiget() const {return PickupWidget;}
+	FORCEINLINE EItemState GetItemState() const {return ItemState;}
+	void SetItemState(EItemState State);
 	FORCEINLINE UStaticMeshComponent* GetItemMesh() const {return ItemMesh;}
-    
+    FORCEINLINE int32 GetSlotIndex() const {return SloatIndex;}
+	FORCEINLINE void SetSlotIndex(int32 Index) {SloatIndex = Index;}
 };

@@ -21,6 +21,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	 FHitResult BoxHit_;
+
 protected:
    
     virtual void BeginPlay() override;
@@ -46,6 +47,7 @@ protected:
     UFUNCTION(BlueprintImplementableEvent)
 	void CreateFields(const FVector& FieldLocation);
 
+	void StopFalliong();
 
 private:
      
@@ -81,10 +83,15 @@ private:
 	 UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	 bool bShowBoxDebug = false;
 
+	 FTimerHandle ThrowWeaponTimer;
+	 float ThrowWeaponTime;
+	 bool bFalling;
+
 public:
 
 	 TArray<AActor* > IgnoreActors;
 
+	 void ThrowWeapon();
 
    FORCEINLINE UBoxComponent* GetWeaponBox() const {return WeaponBox;}
 };

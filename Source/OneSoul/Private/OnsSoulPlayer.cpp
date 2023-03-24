@@ -3,6 +3,7 @@
 
 #include "OnsSoulPlayer.h"
 #include "OneSoul/OneSoulGameMode.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "JW_PlayerRollComponent.h"
 #include "JW_ParryGuardComponent.h"
@@ -26,6 +27,7 @@
 #include "NormalEnemy_YG.h"
 #include "ReSpawn.h"
 #include "NPC.h"
+#include "InventoryGrid.h"
 
 AOnsSoulPlayer::AOnsSoulPlayer()
       
@@ -86,6 +88,10 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 
 	SoulNum = 0;
 
+	InventorySlots = 5;
+
+	IsPaused = false;
+
 	SetPlayerMaxSpeed(WalkSpeed);
 
 	compPlayerRoll = CreateDefaultSubobject<UJW_PlayerRollComponent>(TEXT("Roll"));
@@ -105,6 +111,10 @@ void AOnsSoulPlayer::BeginPlay()
 	ReSpawnWiget = CreateWidget<UUserWidget>(GetWorld(), Respawn);
 	YouDieWiget = CreateWidget<UUserWidget>(GetWorld(),YouDie);
 
+	MainInventory = CreateWidget<UUserWidget>(GetWorld(),MainInventorys);
+	MainInventory -> SetVisibility(ESlateVisibility::Collapsed);
+	MainInventory -> AddToViewport();
+
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && LevelStartMontage)
 	{
@@ -121,6 +131,8 @@ void AOnsSoulPlayer::BeginPlay()
 	  CurrentGameModeBase -> SpawnTransform = GetActorTransform();
 	}
 
+	Inventory.Add(EquippedWeapon);
+	//EquippedWeapon -> SetSlotIndex(0);
 
 	switch (RotationMode)
 	{
@@ -172,6 +184,7 @@ void AOnsSoulPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &AOnsSoulPlayer::EKeyPressed);
 	PlayerInputComponent->BindAction("Healing", IE_Pressed, this, &AOnsSoulPlayer::PotionDrinking);
 	PlayerInputComponent->BindAction("WeaponChange", IE_Pressed, this, &AOnsSoulPlayer::WeaponChange);
+	PlayerInputComponent->BindAction("ToggleInventory",IE_Pressed,this,&AOnsSoulPlayer::ToggleInventory);
 
 	PlayerInputComponent->BindAction("MoveW", IE_Released, this, &AOnsSoulPlayer::notMoveF);
 	PlayerInputComponent->BindAction("MoveA", IE_Released, this, &AOnsSoulPlayer::notMoveR);
@@ -180,6 +193,42 @@ void AOnsSoulPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	compPlayerRoll->SetupInputBinding(PlayerInputComponent);
 	compPlayerGuard->SetupInputBinding(PlayerInputComponent);
+}
+
+void AOnsSoulPlayer::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
+{
+	FLatentActionInfo Stop_Move;
+
+	if (PrevMovementMode == MOVE_Falling)
+	{
+		UKismetSystemLibrary::RetriggerableDelay(GetWorld(), 1.f, Stop_Move);
+
+		if (GetCharacterMovement()->IsFalling())
+		{
+		 TmpDmg = 5.f;
+
+		 UKismetSystemLibrary::RetriggerableDelay(GetWorld(), 0.25f, Stop_Move);
+		 
+		 if (GetCharacterMovement()->IsFalling())
+		 {
+		  TmpDmg = 20.f;
+
+		  UKismetSystemLibrary::RetriggerableDelay(GetWorld(), 0.25f, Stop_Move);
+
+		  if (GetCharacterMovement()->IsFalling())
+		  {
+		   TmpDmg = 40.f;
+
+		   UKismetSystemLibrary::RetriggerableDelay(GetWorld(), 0.1f, Stop_Move);
+
+		   if (GetCharacterMovement()->IsFalling())
+		   {
+			TmpDmg = 100.f;
+		   }
+		  }
+		 }
+		}
+    }
 }
 
 float AOnsSoulPlayer::TakeDamage(
@@ -227,8 +276,8 @@ void AOnsSoulPlayer::Destroyed()
 	{
 	  CurrentGameModeBase-> ReSpawnPlayer(this); 
 
+	 SpawnDefaultWeapon();
 
-	  
       UGameplayStatics:: GetPlayerController(this,0) -> SetShowMouseCursor(false);
       UGameplayStatics:: GetPlayerController(this, 0) -> SetInputMode(FInputModeGameOnly());
 	}
@@ -256,7 +305,7 @@ void AOnsSoulPlayer::DirectionalHitReact(const FVector& ImpactPoint)
 
 
 	const FVector Forward = GetActorForwardVector();
-	// Lower Impact Point to the Enemy's Actor Location Z
+	// 적의 액터 위치 Z에 대한 하단 충격 지점
 	const FVector ImpactLowered(ImpactPoint.X, ImpactPoint.Y, GetActorLocation().Z);
 	const FVector ToHit = (ImpactLowered - GetActorLocation()).GetSafeNormal();
 
@@ -375,6 +424,46 @@ void AOnsSoulPlayer::StopSprint()
   }
 }
 
+void AOnsSoulPlayer::SpawnDefaultWeapon()
+{
+	if (DefaulWeaponClass)
+	{
+	  AWeapon* DefaultWeapon = GetWorld() -> SpawnActor<AWeapon>(DefaulWeaponClass);
+
+	  const USkeletalMeshSocket* HandSocket = GetMesh() -> GetSocketByName(FName("RightHandSoket"));
+
+	  if (HandSocket)
+	  {
+		  HandSocket -> AttachActor(DefaultWeapon,GetMesh());
+	  }
+    }
+}
+
+void AOnsSoulPlayer::SwapWeapon(AWeapon* WeaponToSwap)
+{
+  DropWeapon();
+  EquipWeapon(WeaponToSwap);
+  OverlappingItem = nullptr;
+}
+
+void AOnsSoulPlayer::GetPickupItem(AItem* Item)
+{
+ auto Weapon = Cast<AWeapon>(Item);
+ if (Weapon)
+ {
+	 if (Inventory.Num() < INVENTORY_CAPACITY)
+	 {
+	   Weapon -> SetSlotIndex(Inventory.Num());
+	   Inventory.Add(Weapon);
+	   Weapon -> SetItemState(EItemState::EIS_PickUp);
+     }
+	 else
+	 {
+       SwapWeapon(Weapon);
+	 }
+ }
+}
+
 void AOnsSoulPlayer::ToggleLockOn()
 {
    ANormalEnemy_YG* Enemy = Cast<ANormalEnemy_YG>(Taget);
@@ -450,14 +539,11 @@ void AOnsSoulPlayer::EKeyPressed()
  AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
  AItem* OverlappingWidget = Cast<AItem>(OverlappingItem);
 
- if (OverlappingWeapon)
+ if (OverlappingItem)
  {
-	 if (EquippedWeapon)
-	 {
-		 EquippedWeapon -> Destroy();
-	 }
+	 SwapWeapon(OverlappingWeapon);
      OverlappingWidget->GetPickupWiget()->SetVisibility(false);
-	 EquipWeapon(OverlappingWeapon);
+	
  }
 
  if (SpawnTarget && SpawnTarget -> GetReSpawnBox())
@@ -473,6 +559,15 @@ void AOnsSoulPlayer::EKeyPressed()
 				              GetActorLocation());
 
 			PotionHP(MaxHealth);
+			
+			AGameModeBase* CurrentMode = GetWorld()->GetAuthGameMode();
+
+			AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(CurrentMode);
+
+			if (CurrentGameModeBase != nullptr)
+			{
+				CurrentGameModeBase->PotionNum = 5.f;
+			}
 
 			PlayerSpawnTimer();
 
@@ -604,7 +699,30 @@ void AOnsSoulPlayer::EquipWeapon(AWeapon* Weapon)
 	Weapon->Equip(GetMesh(), FName("RightHandSoket"), this, this);
 	CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
 	OverlappingItem = nullptr;
+
+	if (EquippedWeapon == nullptr)
+	{
+	 EquipItemDelegate.Broadcast(-1,Weapon->GetSlotIndex());
+	}
+	else
+	{
+	  EquipItemDelegate.Broadcast(EquippedWeapon->GetSlotIndex(), Weapon -> GetSlotIndex());
+	}
+
 	EquippedWeapon = Weapon;
+	EquippedWeapon -> SetItemState(EItemState::EIS_Equipped);
+}
+
+void AOnsSoulPlayer::DropWeapon()
+{
+	if (EquippedWeapon)
+	{
+	  FDetachmentTransformRules DetachmentTransformRules(EDetachmentRule::KeepWorld,true);
+	  EquippedWeapon -> GetItemMesh()->DetachFromComponent(DetachmentTransformRules);
+
+	  EquippedWeapon->SetItemState(EItemState::EIS_Falling);
+	  EquippedWeapon->ThrowWeapon();
+    }
 }
 
 void AOnsSoulPlayer::ReceiveDamage(float Damge)
@@ -618,8 +736,17 @@ void AOnsSoulPlayer::LMBDown()
 	bLMBDown = true;
 	if (IsAttacking == false && CanAttack())
 	{
-		Attack();
-		AttackHitCheck();
+		CurrentStamina = FMath::Clamp(CurrentStamina - 15.f, MinStamina, MaxStamina);
+		if (CurrentStamina <= MinStamina)
+		{ 
+			UKismetSystemLibrary::K2_SetTimer(this, "RegenerateStamina", 0.1f, true);
+		}
+		else
+		{
+		  Attack();
+		  AttackHitCheck();
+		  UKismetSystemLibrary::K2_SetTimer(this, "RegenerateStamina", 0.1f, true);
+		}
 	}
 	else if (IsAttacking == true && CanAttack())
 	{
@@ -640,15 +767,15 @@ void AOnsSoulPlayer::EndAttacking()
 
 void AOnsSoulPlayer::AttackHitCheck()
 	{
-		if (ComboCnt >= 2)
+	    if (ComboCnt >= 2)
 		{
-			ComboCnt = 0;
+		  ComboCnt = 0;
 		}
 		if (bIsAttackButton == true)
 		{
-			ComboCnt += 1;
-			bIsAttackButton = false;
-			Attack();
+			  ComboCnt += 1;
+			  bIsAttackButton = false;
+			  Attack();
 		}
 	}
 
@@ -787,12 +914,33 @@ void AOnsSoulPlayer::WeaponChange()
 {
 	if (CanArm())
 	{
-		Arm();
+	  Arm();
 	}
 	else if (CanDisarm())
 	{
 		Disarm();
 
+	}
+}
+
+void AOnsSoulPlayer::ToggleInventory()
+{
+
+	if (IsPaused)
+	{    
+	    IsPaused = false;
+
+		GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(false);
+		MainInventory->SetVisibility(ESlateVisibility::Collapsed);
+		UGameplayStatics::GetPlayerController(this, 0)->SetInputMode(FInputModeGameOnly());
+	}
+	else
+	{
+		IsPaused = true;
+		
+		GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
+		MainInventory -> SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		UGameplayStatics::GetPlayerController(this, 0)->SetInputMode(FInputModeGameAndUI());
 	}
 }
 
@@ -860,4 +1008,15 @@ void AOnsSoulPlayer::notMoveF()
 void AOnsSoulPlayer::notMoveR()
 {
 	isMoveR = false;
+}
+
+void AOnsSoulPlayer::ExchangeInventoryItems(int32 CurrentItemIndex, int32 NewItemIndex)
+{
+	if ((CurrentItemIndex == NewItemIndex) && (NewItemIndex >= Inventory.Num())) return;
+	auto OldEquippedWeapon = EquippedWeapon;
+	auto NewWeapon = Cast<AWeapon>(Inventory[NewItemIndex]);
+	EquipWeapon(NewWeapon);
+
+	OldEquippedWeapon -> SetItemState(EItemState::EIS_PickUp);
+	NewWeapon -> SetItemState(EItemState::EIS_Equipped);
 }
