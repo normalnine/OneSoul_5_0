@@ -41,4 +41,16 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool changeGroggy = false;
+
+
+	//hp ¹Ù
+	UPROPERTY(EditAnywhere)
+		class UEnemy_HpBar* EnemyHpBar;
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<class UEnemy_HpBar> Enemy_HP_Widget;
+
+	UPROPERTY(EditAnywhere)
+		class UEnemy_HpBar_WidgetComponent* HpWidget;
+
 };

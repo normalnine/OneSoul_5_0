@@ -29,7 +29,7 @@ public:
 	void guard();
 	void guardOff();
 
-	bool imguard = false;
+
 
 
 };

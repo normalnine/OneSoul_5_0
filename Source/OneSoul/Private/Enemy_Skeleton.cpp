@@ -4,12 +4,17 @@
 #include "Enemy_Skeleton.h"
 #include "Enemy_Skeleton_FSM.h"
 #include "OnsSoulPlayer.h"
+#include "Enemy_HpBar.h"
+#include "Enemy_HpBar_WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "JW_ParryGuardComponent.h"
 #include "Enemy_Skeleton_Anim.h"
 #include <Components/CapsuleComponent.h>
 #include <Components/SphereComponent.h>
 #include <Kismet/GameplayStatics.h>
+#include "Engine/EngineTypes.h"
+#include <Kismet/KismetSystemLibrary.h>
+
 
 
 AEnemy_Skeleton::AEnemy_Skeleton()
@@ -62,8 +67,20 @@ AEnemy_Skeleton::AEnemy_Skeleton()
 
 	SwordCollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AEnemy_Skeleton::OnOverlapBeginsword);
 
+	collisionComp->OnComponentBeginOverlap.AddDynamic(this, &AEnemy_Skeleton::OnOverlapBeginshield);
+
 
 	fsm = CreateDefaultSubobject<UEnemy_Skeleton_FSM>(TEXT("FSM"));
+
+
+
+	HpWidget = CreateDefaultSubobject<UEnemy_HpBar_WidgetComponent>(TEXT("HpBar"));
+	HpWidget->SetupAttachment(GetRootComponent());
+
+	//몬스터 캡슐에 칼이 맞으면
+	UCapsuleComponent* mycapsule = GetCapsuleComponent();
+	mycapsule->OnComponentBeginOverlap.AddDynamic(this, &AEnemy_Skeleton::OnOverlapME);
+	
 }
 
 void AEnemy_Skeleton::BeginPlay()
@@ -71,6 +88,23 @@ void AEnemy_Skeleton::BeginPlay()
 	Super::BeginPlay();
 
 	SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HpWidget->UpdateCurrHP(fsm->hp, fsm->maxhp);
+
+	
+}
+
+void AEnemy_Skeleton::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (fsm->isShield)
+	{
+	collisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	else
+	{
+		collisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 }
 
 void AEnemy_Skeleton::OnOverlapBeginsword(class UPrimitiveComponent* selfComp, class AActor* otherActor, UPrimitiveComponent* otherComp,
@@ -83,32 +117,106 @@ void AEnemy_Skeleton::OnOverlapBeginsword(class UPrimitiveComponent* selfComp, c
  		{
  			if (target->parrying)
  			{
- 				UE_LOG(LogTemp, Warning, TEXT("parryGood"));
- 				changeGroggy = true;
- 			}
+			changeGroggy = true;
+			FActorSpawnParameters params;
+			params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			GetWorld()->SpawnActor<AActor>(effectfactory1, SwordCollisionComp->GetRelativeTransform(), params);
+			}
  			else
- 			{
- 				//플레이어가 가등중일때
- 				if (target->compPlayerGuard->imguard)
- 				{
- 					
- 					FString sectionName = FString::Printf(TEXT("thing"));
- 					PlayAnimMontage(fsm->damageMontage, 1.0f, FName(*sectionName));
- 
- 					//플레이어를 넉백시킨다
- 					FVector imp = -1 * target->GetActorForwardVector() * 1000.0f;
- 					target->GetCharacterMovement()->AddImpulse(imp, true);
- 
- 					//플레이어의 기력 감소
- 					target->CurrentStamina = FMath::Clamp(target->CurrentStamina - 10.f, target->MinStamina, target->MaxStamina);
- 				}
- 				else
- 				{
- 					target->ReceiveDamage(1);
- 				}
- 
- 			}
+ 			{target->ReceiveDamage(1);}
  		
  
  		}
+		AShield* shield = Cast<AShield>(otherActor);
+		if (shield !=nullptr)
+		{
+			if (!(fsm->superArm))
+			{
+			
+			FString sectionName = FString::Printf(TEXT("thing"));
+			PlayAnimMontage(fsm->damageMontage, 1.0f, FName(*sectionName));
+
+
+			FActorSpawnParameters params;
+			params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			//튕겨지는 이펙트 생성
+			GetWorld()->SpawnActor<AActor>(effectfactory,shield->GetActorTransform(),params);
+
+			auto actor = UGameplayStatics::GetActorOfClass(GetWorld(), AOnsSoulPlayer::StaticClass());
+
+			player = Cast<AOnsSoulPlayer>(actor);
+
+				if (player !=nullptr)
+				{
+				
+					//플레이어를 넉백시킨다
+					FVector imp = -1 * player->GetActorForwardVector() * 1000.0f;
+					player->GetCharacterMovement()->AddImpulse(imp, true);
+	
+					//플레이어의 기력 감소
+					player->CurrentStamina = FMath::Clamp(player->CurrentStamina - 10.f, player->MinStamina, player->MaxStamina);
+
+					//플레이어의 기력 회복 몇초뒤에 호출해야하는데
+					FTimerHandle ddd;
+					GetWorld()->GetTimerManager().SetTimer(ddd, this, &AEnemy_Skeleton::reStamina, 2.0f, false);
+				}
+			}
+			
+		}
+}
+
+void AEnemy_Skeleton::OnOverlapBeginshield(class UPrimitiveComponent* selfComp, class AActor* otherActor, UPrimitiveComponent* otherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	AWeapon* weapon = Cast<AWeapon>(otherActor);
+	if (weapon != nullptr)
+	{
+		FActorSpawnParameters params;
+		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		//튕겨지는 이펙트 생성
+		GetWorld()->SpawnActor<AActor>(effectfactory,weapon->GetActorTransform(), params);
+		
+		//방패에 맞으면 몸의 콜리전을 잠시 끄고 다시 키는거 - 방패 맞고 몸맞아서 따블로 맞으면 안되니까
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		
+		//UE_LOG(LogTemp, Warning, TEXT("imGuard"));
+		FString sectionName = FString::Printf(TEXT("Block"));
+		PlayAnimMontage(fsm->damageMontage, 1.0f, FName(*sectionName));
+		fsm->mState = EEnemyState1::Shield;
+
+		//1초 뒤에 몸의 콜리전을 키는 함수호출
+		FTimerHandle ddd;
+		GetWorld()->GetTimerManager().SetTimer(ddd, this, &AEnemy_Skeleton::oncoll, 1.0f, false);
 	}
+}
+
+void AEnemy_Skeleton::reStamina()
+{
+	player->SprintTimer();
+	player->RegenerateStamina();
+}
+
+void AEnemy_Skeleton::OnOverlapME(class UPrimitiveComponent* selfComp, class AActor* otherActor, UPrimitiveComponent* otherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	AWeapon* weapon = Cast<AWeapon>(otherActor);
+	if (weapon != nullptr)
+	{
+		FActorSpawnParameters params;
+		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+
+		//FVector HitLocation = SweepResult.Location;
+		FName HitLocation = SweepResult.BoneName;
+		GetWorld()->SpawnActor<AActor>(HitresultFactory, GetMesh()->GetSocketLocation(TEXT("*HitLocation")),weapon->GetActorRotation()-GetActorRotation(),params);
+
+
+		/*	FString LocationString = HitLocation.ToString();
+
+			UKismetSystemLibrary::PrintString(this, LocationString, true, true, FLinearColor::Green); */
+	
+	}
+}
+
+void AEnemy_Skeleton::oncoll()
+{
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+}

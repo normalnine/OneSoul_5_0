@@ -99,7 +99,7 @@ void AWeapon::OnBoxOverlap(
               bool bFromSweep,
               const FHitResult& SweepResult)
 {
-		UE_LOG(LogTemp,Warning,TEXT("ovelapweapon"));
+		//UE_LOG(LogTemp,Warning,TEXT("ovelapweapon"));
    
 		//if (ActorIsSameType(OthrActor)) return;
 
@@ -118,8 +118,28 @@ void AWeapon::OnBoxOverlap(
 		  //매지션하고 충돌되었을때
 		  if (Enemy2 != nullptr)
 		  {
-			  UE_LOG(LogTemp, Warning, TEXT("AEnemy_Magician"));
-			  Enemy2->fsm->OnDamageProcess();
+			  if (Enemy2->fsm->Hitback)
+			  {
+				  //플레이어를 캐스팅
+				  AOnsSoulPlayer* me = Cast<AOnsSoulPlayer>(GetOwner());
+				  //플레이어에 컴포넌트호출해서 거기에 있는 크리티컬어택 몽타주 실행
+				  me->compPlayerBase->CriAttack();
+				  //칼 콜리전 끄기 - 몬스터나 칼 콜리전 둘중 하나가 없어져야지 무한반복이 안실행됨
+				  WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				  //몬스터랑 위치맞추기
+				  Enemy2->SetActorLocation(me->GetActorLocation() + me->GetActorForwardVector() * 100.0f);
+
+				  //몬스터 피격함수 호출
+				  Enemy2->fsm->OnDamageProcess();
+				  //공격모션안되던 버그를 수정하기위해
+				  me->IsAttacking = false;
+
+
+			  }
+			  else
+			  {
+				  Enemy2->fsm->OnDamageProcess();
+			  }
 		  }
 		  //아처랑 충돌되었을때
 
@@ -134,6 +154,7 @@ void AWeapon::OnBoxOverlap(
 		  {
 			  if (Enemy1->fsm->cri || Enemy1->fsm->Hitback)
 			  {
+				  UE_LOG(LogTemp, Warning, TEXT("asdadasddasd"));
 				  //플레이어를 캐스팅
 				  AOnsSoulPlayer* me = Cast<AOnsSoulPlayer>(GetOwner());
 				  //플레이어에 컴포넌트호출해서 거기에 있는 크리티컬어택 몽타주 실행
@@ -142,9 +163,10 @@ void AWeapon::OnBoxOverlap(
 				  WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 				  //몬스터랑 위치맞추기
 				  Enemy1->SetActorLocation(me->GetActorLocation() + me->GetActorForwardVector() * 100.0f);
+				 
 				  //몬스터 피격함수 호출
 				  Enemy1->fsm->OnDamageProcess();
-				  //공격안되던 버그를 수정하기위해
+				  //공격모션안되던 버그를 수정하기위해
 				  me->IsAttacking = false;
 
 
@@ -197,7 +219,7 @@ void AWeapon::OnBoxOverlap(
 		}
 		if (Boss == nullptr)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("bossisnull"));
+			//UE_LOG(LogTemp, Warning, TEXT("bossisnull"));
 
 		}
 	

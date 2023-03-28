@@ -18,16 +18,6 @@ void UJW_PlayerRollComponent::BeginPlay()
 void UJW_PlayerRollComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-   // if (re)
-   // {
-   //     if (me->CurrentStamina>99)
-   //     {
-			////다시 스테미나 채우기
-			//me->RegenerateStamina();
-   //     }
-		
-   // }
-	
 }
 
 void UJW_PlayerRollComponent::SetupInputBinding(class UInputComponent* PlayerInputComponent)
@@ -35,7 +25,7 @@ void UJW_PlayerRollComponent::SetupInputBinding(class UInputComponent* PlayerInp
 	Super::SetupInputBinding(PlayerInputComponent);
 
 	//Space Bar
-	PlayerInputComponent->BindAction(TEXT("Roll"), IE_Released, this, &UJW_PlayerRollComponent::Roll);
+	PlayerInputComponent->BindAction(TEXT("Roll"), IE_Pressed, this, &UJW_PlayerRollComponent::Roll);
 	
 
 

@@ -94,4 +94,5 @@ public:
 	 void ThrowWeapon();
 
    FORCEINLINE UBoxComponent* GetWeaponBox() const {return WeaponBox;}
+
 };

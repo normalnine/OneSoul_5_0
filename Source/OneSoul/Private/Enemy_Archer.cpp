@@ -3,6 +3,8 @@
 
 #include "Enemy_Archer.h"
 #include "Enemy_Archer_FSM.h"
+#include "Enemy_HpBar.h"
+#include "Enemy_HpBar_WidgetComponent.h"
 
 AEnemy_Archer::AEnemy_Archer()
 {
@@ -30,4 +32,7 @@ AEnemy_Archer::AEnemy_Archer()
 
 	}
 	fsm = CreateDefaultSubobject<UEnemy_Archer_FSM>(TEXT("FSM"));
+
+	HpWidget = CreateDefaultSubobject<UEnemy_HpBar_WidgetComponent>(TEXT("HpBar"));
+	HpWidget->SetupAttachment(GetRootComponent());
 }

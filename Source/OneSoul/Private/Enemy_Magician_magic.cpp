@@ -6,6 +6,7 @@
 #include "OnsSoulPlayer.h"
 #include <GameFramework/ProjectileMovementComponent.h>
 #include <Kismet/GameplayStatics.h>
+#include "Shield.h"
 
 // Sets default values
 AEnemy_Magician_magic::AEnemy_Magician_magic()
@@ -37,7 +38,8 @@ AEnemy_Magician_magic::AEnemy_Magician_magic()
 void AEnemy_Magician_magic::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	FTimerHandle ddd;
+	GetWorld()->GetTimerManager().SetTimer(ddd, this, &AEnemy_Magician_magic::Die, 4.5f, false);
 }
 
 // Called every frame
@@ -50,12 +52,37 @@ void AEnemy_Magician_magic::Tick(float DeltaTime)
 void AEnemy_Magician_magic::OnOverlapBeginMagic(class UPrimitiveComponent* selfComp, class AActor* otherActor, UPrimitiveComponent* otherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	AOnsSoulPlayer* target = Cast<AOnsSoulPlayer>(otherActor);
-	//UEFSM* enemy = Cast<UEFSM>(otherActor);
 	if (target != nullptr)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("OverLap 1"));
+		
+		Destroy();
+	}
 
+	AShield* shield = Cast<AShield>(otherActor);
+	if (shield != nullptr)
+	{
+		//플레이어 캐스팅해서
+		auto actor = UGameplayStatics::GetActorOfClass(GetWorld(), AOnsSoulPlayer::StaticClass());
+		player = Cast<AOnsSoulPlayer>(actor);
 
+		if (player != nullptr)
+		{
+
+			//플레이어를 넉백시킨다
+			FVector imp = -1 * player->GetActorForwardVector() * 1000.0f;
+			player->GetCharacterMovement()->AddImpulse(imp, true);
+
+			//플레이어의 기력 감소
+			player->CurrentStamina = FMath::Clamp(target->CurrentStamina - 10.f, target->MinStamina, target->MaxStamina);
+		}
+
+		Destroy();
 	}
 }
+void AEnemy_Magician_magic::Die()
+{
+	Destroy();
+}
+
 

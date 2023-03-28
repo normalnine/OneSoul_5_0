@@ -11,10 +11,12 @@ enum class EEnemyState4 : uint8
 {
 	Idle,
 	Move,
+	MovetoTarget,
 	Attack0,
 	Attack1,
 	Attack2,
 	Attack3,
+	JumpAttack,
 	AttackDelay,
 	Damage,
 	Die,
@@ -44,6 +46,8 @@ public:
 	void IdleState();
 	//이동상태
 	void MoveState();
+	//타겟한테 이동
+	void movetoPlayer();
 	//공격상태
 	void AttackState();
 	//공격상태
@@ -54,6 +58,9 @@ public:
 	void AttackState3();
 	//공격 대기
 	void BlockAttack();
+
+	// 점프 공격
+	void jumpattack();
 
 	//막기 상태
 	void UpdaetAttackDelay();
@@ -109,7 +116,8 @@ public:
 		float attackRange = 150.0f;
 
 	//쫓아 갈 수 있는 범위
-	float traceRange = 1000;
+	UPROPERTY(EditAnywhere, Category = FSM)
+	float traceRange = 3000;
 
 	//공격대기시간
 	UPROPERTY(EditAnywhere, Category = FSM)
@@ -117,9 +125,12 @@ public:
 	//체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FSM)
 		int32 hp = 20;
+	//체력
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FSM)
+		int32 maxhp = 20;
 	//피격 대기 시간
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
-		float damageDelayTime = 2.0f;
+		float damageDelayTime = 1.0f;
 	//아래로 사라지는 속도
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
 		float dieSpeed = 50.0f;
@@ -157,4 +168,25 @@ public:
 
 	//뒤잡상태에서 피격을 맞았을때 true 로 플레이어한테 전달할 값
 	bool Hitback = false;
+	//점프공격 을 일단 처음 한번만 실행하게 하려고
+	bool jumptotarget =true;
+
+	//플레이어 카메라 흔들리게 하려는 요소들
+	bool camShake = false;
+	float currCamShakeTime =0;
+	float camShakeTime =1;
+	UFUNCTION(BlueprintCallable)
+	void Shake();
+
+	//한번 공격할때 플레이어 위치를 한번 저장하는 벡터
+	FVector movetarget;
+
+	//멈춰!
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool stopmove = false;
+
+
+	//소울스폰
+	UPROPERTY(EditDefaultsOnly, Category = dropFactory)
+		TSubclassOf<class AActor> dropFactory;
 };

@@ -22,4 +22,14 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = FSMComponent)
 		class UEnemy_Magician_FSM* fsm;
+
+	//hp ¹Ù
+	UPROPERTY(EditAnywhere)
+		class UEnemy_HpBar* EnemyHpBar;
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<class UEnemy_HpBar> Enemy_HP_Widget;
+
+	UPROPERTY(EditAnywhere)
+		class UEnemy_HpBar_WidgetComponent* HpWidget;
 };

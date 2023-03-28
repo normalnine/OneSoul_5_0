@@ -4,7 +4,10 @@
 #include "Enemy_Skeleton_FSM.h"
 #include "Enemy_Skeleton.h"
 #include "Enemy_Skeleton_Anim.h"
+#include "Enemy_HpBar.h"
+#include "Enemy_HpBar_WidgetComponent.h"
 #include <Kismet/GameplayStatics.h>
+#include "GameFramework/Actor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include <Components/CapsuleComponent.h>
 #include <AIController.h>
@@ -25,6 +28,7 @@ UEnemy_Skeleton_FSM::UEnemy_Skeleton_FSM()
 	{
 		damageMontage = tempMontage.Object;
 	}
+
 }
 
 
@@ -45,6 +49,9 @@ void UEnemy_Skeleton_FSM::BeginPlay()
 
 	originPos = me->GetActorLocation();
 
+
+	me->HpWidget->UpdateCurrHP(hp, maxhp);
+
 }
 
 
@@ -63,6 +70,15 @@ void UEnemy_Skeleton_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FA
 		break;
 	case EEnemyState1::Attack:
 		AttackState();
+		break;
+	case EEnemyState1::Attackcombo1:
+		AttackCombo1();
+		break;
+	case EEnemyState1::Attackcombo2:
+		AttackCombo2();
+		break;
+	case EEnemyState1::Attackcombo3:
+		AttackCombo3();
 		break;
 	case EEnemyState1::AttackDelay:
 		UpdaetAttackDelay();
@@ -138,19 +154,26 @@ void UEnemy_Skeleton_FSM::MoveState()
 		//만약에 target - me 거리가 공격범위보다 작으면
 		if (dir.Length() < attackRange)
 		{
-			if (fight)
-			{
-				index = FMath::RandRange(0, 1);
-			}
+		//	if (fight)
+			//{
+				index = FMath::RandRange(0, 2);
+			//}
 			
 			if (index == 0)
 			{
 				ChangeState(EEnemyState1::Attack);
 			}
+			else if (index ==1)
+			{
+				ChangeState(EEnemyState1::Attackcombo1);
+			}
 			else
 			{
 				ChangeState(EEnemyState1::Shield);
 			}
+			
+				
+			
 		}
 		//그렇지 않으면
 		else
@@ -189,6 +212,49 @@ void UEnemy_Skeleton_FSM::AttackState()
 	
 }
 
+void UEnemy_Skeleton_FSM::AttackCombo1()
+{
+	superArm = true;
+	me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	currTime += GetWorld()->DeltaTimeSeconds;
+
+		
+		if (currTime > 2)
+		{
+
+			currTime = 0;
+
+			ChangeState(EEnemyState1::AttackDelay);
+		}
+
+}
+
+void UEnemy_Skeleton_FSM::AttackCombo2()
+{
+	currTime += GetWorld()->DeltaTimeSeconds;
+	if (currTime > 1)
+	{
+
+		currTime = 0;
+
+		ChangeState(EEnemyState1::Attackcombo3);
+	}
+	
+}
+
+void UEnemy_Skeleton_FSM::AttackCombo3()
+{
+	currTime += GetWorld()->DeltaTimeSeconds;
+	if (currTime > 1)
+	{
+
+		currTime = 0;
+
+		ChangeState(EEnemyState1::AttackDelay);
+	}
+	
+}
+
 void UEnemy_Skeleton_FSM::BlockAttack()
 {
 	isShield = true;
@@ -211,6 +277,7 @@ void UEnemy_Skeleton_FSM::BlockAttack()
 
 void UEnemy_Skeleton_FSM::UpdaetAttackDelay()
 {
+	superArm = false;
 	if (IsWaitComplete(attackDelayTime))
 	{
 
@@ -220,7 +287,19 @@ void UEnemy_Skeleton_FSM::UpdaetAttackDelay()
 		if (dist < attackRange)
 		{
 
-			ChangeState(EEnemyState1::Attack);
+			index = FMath::RandRange(0, 2);
+			if (index == 0)
+			{
+				ChangeState(EEnemyState1::Attack);
+			}
+			else if (index == 1)
+			{
+				ChangeState(EEnemyState1::Attackcombo1);
+			}
+			else
+			{
+				ChangeState(EEnemyState1::Shield);
+			}
 		}
 		else
 		{
@@ -250,22 +329,8 @@ void UEnemy_Skeleton_FSM::DamageState()
 }
 void UEnemy_Skeleton_FSM::DieState()
 {
+	me->HpWidget->SetVisibility(false);
 
-	//계속 아래로 내려가고 싶다.
-	//동속ㅇ운동ㅇ 공식 피=피제+브이티
-	//FVector p0 = me->GetActorLocation();
-	//FVector vt = FVector::DownVector * dieSpeed * GetWorld()->DeltaTimeSeconds;
-	//FVector p = p0 + vt;
-	//2. 만약에 p.Z 가 -200 보다 작으면 파괴한다
-	/*if (p.Z < -200)*/
-	//{
-	//	me->Destroy();
-	//}
-	////3. 그렇지 않으면 해당 위치로 셋팅한다
-	//else
-	//{
-	//	me->SetActorLocation(p);
-	//}
 
 
 }
@@ -278,49 +343,63 @@ void UEnemy_Skeleton_FSM::UpdateReturnPos()
 
 void UEnemy_Skeleton_FSM::OnDamageProcess()
 {
+	me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	me->HpWidget->SetVisibility(true);
 	
 
-	if (isShield)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("imGuard"));
-		FString sectionName = FString::Printf(TEXT("Block"));
-		me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
-		mState = EEnemyState1::Shield;
-	}
-	else
-	{
+	//if (isShield)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("imGuard"));
+	//	FString sectionName = FString::Printf(TEXT("Block"));
+	//	me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+	//	mState = EEnemyState1::Shield;
+	//}
+	//else
+	//{
 		//체력감소
 		//hp -= damage;
 		hp--;
+		//피격되었을때 hp표시줄을 보여주는거 한번만 실행되면됨
+		me->HpWidget->UpdateCurrHP(hp,maxhp);
+		
 		if (hp > 0)
-		{
-			if (cri)
-			{	
-				//몽타주실행
-				FString sectionName = FString::Printf(TEXT("Cri"));
-				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
-				FTimerHandle aaa;
-				GetWorld()->GetTimerManager().SetTimer(aaa, this, &UEnemy_Skeleton_FSM::moveBack, 1.0f, false);
-				//상태변경
-				mState = EEnemyState1::Damage;
-			}
-			else if (Hitback)
+		{	if (!(superArm))
 			{
-				FString sectionName = FString::Printf(TEXT("BackAttack"));
-				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
-				mState = EEnemyState1::Damage;
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("defultattack"));
+		
+				if (cri)
+				{	
+				/*	FB = true;*/
+					FString sectionName = FString::Printf(TEXT("Cri"));
+					me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+					FTimerHandle aaa;
+					GetWorld()->GetTimerManager().SetTimer(aaa, this, &UEnemy_Skeleton_FSM::moveBack, 1.0f, false);
+					mState = EEnemyState1::Damage;
+				}
+				else if (Hitback)
+				{
+					/*FB = false;*/
+					/*FRotator addRotator = me->GetActorRotation();
+					addRotator.Yaw += 90.0f;
+					me->SetActorRotation(addRotator);*/
+					FString sectionName = FString::Printf(TEXT("BackAttack"));
+					me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+					FTimerHandle aaa;
+					GetWorld()->GetTimerManager().SetTimer(aaa, this, &UEnemy_Skeleton_FSM::moveBack, 1.0f, false);
+					mState = EEnemyState1::Damage;
+				}
+				else
+				{
+					//UE_LOG(LogTemp, Warning, TEXT("defultattack"));
 				
 			
-				currentTime = 0;
-				//피격 애니메이션 재생
-				FString sectionName = FString::Printf(TEXT("Damage0"));
-				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+					currentTime = 0;
+					//피격 애니메이션 재생
+					FString sectionName = FString::Printf(TEXT("Damage0"));
+					me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 				
-				mState = EEnemyState1::Damage;
+					mState = EEnemyState1::Damage;
+				}
 			}
 
 		}
@@ -333,7 +412,7 @@ void UEnemy_Skeleton_FSM::OnDamageProcess()
 			//죽음 애니메이션 재생
 			FString sectionName = FString::Printf(TEXT("Die"));
 			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
-
+			GetWorld()->SpawnActor<AActor>(dropFactory, me->GetActorTransform());
 
 		}
 		//애니메이션 상태 동기화
@@ -344,7 +423,7 @@ void UEnemy_Skeleton_FSM::OnDamageProcess()
 
 
 
-}
+//}
 
 
 bool UEnemy_Skeleton_FSM::GetRandomPositionInNavMesh(FVector centerLocation, float radius, FVector& dest)
@@ -382,12 +461,36 @@ void UEnemy_Skeleton_FSM::groggy()
 void UEnemy_Skeleton_FSM::moveBack()
 {
 
-		UE_LOG(LogTemp, Warning, TEXT("qweasd"));
 		//뒤로살짝밀려가게
-		FVector imp = -1 * me->GetActorForwardVector() * 5000.0f;
+		/*int32 a;
+		if (FB){a=-1;}else{a=1;}*/
+		FVector imp = /*a * */(target->GetActorForwardVector()) * 5000.0f;
 		me->GetCharacterMovement()->AddImpulse(imp, true);
 	
 
+}
+
+void UEnemy_Skeleton_FSM::showHP()
+{
+	if (me->HpWidget)
+	{
+		me->HpWidget->SetVisibility(true);
+	}
+	
+}
+
+void UEnemy_Skeleton_FSM::gof()
+{
+	if (timerCount<3)
+	{	
+		timerCount++;
+		FVector imp = me->GetActorForwardVector() * 1500.0f;
+		me->GetCharacterMovement()->AddImpulse(imp, true);
+		if (timerCount == 3)
+		{
+			GetWorld()->GetTimerManager().ClearTimer(ddd);
+		}
+	}
 }
 
 bool UEnemy_Skeleton_FSM::IsTargetTrace()
@@ -502,11 +605,17 @@ void UEnemy_Skeleton_FSM::ChangeState(EEnemyState1 state)
 		//me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 	}
 	break;
+	case EEnemyState1::Attackcombo1:
+	{
+		
+		GetWorld()->GetTimerManager().SetTimer(ddd, this, &UEnemy_Skeleton_FSM::gof, 1.0f, false);
+	}
+	break;
 	case EEnemyState1::Die:
 
 		//충돌안되게 설정
 		me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
+		
 
 
 
@@ -545,3 +654,4 @@ void UEnemy_Skeleton_FSM::MoveToPos(FVector pos)
 		ChangeState(EEnemyState1::Idle);
 	}
 }
+

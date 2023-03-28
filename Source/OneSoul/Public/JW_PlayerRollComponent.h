@@ -27,8 +27,8 @@ public:
 		UAnimMontage* Rolling;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montages)
 		UAnimMontage* BackStep;
-
-		bool re = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool re = true;
 
 
 };

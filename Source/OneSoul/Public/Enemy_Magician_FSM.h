@@ -97,20 +97,24 @@ public:
 
 	//공격범위
 	UPROPERTY(EditAnywhere, Category = FSM)
-		float attackRange = 900.0f;
+		float attackRange = 1500.0f;
 
 	//쫓아 갈 수 있는 범위
-	float traceRange = 1200;
+	float traceRange = 2000;
 
 	//공격대기시간
 	UPROPERTY(EditAnywhere, Category = FSM)
 		float attackDelayTime = 2.0f;
 	//체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FSM)
-		int32 hp = 5;
+		int32 hp = 20;
+
+	//체력
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FSM)
+		int32 maxhp = 20;
 	//피격 대기 시간
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
-		float damageDelayTime = 2.0f;
+		float damageDelayTime = 3.0f;
 	//아래로 사라지는 속도
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
 		float dieSpeed = 50.0f;
@@ -172,4 +176,8 @@ public:
 
 		//뒤잡상태에서 피격을 맞았을때 true 로 플레이어한테 전달할 값
 		bool Hitback = false;
+
+		//소울스폰
+		UPROPERTY(EditDefaultsOnly, Category = dropFactory)
+			TSubclassOf<class AActor> dropFactory;
 };
