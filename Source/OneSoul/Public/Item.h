@@ -99,8 +99,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Sound, meta = (AllowPrivateAccess = "true"))
     USoundBase* PickupSound;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sound, meta = (AllowPrivateAccess = "true"))
-	EItemState ItemState = EItemState::EIS_Hovering;
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly,Category = Inventroy, meta = (AllowPrivateAccess = "true"))
 	UTexture2D* IconBackGround;
@@ -117,4 +116,6 @@ public:
 	FORCEINLINE UStaticMeshComponent* GetItemMesh() const {return ItemMesh;}
     FORCEINLINE int32 GetSlotIndex() const {return SloatIndex;}
 	FORCEINLINE void SetSlotIndex(int32 Index) {SloatIndex = Index;}
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sound, meta = (AllowPrivateAccess = "true"))
+		EItemState ItemState = EItemState::EIS_Hovering;
 };

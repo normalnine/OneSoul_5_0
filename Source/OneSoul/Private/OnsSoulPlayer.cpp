@@ -27,6 +27,7 @@
 #include "NormalEnemy_YG.h"
 #include "ReSpawn.h"
 #include "NPC.h"
+#include "Shield.h"
 #include "InventoryGrid.h"
 #include <Blueprint/WidgetBlueprintLibrary.h>
 #include "EnemyBossDieUI.h"
@@ -180,7 +181,7 @@ void AOnsSoulPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAxis("Turn Right",this,&AOnsSoulPlayer::Turn);
 	PlayerInputComponent->BindAxis("Look Up",this,&AOnsSoulPlayer::LookUp);
 
-	PlayerInputComponent->BindAction("Jump",IE_Pressed,this,&AOnsSoulPlayer::Jump);
+	PlayerInputComponent->BindAction("Jump",IE_Pressed,this,&AOnsSoulPlayer::Jumpp);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AOnsSoulPlayer::StopJumping);
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AOnsSoulPlayer::StartSprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AOnsSoulPlayer::StopSprint);
@@ -589,7 +590,7 @@ void AOnsSoulPlayer::EKeyPressed()
 	}
  AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
  AItem* OverlappingWidget = Cast<AItem>(OverlappingItem);
-
+ AShield* OverlappingShiled = Cast<AShield>(OverlappingItem);
  if (OverlappingItem)
  {
 	 SwapWeapon(OverlappingWeapon);
@@ -1083,4 +1084,21 @@ void AOnsSoulPlayer::ExchangeInventoryItems(int32 CurrentItemIndex, int32 NewIte
 
 	OldEquippedWeapon -> SetItemState(EItemState::EIS_PickUp);
 	NewWeapon -> SetItemState(EItemState::EIS_Equipped);
+}
+
+void AOnsSoulPlayer::EquipShield(AShield* shield)
+{
+
+	shield->Equip(GetMesh(), FName("hand_l"), this, this);
+	FVector NewScale = FVector(15.0f, 15.0f, 15.0f); // 크기를 두 배로 설정합니다.
+	shield->SetActorRelativeScale3D(NewScale);
+	canshield = true;
+}
+
+void AOnsSoulPlayer::Jumpp()
+{
+	if (compPlayerRoll->re)
+	{
+		Jump();
+	}
 }

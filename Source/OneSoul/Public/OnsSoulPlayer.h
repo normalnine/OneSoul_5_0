@@ -285,8 +285,7 @@ private:
     UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArm;
 
-	UPROPERTY(VisibleAnywhere)
-	UCameraComponent* Camera;
+
 
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* Sphere;
@@ -363,7 +362,7 @@ public:
 
    FORCEINLINE ECharacterState GetCharacterState() const {return CharacterState;}
 
-   UPROPERTY(EditAnywhere)
+   UPROPERTY(EditAnywhere, BlueprintReadWrite)
    class UJW_PlayerRollComponent* compPlayerRoll;
    UPROPERTY(EditAnywhere)
    class UJW_ParryGuardComponent* compPlayerGuard;
@@ -373,12 +372,19 @@ public:
    bool isMoveF = false;
    UPROPERTY(EditAnywhere)
    bool isMoveR = false;
-
+   UPROPERTY(VisibleAnywhere)
+	   UCameraComponent* Camera;
    void notMoveF();
    void notMoveR();
-
+   void Jumpp();
+   UFUNCTION(BlueprintCallable, Category = "Equip")
+	void EquipShield(AShield* shield);
+   UPROPERTY(EditAnywhere)
+	   bool imguard = false;
    UPROPERTY(EditAnywhere, BlueprintReadWrite)
    bool parrying = false;
+   
+   bool canshield = false;
 
    bool bTalking = false;
    class ANPC* npc;
