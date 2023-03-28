@@ -29,6 +29,7 @@ void UNPC_MenuUI::NativeConstruct()
 
 void UNPC_MenuUI::LevelUp()
 {
+	SetVisibility(ESlateVisibility::Hidden);
 	return;
 }
 
@@ -60,4 +61,5 @@ void UNPC_MenuUI::PlayerInputEnable()
 	PlayerController->bShowMouseCursor = false;
 	PlayerController->SetIgnoreLookInput(false);
 	PlayerController->SetIgnoreMoveInput(false);
+	UE_LOG(LogTemp,Warning,TEXT("PlayerInputEnable"));
 }

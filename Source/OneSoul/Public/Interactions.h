@@ -3,17 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
-#include "NPC.generated.h"
+#include "GameFramework/Actor.h"
+#include "Interactions.generated.h"
 
 UCLASS()
-class ONESOUL_API ANPC : public ACharacter
+class ONESOUL_API AInteractions : public AActor
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
-	ANPC();
+	AInteractions();
 
 protected:
 	// Called when the game starts or when spawned
@@ -23,14 +23,11 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* boxComp;
 
 	UPROPERTY(EditAnywhere)
-	class AOnsSoulPlayer* player;
+	class UParticleSystemComponent* particle;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UNPC_InteractiveUI> interactiveUIFactory;
@@ -39,18 +36,16 @@ public:
 	class UNPC_InteractiveUI* interactiveUI;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UNPC_MenuUI> npcMenuUIFactory;
+	TSubclassOf<class UInteractions_DialogueUI> dialogueUIFactory;
 
 	UPROPERTY(EditAnywhere)
-	class UNPC_MenuUI* npcMenuUI;
+	class UInteractions_DialogueUI* dialogueUI;
 
+	UPROPERTY(EditAnywhere)
 	class APlayerController* PlayerController;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FString> dialogueText;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 dialogueIndex = 0;
+	UPROPERTY(EditAnywhere)
+	FString dialogueString;
 
 	UFUNCTION()
 	void BeginOverlapTriggerBox(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -59,11 +54,10 @@ public:
 	void EndOverlapTriggerBox(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	UFUNCTION()
-	void OpenMenuUI();
-	
-	UFUNCTION()
-	void PlayerInputDisable();
-	
-	UFUNCTION()
 	void Dialogue();
+	
+	UFUNCTION()
+	void Close();
+
+
 };

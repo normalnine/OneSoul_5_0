@@ -18,6 +18,7 @@
 #include "EnemyBossLaser.h"
 #include "EnemyBossGhost.h"
 #include "EnemyBossDieUI.h"
+#include "OneSoulGameInstance.h"
 
 // Sets default values for this component's properties
 UEnemyBossFSM::UEnemyBossFSM()
@@ -326,13 +327,16 @@ void UEnemyBossFSM::ChangeState(EEnemyBossState state)
 		//3. 몽타주를 플레이한다.
 		//me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 		me->PlayAnimMontage(damageMontage, 1.0f, FName(TEXT("Damage0")));
-
-// 		FTimerHandle WaitHandle;
-// 		float WaitTime = 5.0f; //시간을 설정하고
-// 		GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
-// 			{
-// 				ChangeState(EEnemyBossState::Idle);
-// 			}), WaitTime, false);
+		accumulatedDamage = 0;
+		bGroggy = true;
+		FTimerHandle WaitHandle;
+		float WaitTime = 2.0f; //시간을 설정하고
+		GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+			{
+				me->StopAnimMontage(damageMontage);
+				bGroggy = false;
+				ChangeState(EEnemyBossState::Idle);
+			}), WaitTime, false);
 	}
 	break;
 	case EEnemyBossState::Die:
@@ -346,7 +350,14 @@ void UEnemyBossFSM::ChangeState(EEnemyBossState state)
 		{
 			EnemyBossDieUI->AddToViewport();
 		}
-
+		
+		if (gameInst == nullptr)
+		{
+			gameInst = Cast<UOneSoulGameInstance>(GetWorld()->GetGameInstance());
+			gameInst->soul += soul;
+		}
+		
+		
 		//Die 몽타주 실행
 		me->PlayAnimMontage(damageMontage, 1.0f, FName(TEXT("Die")));
 		break;
@@ -359,8 +370,16 @@ void UEnemyBossFSM::ReceiveDamage(float damage)
 	currHP -= damage;
 	EnemyBossHPBar->UpdateCurrHP(currHP, maxHP);
 
+	FTimerHandle WaitHandle;
+	float WaitTime = 1.0f; //시간을 설정하고
+	GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			EnemyBossHPBar->UpdateBackCurrHP(currHP, maxHP);
+
+		}), WaitTime, false);
+
 	//데미지를 누적하자
-	accumulatedDamage += damage;
+	if(!bGroggy) accumulatedDamage += damage;
 	EnemyBossHPBar->UpdateAccumulatedDamage(accumulatedDamage);
 
 	bDamageDealtRecently = true;
@@ -368,7 +387,7 @@ void UEnemyBossFSM::ReceiveDamage(float damage)
 
 	if (currHP > 0)
 	{
-		if (accumulatedDamage > groggyDamage)
+		if (accumulatedDamage > groggyDamage && !bGroggy)
 		{
 			ChangeState(EEnemyBossState::Damaged);
 		}
@@ -421,6 +440,8 @@ bool UEnemyBossFSM::IsTargetTrace()
 			EnemyBossHPBar = CreateWidget<UEnemyBossHPBar>(GetWorld(), EnemyBossHPBarFactory);
 			EnemyBossHPBar->AddToViewport();
 			EnemyBossHPBar->UpdateCurrHP(currHP, maxHP);
+			EnemyBossHPBar->UpdateBackCurrHP(currHP, maxHP);
+
 		}
 
 		//Enemy -----> target LineTrace 쏘자!!
