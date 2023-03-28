@@ -18,6 +18,25 @@ void UJW_PlayerRollComponent::BeginPlay()
 void UJW_PlayerRollComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+
+    if (!(re))
+    {
+
+		//뒤로 밀려나게 해주기
+		FVector imp = me->GetActorForwardVector() * 10.0f;
+	    FVector p = me->GetActorLocation()+imp;
+        me->SetActorLocation(p);
+
+
+    }
+    if (!ba)
+    {
+		FVector imp = -1*me->GetActorForwardVector() * 10.0f;
+		FVector p = me->GetActorLocation() + imp;
+		me->SetActorLocation(p);
+    }
+
 }
 
 void UJW_PlayerRollComponent::SetupInputBinding(class UInputComponent* PlayerInputComponent)
@@ -55,9 +74,6 @@ void UJW_PlayerRollComponent::Roll()
              
  
  
- 				//뒤로 밀려나게 해주기
- 				FVector imp = -1 * me->GetActorForwardVector() * 10000.0f;
- 				me->GetCharacterMovement()->AddImpulse(imp, true);
 
                 //다시 스테미나 채우기
                 me->SprintTimer();
@@ -81,9 +97,10 @@ void UJW_PlayerRollComponent::Roll()
 			
  
  				//앞으로 밀려나게 주기
- 				FVector imp = me->GetActorForwardVector() * 10000.0f;
- 				me->GetCharacterMovement()->AddImpulse(imp, true);
- 
+ 				/*FVector imp = me->GetActorForwardVector() * 10000.0f;
+ 				me->GetCharacterMovement()->AddImpulse(imp, true);*/
+               // me->GetCharacterMovement()->AddForce(imp);
+
 				//다시 스테미나 채우기
                 me->StopSprint();
 				me->RegenerateStamina();

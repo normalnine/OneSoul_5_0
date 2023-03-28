@@ -374,8 +374,10 @@ public:
    bool isMoveR = false;
    UPROPERTY(VisibleAnywhere)
 	   UCameraComponent* Camera;
-   void notMoveF();
-   void notMoveR();
+	UFUNCTION(BlueprintCallable)
+		void notMoveF();
+	UFUNCTION(BlueprintCallable)
+		void notMoveR();
    void Jumpp();
    UFUNCTION(BlueprintCallable, Category = "Equip")
 	void EquipShield(AShield* shield);
