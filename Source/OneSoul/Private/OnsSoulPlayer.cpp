@@ -530,13 +530,15 @@ void AOnsSoulPlayer::EKeyPressed()
 		return;
 	}
 
-	TArray<UUserWidget*> levlupWidgets;
-	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), levlupWidgets, UNPC_LevelupUI::StaticClass(), true);
+	TArray<UUserWidget*> levelupWidgets;
+	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), levelupWidgets, UNPC_LevelupUI::StaticClass(), true);
 
-	for (UUserWidget* Widget : levlupWidgets)
-	{
-		Widget->RemoveFromViewport();
+	for (UUserWidget* Widget : levelupWidgets)
+	{		
 		npc->npcMenuUI->SetVisibility(ESlateVisibility::Visible);
+		npc->npcMenuUI->PlayerInputEnable();
+		npc->npcMenuUI->RemoveFromViewport();
+		Widget->RemoveFromViewport();
 		return;
 	}
 
