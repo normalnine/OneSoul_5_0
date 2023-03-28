@@ -158,6 +158,24 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	bool IsPaused;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	int32 WeaponInventorySlots =  3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	int32 SheidInventorySlots = 3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	int32 UserItemInventorySlots = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	int32 LeftArrowInventorySlots = 2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	int32 RightArrowInventorySlots = 2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	int32 AccessorisInventorySlots = 4;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	ERotationMode RotationMode = ERotationMode::OrienttoMovement;
 

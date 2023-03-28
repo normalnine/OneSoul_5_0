@@ -10,7 +10,7 @@
 void UInventoryGrid::PreConstruct(bool IsDesignTime)
 {
  
-  AOnsSoulPlayer* play = Cast<AOnsSoulPlayer>(Player);
+ /*AOnsSoulPlayer* play = Cast<AOnsSoulPlayer>(Player);
 
   for (int32 Index = 0; Index <= play->InventorySlots-1; Index++)
   {
@@ -30,5 +30,5 @@ void UInventoryGrid::PreConstruct(bool IsDesignTime)
 		 }
 	 }
 
-  }
+  }*/
 }

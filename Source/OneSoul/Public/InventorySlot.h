@@ -17,11 +17,8 @@ public:
 
 private:
 
-  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Index, meta = (AllowPrivateAccess = "true"))
-  int32 Index;
 
 public:
 
-  FORCEINLINE int32 GetIndex() const {return Index;}
 
 };

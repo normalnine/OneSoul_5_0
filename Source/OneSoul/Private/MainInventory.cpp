@@ -15,25 +15,25 @@ void UMainInventory::Construct_Implementation()
 
 void UMainInventory::Equipment()
 {
-  SetVisibility(ESlateVisibility::Collapsed);
+  /*SetVisibility(ESlateVisibility::Collapsed);
 
   EquipmentWiget = CreateWidget<UUserWidget>(GetWorld(),EquipmentWidgets);
   if (EquipmentWiget)
   {
 	  EquipmentWiget -> AddToViewport();
-  }
+  }*/
 
 }
 
 void UMainInventory::Inventory()
 {
-  SetVisibility(ESlateVisibility::Collapsed);
+  /*SetVisibility(ESlateVisibility::Collapsed);
 
   InventorytWiget = CreateWidget<UUserWidget>(GetWorld(),InventoryWidgets);
   if (InventorytWiget)
   {
 	  InventorytWiget -> AddToViewport();
-  }
+  }*/
 }
 
 void UMainInventory::State()
