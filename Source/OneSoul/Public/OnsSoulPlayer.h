@@ -304,7 +304,7 @@ private:
 
 public:
    FORCEINLINE ECharacterState GetCharacterState() const {return CharacterState;}
-   UPROPERTY(EditAnywhere)
+   UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	   class UJW_PlayerRollComponent* compPlayerRoll;
    UPROPERTY(EditAnywhere)
 	   class UJW_ParryGuardComponent* compPlayerGuard;
@@ -328,5 +328,7 @@ public:
    bool bTalking = false;
    class ANPC* npc;
 
+   void Jumpp();
 
+   bool canshield = false;
 };

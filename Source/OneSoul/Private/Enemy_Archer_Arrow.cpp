@@ -26,9 +26,9 @@ AEnemy_Archer_Arrow::AEnemy_Archer_Arrow()
 
 	movementComp->SetUpdatedComponent(collisionComp);
 
-	movementComp->InitialSpeed = 600;
+	movementComp->InitialSpeed = 800;
 
-	movementComp->MaxSpeed = 600;
+	movementComp->MaxSpeed = 800;
 
 	collisionComp->OnComponentBeginOverlap.AddDynamic(this, &AEnemy_Archer_Arrow::OnOverlapBegin);
 }
@@ -48,12 +48,21 @@ void AEnemy_Archer_Arrow::Tick(float DeltaTime)
 
 void AEnemy_Archer_Arrow::OnOverlapBegin(class UPrimitiveComponent* selfComp, class AActor* otherActor, UPrimitiveComponent* otherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	AOnsSoulPlayer* target = Cast<AOnsSoulPlayer>(otherActor);
 	
+	//방패에 맞았을때
+	AShield*shield = Cast<AShield>(otherActor);
+	if (shield !=nullptr)
+	{
+		Destroy();
+		UE_LOG(LogTemp, Warning, TEXT("why?"));
+	}
+
+	AOnsSoulPlayer* target = Cast<AOnsSoulPlayer>(otherActor);
+
 	if (target != nullptr)
 	{
 		target->ReceiveDamage(1);
-
+		target->PlayHitReactMontage();
 
 	}
 }

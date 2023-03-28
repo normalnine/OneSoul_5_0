@@ -17,6 +17,7 @@ public:
 	AEnemy_Skeleton();
 
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
 	// 칼 스태틱매쉬
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
@@ -40,6 +41,9 @@ public:
 	UFUNCTION()
 		void OnOverlapBeginsword(class UPrimitiveComponent* selfComp, class AActor* otherActor, UPrimitiveComponent* otherComp,
 			int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+		void OnOverlapBeginshield(class UPrimitiveComponent* selfComp, class AActor* otherActor, UPrimitiveComponent* otherComp,
+			int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool changeGroggy = false;
@@ -48,4 +52,34 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = FSM)
 		class AOnsSoulPlayer* player;
 
+	//hp 바
+	UPROPERTY(EditAnywhere)
+		class UEnemy_HpBar* EnemyHpBar;
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<class UEnemy_HpBar> Enemy_HP_Widget;
+
+	UPROPERTY(EditAnywhere)
+		class UEnemy_HpBar_WidgetComponent* HpWidget;
+
+	//플레이어 방패 랑 충돌 되었을때 나오는 이펙트
+	UPROPERTY(EditDefaultsOnly, Category = BulletFactory)
+		TSubclassOf<class AActor> effectfactory;
+	//플레이어가 패링 되었을때 나오는 이펙트
+	UPROPERTY(EditDefaultsOnly, Category = BulletFactory)
+		TSubclassOf<class AActor> effectfactory1;
+
+
+		void reStamina();
+
+	UFUNCTION()
+	void OnOverlapME(class UPrimitiveComponent* selfComp, class AActor* otherActor, UPrimitiveComponent* otherComp,
+	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	//칼이랑 충돌되면 나오는 피 이펙트
+	UPROPERTY(EditDefaultsOnly, Category = HitresultFactory)
+	TSubclassOf<class AActor> HitresultFactory;
+
+	//몸의 콜리전을 다시 키는함수
+	void oncoll();
 };

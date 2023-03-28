@@ -3,6 +3,8 @@
 
 #include "Enemy_Titan.h"
 #include "Enemy_Titan_FSM.h"
+#include "Enemy_HpBar.h"
+#include "Enemy_HpBar_WidgetComponent.h"
 #include <Components/CapsuleComponent.h>
 #include "OnsSoulPlayer.h"
 
@@ -31,6 +33,9 @@ AEnemy_Titan::AEnemy_Titan()
 	RcollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AEnemy_Titan::OnOverlapBegin);
 
 	fsm = CreateDefaultSubobject<UEnemy_Titan_FSM>(TEXT("FSM"));
+
+	HpWidget = CreateDefaultSubobject<UEnemy_HpBar_WidgetComponent>(TEXT("HpBar"));
+	HpWidget->SetupAttachment(GetRootComponent());
 }
 
 

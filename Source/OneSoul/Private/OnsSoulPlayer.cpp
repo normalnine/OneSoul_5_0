@@ -163,7 +163,7 @@ void AOnsSoulPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAxis("Turn Right",this,&AOnsSoulPlayer::Turn);
 	PlayerInputComponent->BindAxis("Look Up",this,&AOnsSoulPlayer::LookUp);
 
-	PlayerInputComponent->BindAction("Jump",IE_Pressed,this,&AOnsSoulPlayer::Jump);
+	PlayerInputComponent->BindAction("Jump",IE_Pressed,this,&AOnsSoulPlayer::Jumpp);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AOnsSoulPlayer::StopJumping);
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AOnsSoulPlayer::StartSprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AOnsSoulPlayer::StopSprint);
@@ -875,5 +875,13 @@ void AOnsSoulPlayer::EquipShield(AShield* shield)
 	shield->Equip(GetMesh(), FName("hand_l"), this, this);
 	FVector NewScale = FVector(15.0f, 15.0f, 15.0f); // 크기를 두 배로 설정합니다.
 	shield->SetActorRelativeScale3D(NewScale);
-	
+	canshield=true;
+}
+
+void AOnsSoulPlayer::Jumpp()
+{
+	if (compPlayerRoll->re)
+	{
+	Jump();
+	}
 }

@@ -87,4 +87,5 @@ public:
 
 
    FORCEINLINE UBoxComponent* GetWeaponBox() const {return WeaponBox;}
+
 };

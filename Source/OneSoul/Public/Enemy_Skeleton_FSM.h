@@ -12,6 +12,9 @@ enum class EEnemyState1 : uint8
 	Idle,
 	Move,
 	Attack,
+	Attackcombo1,
+	Attackcombo2,
+	Attackcombo3,
 	AttackDelay,
 	Shield,
 	Damage,
@@ -44,6 +47,13 @@ public:
 	void MoveState();
 	//공격상태
 	void AttackState();
+	//콤보공격1
+	void AttackCombo1();
+	//콤보공격2
+	void AttackCombo2();
+	//콤보공격3
+	void AttackCombo3();
+
 	//공격 대기
 	void BlockAttack();
 
@@ -109,6 +119,9 @@ public:
 	//체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FSM)
 		int32 hp = 100;
+	//체력
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FSM)
+		int32 maxhp = 100;
 	//피격 대기 시간
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
 		float damageDelayTime = 3.0f;
@@ -158,4 +171,18 @@ public:
 
 	//뒤잡상태에서 피격을 맞았을때 true 로 플레이어한테 전달할 값
 	bool Hitback = false;
+
+	//소울스폰
+	UPROPERTY(EditDefaultsOnly, Category = dropFactory)
+		TSubclassOf<class AActor> dropFactory;
+
+	void showHP();
+	//슈퍼아머상태
+	bool superArm = false;
+
+	//콤보 공격을 할때마다 앞으로 나아가는 함수 (루트모션이 또 안먹음)
+	void gof();
+
+	int32 timerCount = 0;
+	FTimerHandle ddd;
 };

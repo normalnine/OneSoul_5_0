@@ -4,6 +4,8 @@
 #include "Enemy_Archer_FSM.h"
 #include "Enemy_Archer.h"
 #include "Enemy_Archer_anim.h"
+#include "Enemy_HpBar.h"
+#include "Enemy_HpBar_WidgetComponent.h"
 #include <Kismet/GameplayStatics.h>
 #include <Components/CapsuleComponent.h>
 #include <AIController.h>
@@ -41,6 +43,8 @@ void UEnemy_Archer_FSM::BeginPlay()
 	ai = Cast<AAIController>(me->GetController());
 
 	originPos = me->GetActorLocation();
+
+	me->HpWidget->UpdateCurrHP(hp, maxhp);
 	
 }
 
@@ -121,15 +125,15 @@ void UEnemy_Archer_FSM::MoveState()
 		if (dir.Length() < attackRange)
 		{
 
-			if (dir.Length() < 500)
+			/*if (dir.Length() < 500)
 			{
 				ChangeState(EEnemyState5::Run);
 			}
 			else
 			{
-				ChangeState(EEnemyState5::Attack);
-			}
-
+				
+			}*/
+			ChangeState(EEnemyState5::Attack);
 
 		}
 		//그렇지 않으면
@@ -196,12 +200,12 @@ void UEnemy_Archer_FSM::UpdaetAttackDelay()
 		FVector dir = target->GetActorLocation() - me->GetActorLocation();
 		float dist = dir.Length();
 
-		if (dist < 500)
+		/*if (dist < 500)
 		{
 			EEnemyState5::Run;
 			anim->animState = mState;
 		}
-		else if (dist < attackRange)
+		else */if (dist < attackRange)
 		{
 
 			ChangeState(EEnemyState5::Attack);
@@ -223,7 +227,7 @@ void UEnemy_Archer_FSM::DamageState()
 }
 void UEnemy_Archer_FSM::DieState()
 {
-
+	me->HpWidget->SetVisibility(false);
 
 	////동속ㅇ운동ㅇ 공식 피=피제+브이티
 	//FVector p0 = me->GetActorLocation();
@@ -248,11 +252,13 @@ void UEnemy_Archer_FSM::UpdateReturnPos()
 }
 void UEnemy_Archer_FSM::OnDamageProcess()
 {
-
+	me->HpWidget->SetVisibility(true);
 	UE_LOG(LogTemp, Warning, TEXT("IMHIT"));
 	//체력감소
 	//hp -= damage;
 	hp--;
+	//피격되었을때 hp표시줄을 보여주는거 한번만 실행되면됨
+	me->HpWidget->UpdateCurrHP(hp, maxhp);
 	if (hp > 0)
 	{
 		if (Hitback)
@@ -261,6 +267,9 @@ void UEnemy_Archer_FSM::OnDamageProcess()
 
 			FString sectionName = FString::Printf(TEXT("BackAttack"));
 			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+			//뒤로 밀려나는 함수
+			FTimerHandle aaa;
+			GetWorld()->GetTimerManager().SetTimer(aaa, this, &UEnemy_Archer_FSM::moveBack, 1.0f, false);
 			mState = EEnemyState5::Damage;
 		}
 		else
@@ -283,7 +292,7 @@ void UEnemy_Archer_FSM::OnDamageProcess()
 		//죽음 애니메이션 재생
 		FString sectionName = FString::Printf(TEXT("Die"));
 		me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
-
+		GetWorld()->SpawnActor<AActor>(dropFactory, me->GetActorTransform());
 
 	}
 	//애니메이션 상태 동기화
@@ -316,7 +325,7 @@ void UEnemy_Archer_FSM::mazic()
 	FActorSpawnParameters params;
 	params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	//총알을  소켓 에서 스폰한다
+	//소켓 에서 스폰한다
 	GetWorld()->SpawnActor<AActor>(ArrowFactory, me->GetMesh()->GetSocketLocation(TEXT("Socket2")), dirx, params);
 	ChangeState(EEnemyState5::AttackDelay);
 }
@@ -332,7 +341,8 @@ void UEnemy_Archer_FSM::groggy()
 
 void UEnemy_Archer_FSM::moveBack()
 {
-
+	FVector imp = (target->GetActorForwardVector()) * 5000.0f;
+	me->GetCharacterMovement()->AddImpulse(imp, true);
 }
 
 bool UEnemy_Archer_FSM::IsTargetTrace()
@@ -351,7 +361,7 @@ bool UEnemy_Archer_FSM::IsTargetTrace()
 	float angle = UKismetMathLibrary::DegAcos(dotvalue);
 	//UE_LOG(LogTemp, Warning, TEXT("%f"),angle);
 	//구한 값이 70보다 작고 적과 플레이어와의 거리가 지정한 거리보다 작으면
-	if (angle < 70 && dirSize.Size() < traceRange)
+	if (angle < 90 && dirSize.Size() < traceRange)
 	{
 
 

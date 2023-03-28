@@ -7,6 +7,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "OnsSoulPlayer.h"
 #include <Kismet/GameplayStatics.h>
+#include "Enemy_Skeleton.h"
 
 AShield::AShield()
 {
@@ -61,5 +62,13 @@ void AShield::AttachMeshToSocket(USceneComponent* InParent, const FName& InSocke
 
 void AShield::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OthrActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	//몬스터를 캐스팅 
+	AEnemy_Skeleton* enemy1 = Cast<AEnemy_Skeleton>(OthrActor);
+	if (enemy1 != nullptr)
+	{
+		//플레이어를 넉백시킨다
+		FVector imp = -1 * player->GetActorForwardVector() * 1000.0f;
+		player->GetCharacterMovement()->AddImpulse(imp, true);
+	}
 
 }

@@ -4,6 +4,8 @@
 #include "Enemy_Titan_FSM.h"
 #include "Enemy_Titan.h"
 #include "Enemy_Titan_anim.h"
+#include "Enemy_HpBar.h"
+#include "Enemy_HpBar_WidgetComponent.h"
 #include <Kismet/GameplayStatics.h>
 #include <Components/CapsuleComponent.h>
 #include <AIController.h>
@@ -24,7 +26,6 @@ UEnemy_Titan_FSM::UEnemy_Titan_FSM()
 		damageMontage = tempMontage.Object;
 	}
 
-	hp=MAXhp;
 }
 
 
@@ -44,6 +45,8 @@ void UEnemy_Titan_FSM::BeginPlay()
 	ai = Cast<AAIController>(me->GetController());
 
 	originPos = me->GetActorLocation();
+
+	me->HpWidget->UpdateCurrHP(hp, maxhp);
 	
 }
 
@@ -404,7 +407,7 @@ void UEnemy_Titan_FSM::DamageState()
 }
 void UEnemy_Titan_FSM::DieState()
 {
-
+	me->HpWidget->SetVisibility(false);
 	//아직 죽음 애니메이션이 끝나지 않았다면
 	//바닥내려가지 않도록 처리
 	/*if (anim->bDieDone == false)
@@ -436,8 +439,9 @@ void UEnemy_Titan_FSM::UpdateReturnPos()
 }
 void UEnemy_Titan_FSM::OnDamageProcess()
 {
+	me->HpWidget->SetVisibility(true);
 	hp--;
-	
+	me->HpWidget->UpdateCurrHP(hp, maxhp);
 	
 		//체력이 남아있다면
 		if (hp > 0)
@@ -484,7 +488,7 @@ void UEnemy_Titan_FSM::OnDamageProcess()
 			//죽음 애니메이션 재생
 			FString sectionName = FString::Printf(TEXT("Die"));
 			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
-
+			GetWorld()->SpawnActor<AActor>(dropFactory, me->GetActorTransform());
 		}
 		//애니메이션 상태 동기화
 		anim->animState = mState;

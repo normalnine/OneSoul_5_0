@@ -17,6 +17,13 @@ void UJW_ParryGuardComponent::BeginPlay()
 void UJW_ParryGuardComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	if (me->CurrentStamina<10)
+	{
+		if (playerAnim->Montage_IsPlaying(Guard))
+		{
+			guardOff();
+		}
+	}
 }
 
 void UJW_ParryGuardComponent::SetupInputBinding(class UInputComponent* PlayerInputComponent)
@@ -33,27 +40,29 @@ void UJW_ParryGuardComponent::SetupInputBinding(class UInputComponent* PlayerInp
 
 void UJW_ParryGuardComponent::parry()
 {
-	if (!(playerAnim->Montage_IsPlaying(Parrying)))
+	if (me->canshield)
 	{
+		if (!(playerAnim->Montage_IsPlaying(Parrying)))
+		{
 		playerAnim->Montage_Play(Parrying);
 
+		}
 	}
 }
 
 void UJW_ParryGuardComponent::guard()
 {
-	if (!(playerAnim->Montage_IsPlaying(Guard)))
+	//방패가 장착되어있을때만 가드를 할수있도록
+	if (me->canshield)
 	{
-		me->imguard = true;
-		playerAnim->Montage_Play(Guard);
-		/*AShield* shield = Cast<AShield>(GetOwner());
-		if (shield !=nullptr)
+		if (!(playerAnim->Montage_IsPlaying(Guard)))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("canblock"));
-			shield->shieldcomp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		}*/
+			me->imguard = true;
+			playerAnim->Montage_Play(Guard);
 
+		}
 	}
+
 }
 void UJW_ParryGuardComponent::guardOff()
 {
@@ -61,11 +70,6 @@ void UJW_ParryGuardComponent::guardOff()
 	{
 		me->imguard = false;
 		playerAnim->Montage_StopWithBlendOut(1.0,Guard);
-		/*AShield* shield = Cast<AShield>(GetOwner());
-		if (shield != nullptr)
-		{
-			shield->shieldcomp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		}*/
 
 	}
 }

@@ -127,7 +127,7 @@ public:
 		int32 hp = 20;
 	//체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FSM)
-		int32 MAXhp = 20;
+		int32 maxhp = 20;
 	//피격 대기 시간
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
 		float damageDelayTime = 1.0f;
@@ -185,4 +185,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool stopmove = false;
 
+
+	//소울스폰
+	UPROPERTY(EditDefaultsOnly, Category = dropFactory)
+		TSubclassOf<class AActor> dropFactory;
 };

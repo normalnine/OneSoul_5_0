@@ -3,6 +3,8 @@
 
 #include "Enemy_Magician.h"
 #include "Enemy_Magician_FSM.h"
+#include "Enemy_HpBar.h"
+#include "Enemy_HpBar_WidgetComponent.h"
 AEnemy_Magician::AEnemy_Magician()
 {
 	ConstructorHelpers::FObjectFinder<USkeletalMesh>tempMesh(TEXT("SkeletalMesh'/Game/LJW/Enemys/SimpleSkeleton/mesh/SKELETON.SKELETON'"));
@@ -28,4 +30,7 @@ AEnemy_Magician::AEnemy_Magician()
 
 	}
 	fsm = CreateDefaultSubobject<UEnemy_Magician_FSM>(TEXT("FSM"));
+
+	HpWidget = CreateDefaultSubobject<UEnemy_HpBar_WidgetComponent>(TEXT("HpBar"));
+	HpWidget->SetupAttachment(GetRootComponent());
 }

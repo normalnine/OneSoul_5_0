@@ -4,6 +4,8 @@
 #include "Enemy_Magician_FSM.h"
 #include "Enemy_Magician.h"
 #include "Enemy_Magician_Anim.h"
+#include "Enemy_HpBar.h"
+#include "Enemy_HpBar_WidgetComponent.h"
 #include <Kismet/GameplayStatics.h>
 #include <Components/CapsuleComponent.h>
 #include <AIController.h>
@@ -47,6 +49,8 @@ void UEnemy_Magician_FSM::BeginPlay()
 	ai = Cast<AAIController>(me->GetController());
 
 	originPos = me->GetActorLocation();
+
+	me->HpWidget->UpdateCurrHP(hp, maxhp);
 	
 }
 
@@ -166,21 +170,11 @@ void UEnemy_Magician_FSM::MoveState()
 
 void UEnemy_Magician_FSM::AttackState()
 {
-	FVector des = target->GetActorLocation();
-
-	FVector dir = des - me->GetActorLocation();
-
-	FRotator dirx = dir.Rotation();
-
-	me->SetActorRotation(dirx);
-
 	
 
-
-
-	//2초 뒤에 바닥에서 공격이 나오도록 추가
+	
 	currTime += GetWorld()->DeltaTimeSeconds;
-	if (currTime > 2)
+	if (currTime > 3)
 	{
 
 		currTime = 0;
@@ -219,12 +213,14 @@ void UEnemy_Magician_FSM::UpdaetAttackDelay()
 		FVector dir = target->GetActorLocation() - me->GetActorLocation();
 		float dist = dir.Length();
 
-	/*	if (dist < 500)
+		if (dist < 1000)
 		{
-			EEnemyState3::Run;
-			anim->animState = mState;
+			UE_LOG(LogTemp, Warning, TEXT("RUN"));
+			ChangeState(EEnemyState3::Run);
+			/*	EEnemyState3::Run;
+				anim->animState = mState;*/
 		}
-		else*/ if(dist < attackRange)
+		else if (dist < attackRange)
 		{
 		
 			ChangeState(EEnemyState3::Attack);
@@ -250,7 +246,7 @@ void UEnemy_Magician_FSM::DamageState()
 }
 void UEnemy_Magician_FSM::DieState()
 {
-
+	me->HpWidget->SetVisibility(false);
 	//아직 죽음 애니메이션이 끝나지 않았다면
 	//바닥내려가지 않도록 처리
 	/*if (anim->bDieDone == false)
@@ -283,9 +279,14 @@ void UEnemy_Magician_FSM::UpdateReturnPos()
 void UEnemy_Magician_FSM::OnDamageProcess()
 {
 	UE_LOG(LogTemp, Warning, TEXT("IMHIT"));
+
+	me->HpWidget->SetVisibility(true);
 	//체력감소
 	//hp -= damage;
 	hp--;
+	//피격되었을때 hp표시줄을 보여주는거 한번만 실행되면됨
+	me->HpWidget->UpdateCurrHP(hp, maxhp);
+
 	if (hp > 0)
 	{
 		if (Hitback)
@@ -294,6 +295,9 @@ void UEnemy_Magician_FSM::OnDamageProcess()
 
 			FString sectionName = FString::Printf(TEXT("BackAttack"));
 			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+			//뒤로 밀려나는 함수
+			FTimerHandle aaa;
+			GetWorld()->GetTimerManager().SetTimer(aaa, this, &UEnemy_Magician_FSM::moveBack, 1.0f, false);
 			mState = EEnemyState3::Damage;
 		}
 		else
@@ -316,7 +320,7 @@ void UEnemy_Magician_FSM::OnDamageProcess()
 		//죽음 애니메이션 재생
 		FString sectionName = FString::Printf(TEXT("Die"));
 		me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
-
+		GetWorld()->SpawnActor<AActor>(dropFactory, me->GetActorTransform());
 
 	}
 	//애니메이션 상태 동기화
@@ -371,7 +375,8 @@ void UEnemy_Magician_FSM::groggy()
 
 void UEnemy_Magician_FSM::moveBack()
 {
-
+	FVector imp =(target->GetActorForwardVector()) * 5000.0f;
+	me->GetCharacterMovement()->AddImpulse(imp, true);
 }
 
 bool UEnemy_Magician_FSM::IsTargetTrace()
@@ -460,6 +465,14 @@ void UEnemy_Magician_FSM::ChangeState(EEnemyState3 state)
 	{
 	case EEnemyState3::Attack:
 		{
+		FVector des = target->GetActorLocation();
+
+		FVector dir = des - me->GetActorLocation();
+
+		FRotator dirx = dir.Rotation();
+
+		me->SetActorRotation(dirx);
+
 		//1. 랜덤한 값을 뽑는다 (0, 1 중)
 		mazicattack = FMath::RandRange(0, 1);
 		//2. Damage0, Damage1 이란 문자열을 만든다.
@@ -510,7 +523,7 @@ void UEnemy_Magician_FSM::ChangeState(EEnemyState3 state)
 
 		//충돌안되게 설정
 		me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
+	
 
 
 
