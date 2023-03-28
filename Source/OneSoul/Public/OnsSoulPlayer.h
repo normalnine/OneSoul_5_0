@@ -270,6 +270,7 @@ protected:
 	void LMBDown();
 	void LMBUP();
 	void EKeyPressed();
+	void QkeyPressed();
 	void PotionDrinking();
 	void WeaponChange();
 	void ToggleInventory();
@@ -381,6 +382,7 @@ public:
 
    bool bTalking = false;
    class ANPC* npc;
+   class AInteractions* interaction;
 
    AController* MeController;
 

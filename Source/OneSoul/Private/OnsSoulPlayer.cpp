@@ -28,7 +28,13 @@
 #include "ReSpawn.h"
 #include "NPC.h"
 #include "InventoryGrid.h"
+#include <Blueprint/WidgetBlueprintLibrary.h>
+#include "EnemyBossDieUI.h"
+#include "NPC_LevelupUI.h"
 
+#include "NPC_MenuUI.h"
+#include "Interactions.h"
+#include "Interactions_DialogueUI.h"
 AOnsSoulPlayer::AOnsSoulPlayer()
       
 {
@@ -182,6 +188,7 @@ void AOnsSoulPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &AOnsSoulPlayer::LMBDown);
 	PlayerInputComponent->BindAction("Attack", IE_Released, this, &AOnsSoulPlayer::LMBUP);
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &AOnsSoulPlayer::EKeyPressed);
+	PlayerInputComponent->BindAction("Cancel", IE_Pressed, this, &AOnsSoulPlayer::QkeyPressed);
 	PlayerInputComponent->BindAction("Healing", IE_Pressed, this, &AOnsSoulPlayer::PotionDrinking);
 	PlayerInputComponent->BindAction("WeaponChange", IE_Pressed, this, &AOnsSoulPlayer::WeaponChange);
 	PlayerInputComponent->BindAction("ToggleInventory",IE_Pressed,this,&AOnsSoulPlayer::ToggleInventory);
@@ -513,6 +520,25 @@ void AOnsSoulPlayer::Attack()
 
 void AOnsSoulPlayer::EKeyPressed()
 {
+	TArray<UUserWidget*> FoundWidgets;
+	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), FoundWidgets, UEnemyBossDieUI::StaticClass(), true);
+
+	for (UUserWidget* Widget : FoundWidgets)
+	{
+		Widget->RemoveFromViewport();
+		return;
+	}
+
+	TArray<UUserWidget*> levlupWidgets;
+	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), levlupWidgets, UNPC_LevelupUI::StaticClass(), true);
+
+	for (UUserWidget* Widget : levlupWidgets)
+	{
+		Widget->RemoveFromViewport();
+		npc->npcMenuUI->SetVisibility(ESlateVisibility::Visible);
+		return;
+	}
+
 	if (bTalking)
 	{
 		//UE_LOG(LogTemp,Warning,TEXT("TextUpdate"));
@@ -520,11 +546,12 @@ void AOnsSoulPlayer::EKeyPressed()
 		return;
 	}
 
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANPC::StaticClass(), FoundActors);
 
 
-	for (AActor* Actor : FoundActors)
+	TArray<AActor*> npcs;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANPC::StaticClass(), npcs);
+
+	for (AActor* Actor : npcs)
 	{
 		npc = Cast<ANPC>(Actor);
 		if (npc != nullptr)
@@ -533,6 +560,30 @@ void AOnsSoulPlayer::EKeyPressed()
 			{
 				npc->OpenMenuUI();
 				return;
+			}
+		}
+	}
+
+	TArray<AActor*> interactions;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AInteractions::StaticClass(), interactions);
+
+	for (AActor* Actor : interactions)
+	{
+		interaction = Cast<AInteractions>(Actor);
+		if (interaction != nullptr)
+		{
+			if (IsOverlappingActor(interaction))
+			{
+				if (interaction->dialogueUI->IsInViewport())
+				{
+					interaction->Close();
+					return;
+				}
+				else
+				{
+					interaction->Dialogue();
+					return;
+				}
 			}
 		}
 	}
@@ -580,6 +631,19 @@ void AOnsSoulPlayer::EKeyPressed()
 	   }
 	}
 
+ }
+
+ void AOnsSoulPlayer::QkeyPressed()
+ {
+	 TArray<UUserWidget*> levlupWidgets;
+	 UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), levlupWidgets, UNPC_LevelupUI::StaticClass(), true);
+
+	 for (UUserWidget* Widget : levlupWidgets)
+	 {
+		 Widget->RemoveFromViewport();
+		 npc->npcMenuUI->SetVisibility(ESlateVisibility::Visible);
+		 return;
+	 }
  }
    
 void AOnsSoulPlayer::SetPlayerMaxSpeed(float MaxSpeed)
