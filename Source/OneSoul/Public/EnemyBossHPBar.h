@@ -17,18 +17,30 @@ class ONESOUL_API UEnemyBossHPBar : public UUserWidget
 public:
 	virtual void NativeConstruct() override;
 
+
 public:
 	UPROPERTY()
-		class UProgressBar* currHPBar;
+	class UProgressBar* currHPBar;
+
+	UPROPERTY()
+	class UProgressBar* currHPBar2;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UTextBlock* _accumulatedDamage;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	class UTextBlock* _bossName;
+
+	UPROPERTY()
+	class AEnemyBoss* me;
 
 public:
 	UFUNCTION()
 	void UpdateCurrHP(float curr, float max);
 
 	UFUNCTION()
-	void UpdateAccumulatedDamage(float damage);
+	void UpdateBackCurrHP(float curr, float max);
 
+	UFUNCTION()
+	void UpdateAccumulatedDamage(float damage);
 };

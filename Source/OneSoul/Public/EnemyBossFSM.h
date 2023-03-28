@@ -91,6 +91,10 @@ public:
 	UPROPERTY(EditAnywhere)
 		class UEnemyBossDieUI* EnemyBossDieUI;
 
+	//보스 이름
+	UPROPERTY(EditAnywhere)
+	FString bossName = "Souleater Dimir";
+
 	//현재시간
 	float currTime = 0;
 	//대기 상태 기다리는 시간
@@ -117,8 +121,8 @@ public:
 	//회전 대기 시간
 	float currrotateDelayTime = 2.0f;
 
-	//고스트 스폰 위치
-	double ghostDistance = 450;
+	//고스트 스폰 간격
+	double ghostDistance = 450.0f;
 
 	//고스트 스폰 타이머 반복/정지
 	bool bSpawnGhost = true;
@@ -126,15 +130,15 @@ public:
 	//현재 체력
 	float currHP;
 	//최대 체력
-	float maxHP = 1000;
+	float maxHP = 1000.0f;
 	//누적 데미지
 	float accumulatedDamage;
 	//누적 상태
 	bool bDamageDealtRecently = false;
 	//그로기 데미지
-	float groggyDamage = 5000;
+	float groggyDamage = 500.0f;
 	//소울
-	float soul = 150000;
+	float soul = 150000.0f;
 	//넉백 수치
 	float enemyAttackForce = 2000.0f;
 
@@ -142,6 +146,8 @@ public:
 	float dieSpeed = 100.0f;
 	//죽었을 때 내려가게 하는 변수
 	bool bDieMove = false;
+	//그로기 상태
+	bool bGroggy = false;
 
 	//이동할 수 있는 반경
 	float moveRange = 2000.0f;
@@ -156,6 +162,8 @@ public:
 
 	//고스트 스폰 타이머
 	FTimerHandle GhostHandle;
+
+	
 
 public:
 	//대기
@@ -211,4 +219,6 @@ public:
 
 	//Roar 공격
 	void Roar();
+
+	class UOneSoulGameInstance* gameInst;
 };
