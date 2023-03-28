@@ -591,6 +591,11 @@ void AOnsSoulPlayer::EKeyPressed()
  AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
  AItem* OverlappingWidget = Cast<AItem>(OverlappingItem);
  AShield* OverlappingShiled = Cast<AShield>(OverlappingItem);
+ if (OverlappingShiled)
+ {
+	 EquipShield(OverlappingShiled);
+	 OverlappingWidget->GetPickupWiget()->SetVisibility(false);
+ }
  if (OverlappingItem)
  {
 	 SwapWeapon(OverlappingWeapon);
