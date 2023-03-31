@@ -177,16 +177,7 @@ public:
 	int32 AccessorisEquipmentSlots = 4;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-	int32 UserItemInventorySlots = 5;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-	int32 UpgradeInventorySlots = 5;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-	int32 WeaponInventorySlots = 5;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-	int32 SheidInventorySlots = 5;
+	int32 InventorySlot = 25;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	ERotationMode RotationMode = ERotationMode::OrienttoMovement;
@@ -296,8 +287,6 @@ private:
 
     UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArm;
-
-
 
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* Sphere;
