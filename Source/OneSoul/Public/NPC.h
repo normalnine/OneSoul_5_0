@@ -6,6 +6,15 @@
 #include "GameFramework/Character.h"
 #include "NPC.generated.h"
 
+// UENUM(BlueprintType)
+// enum class ENPCState : uint8
+// {
+// 	Quest,
+// 	Incomplete,
+// 	Complete,
+// 	Normal
+// };
+
 UCLASS()
 class ONESOUL_API ANPC : public ACharacter
 {
@@ -26,44 +35,66 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(EditAnywhere)
+// 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+// 	ENPCState currState;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UBoxComponent* boxComp;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class AOnsSoulPlayer* player;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<class UNPC_InteractiveUI> interactiveUIFactory;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UNPC_InteractiveUI* interactiveUI;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<class UNPC_MenuUI> npcMenuUIFactory;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UNPC_MenuUI* npcMenuUI;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class APlayerController* PlayerController;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FString> dialogueText;
+	class UOneSoulGameInstance* gameInst;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FString> dialogueText_quest;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FString> dialogueText_complete;	
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FString> dialogueText_inComplete;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FString> dialogueText_normal;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bQuestComplete = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 dialogueIndex = 0;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void BeginOverlapTriggerBox(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void EndOverlapTriggerBox(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void OpenMenuUI();
 	
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void PlayerInputDisable();
 	
-	UFUNCTION()
-	void Dialogue();
+	UFUNCTION(BlueprintCallable)
+	void Talk();
+	
+	UFUNCTION(BlueprintCallable)
+	void Dialogue(TArray<FString> dialogueText);
 };

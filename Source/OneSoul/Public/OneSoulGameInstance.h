@@ -16,18 +16,27 @@ struct FPlayerStatus : public FTableRowBase
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditAnywhere)
-		int32 level;
-	UPROPERTY(EditAnywhere)
-		int32 requiredSouls;
-	UPROPERTY(EditAnywhere)
-		int32 offense;
-	UPROPERTY(EditAnywhere)
-		int32 defense;
-	UPROPERTY(EditAnywhere)
-		float maxHP;
-	UPROPERTY(EditAnywhere)
-		float maxStamina;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 level;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 requiredSouls;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 offense;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 defense;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float maxHP;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float maxStamina;
+};
+
+UENUM(BlueprintType)
+enum class ENPCState : uint8
+{
+	Quest,
+	Incomplete,
+	Complete,
+	Normal
 };
 
 UCLASS()
@@ -42,12 +51,18 @@ public:
 // 	virtual void Init() override;
 
 public:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FPlayerStatus> statusData;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 currLevel = 0;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 soul = 1000;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString nickname = "";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ENPCState npcState = ENPCState::Quest;
 };

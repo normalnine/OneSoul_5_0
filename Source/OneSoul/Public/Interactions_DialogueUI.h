@@ -15,6 +15,6 @@ class ONESOUL_API UInteractions_DialogueUI : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* _dialogue;
 };

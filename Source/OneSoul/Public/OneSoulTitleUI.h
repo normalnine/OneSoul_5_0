@@ -13,5 +13,4 @@ UCLASS()
 class ONESOUL_API UOneSoulTitleUI : public UUserWidget
 {
 	GENERATED_BODY()
-	
 };

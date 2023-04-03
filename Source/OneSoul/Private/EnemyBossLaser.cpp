@@ -60,6 +60,8 @@ void AEnemyBossLaser::BeginOverlapLaser(UPrimitiveComponent* OverlappedComponent
 	if (target != nullptr)
 	{
 		target->ReceiveDamage(10);
+		target->DirectionalHitReact(GetActorLocation());
+
 	}
 }
 
