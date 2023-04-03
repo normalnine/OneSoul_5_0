@@ -1131,8 +1131,8 @@ void AOnsSoulPlayer::EquipShield(AShield* shield)
 {
 
 	shield->Equip(GetMesh(), FName("hand_l"), this, this);
-	FVector NewScale = FVector(15.0f, 15.0f, 15.0f); // ũ�⸦ �� ��� �����մϴ�.
-	shield->SetActorRelativeScale3D(NewScale);
+	//FVector NewScale = FVector(15.0f, 15.0f, 15.0f); // ũ�⸦ �� ��� �����մϴ�.
+	//shield->SetActorRelativeScale3D(NewScale);
 	canshield = true;
 }
 

@@ -378,7 +378,9 @@ public:
    bool isMoveR = false;
    UPROPERTY(VisibleAnywhere,BlueprintReadWrite)
    UCameraComponent* Camera;
+   UFUNCTION(BlueprintCallable)
    void notMoveF();
+   UFUNCTION(BlueprintCallable)
    void notMoveR();
    void Jumpp();
    UFUNCTION(BlueprintCallable, Category = "Equip")
