@@ -12,6 +12,7 @@
 #include <Components/TextBlock.h>
 #include <Components/VerticalBox.h>
 #include <Components/Image.h>
+#include "OneSoulGameInstance.h"
 
 // Sets default values
 ANPC::ANPC()
@@ -37,6 +38,7 @@ void ANPC::BeginPlay()
 	PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
 	interactiveUI = CreateWidget<UNPC_InteractiveUI>(GetWorld(), interactiveUIFactory);
 	npcMenuUI = CreateWidget<UNPC_MenuUI>(GetWorld(), npcMenuUIFactory);
+	gameInst = Cast<UOneSoulGameInstance>(GetWorld()->GetGameInstance());
 }
 
 // Called every frame
@@ -91,7 +93,7 @@ void ANPC::OpenMenuUI()
 		}
 		
 		npcMenuUI->AddToViewport();
-		npcMenuUI->text_dialogue->SetText(FText::FromString(dialogueText[dialogueIndex]));
+		//npcMenuUI->text_dialogue->SetText(FText::FromString(dialogueText[dialogueIndex]));
 		PlayerInputDisable();
 	}	
 }
@@ -106,18 +108,58 @@ void ANPC::PlayerInputDisable()
 	PlayerController->SetIgnoreMoveInput(true);
 }
 
-void ANPC::Dialogue()
+void ANPC::Talk()
+{	
+	switch (gameInst->npcState)
+	{
+
+	case ENPCState::Quest:
+		Dialogue(dialogueText_quest);
+		break;
+	case ENPCState::Complete:
+		Dialogue(dialogueText_complete);
+		break;
+	case ENPCState::Incomplete:
+		Dialogue(dialogueText_inComplete);
+		break;
+	case ENPCState::Normal:
+		Dialogue(dialogueText_normal);
+		break;
+
+	default:
+		break;
+	}	
+}
+
+void ANPC::Dialogue(TArray<FString> dialogueText)
 {
 	dialogueIndex++;
-	if (dialogueIndex > dialogueText.Num() - 1)
+	if (dialogueIndex > dialogueText.Num() -1)
 	{
-		dialogueIndex = 0;
 		player->bTalking = false;
+		dialogueIndex = 0;
+
 		npcMenuUI->text_dialogue->SetVisibility(ESlateVisibility::Hidden);
+
 		npcMenuUI->text_dialogue->SetText(FText::FromString(dialogueText[dialogueIndex]));
-		npcMenuUI->vb_menuBox->SetVisibility(ESlateVisibility::Visible);
-		npcMenuUI->image_back->SetVisibility(ESlateVisibility::Visible);
+
+		if (gameInst->npcState == ENPCState::Quest)
+		{
+			npcMenuUI->image_quest->SetVisibility(ESlateVisibility::Visible);
+			npcMenuUI->vb_quest->SetVisibility(ESlateVisibility::Visible);
+		}
+		else
+		{
+			npcMenuUI->vb_menuBox->SetVisibility(ESlateVisibility::Visible);
+			npcMenuUI->image_back->SetVisibility(ESlateVisibility::Visible);
+
+			if (gameInst->npcState == ENPCState::Complete)
+			{
+				gameInst->npcState = ENPCState::Normal;
+			}
+		}		
 		return;
-	}
+	}	
 	npcMenuUI->text_dialogue->SetText(FText::FromString(dialogueText[dialogueIndex]));
 }
+

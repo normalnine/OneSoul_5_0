@@ -34,6 +34,7 @@ void UNPC_LevelupUI::StatusInit(int32 currLevel)
 {
 	int32 afterSoul = gameInst->soul - gameInst->statusData[currLevel].requiredSouls;
 
+	_nickname->SetText(FText::FromString(gameInst->nickname));
 	_currLevel->SetText(FText::AsNumber(gameInst->statusData[currLevel].level));
 	_afterLevel->SetText(FText::AsNumber(gameInst->statusData[currLevel + 1].level));
 	_currSoul->SetText(FText::AsNumber(gameInst->soul));

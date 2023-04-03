@@ -14,7 +14,8 @@ void UStatusUI::NativeConstruct()
 }
 
 void UStatusUI::StatusInit(int32 currLevel)
-{
+{	
+	_nickname->SetText(FText::FromString(gameInst->nickname));
 	_currLevel->SetText(FText::AsNumber(gameInst->statusData[currLevel].level));
 	_currSoul->SetText(FText::AsNumber(gameInst->soul));
 	_requiredSoul->SetText(FText::AsNumber(gameInst->statusData[currLevel].requiredSouls));
