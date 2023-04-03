@@ -4,6 +4,7 @@
 #include "Enemy_Archer_Arrow.h"
 #include <Components/SphereComponent.h>
 #include "OnsSoulPlayer.h"
+#include "Shield.h"
 #include <GameFramework/ProjectileMovementComponent.h>
 #include <Kismet/GameplayStatics.h>
 
@@ -37,7 +38,9 @@ AEnemy_Archer_Arrow::AEnemy_Archer_Arrow()
 void AEnemy_Archer_Arrow::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	auto actor = UGameplayStatics::GetActorOfClass(GetWorld(), AOnsSoulPlayer::StaticClass());
+
+	player = Cast<AOnsSoulPlayer>(actor);
 }
 
 // Called every frame
@@ -51,19 +54,33 @@ void AEnemy_Archer_Arrow::OnOverlapBegin(class UPrimitiveComponent* selfComp, cl
 	
 	//방패에 맞았을때
 	AShield*shield = Cast<AShield>(otherActor);
-	if (shield !=nullptr)
-	{
-		Destroy();
-		UE_LOG(LogTemp, Warning, TEXT("why?"));
-	}
-
 	AOnsSoulPlayer* target = Cast<AOnsSoulPlayer>(otherActor);
 
+	if (shield !=nullptr)
+	{
+		
+		Destroy();
+		
+		//플레이어를 넉백시킨다
+		FVector imp = -1 * player->GetActorForwardVector() * 500.0f;
+		player->GetCharacterMovement()->AddImpulse(imp, true);
+		//플레이어의 기력감소
+		player->CurrentStamina = FMath::Clamp(player->CurrentStamina - 10.f, player->MinStamina, player->MaxStamina);
+		
+	}
 	if (target != nullptr)
 	{
 		target->ReceiveDamage(1);
-		target->PlayHitReactMontage();
+		target->DirectionalHitReact(GetActorLocation());
+		target->HitReactSounds();
 
 	}
 }
 
+
+void AEnemy_Archer_Arrow::reStamina()
+{
+	
+	player->SprintTimer();
+	player->RegenerateStamina();
+}

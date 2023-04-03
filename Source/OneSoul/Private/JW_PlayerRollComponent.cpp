@@ -24,10 +24,10 @@ void UJW_PlayerRollComponent::TickComponent(float DeltaTime, ELevelTick TickType
     {
 
 		//뒤로 밀려나게 해주기
-		FVector imp = me->GetActorForwardVector() * 10.0f;
-	    FVector p = me->GetActorLocation()+imp;
-        me->SetActorLocation(p);
-
+			FVector imp = me->GetActorForwardVector() * 10.0f;
+		FVector p = me->GetActorLocation() + imp;
+		me->SetActorLocation(p);
+      
 
     }
     if (!ba)
@@ -52,12 +52,7 @@ void UJW_PlayerRollComponent::SetupInputBinding(class UInputComponent* PlayerInp
 
 void UJW_PlayerRollComponent::Roll()
 {
-	
-	//점프중이 아닐때
-	/*if (true)
-	{
 
-	}*/
 	//백스탭 애니메이션이 실행중이 아닐때
  	if (playerAnim->Montage_IsPlaying(BackStep) == false)
  	{
@@ -68,7 +63,9 @@ void UJW_PlayerRollComponent::Roll()
  			if (me->CurrentStamina>0)
  			{	//일단 백스탭
  				playerAnim->Montage_Play(BackStep);
- 
+                //날라가는 버그때문에 변경
+				/*FVector imp = -1 * me->GetActorForwardVector() * 10000.0f;
+				me->GetCharacterMovement()->AddImpulse(imp, true);*/
  				//스테미나 감소
                 me->CurrentStamina = FMath::Clamp(me->CurrentStamina - 15.f, me->MinStamina, me->MaxStamina);
              
@@ -97,8 +94,10 @@ void UJW_PlayerRollComponent::Roll()
 			
  
  				//앞으로 밀려나게 주기
- 				/*FVector imp = me->GetActorForwardVector() * 10000.0f;
- 				me->GetCharacterMovement()->AddImpulse(imp, true);*/
+                //날라가는 버그때문에 변경
+				/*FVector imp = me->GetActorForwardVector() * 10000.0f;
+				me->GetCharacterMovement()->AddImpulse(imp, true);*/
+                
                // me->GetCharacterMovement()->AddForce(imp);
 
 				//다시 스테미나 채우기

@@ -93,7 +93,7 @@ public:
 
 	//대기시간
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
-		float idleDelayTime = 1;
+		float idleDelayTime = 3;
 	//경과시간
 	float currentTime = 0;
 
@@ -151,7 +151,7 @@ public:
 	FVector randPos;
 
 	//이동할수있는 범위
-	float moveRange = 2000;
+	float moveRange = 3000;
 
 	//포효 한번만 할려고
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
@@ -189,4 +189,9 @@ public:
 	//소울스폰
 	UPROPERTY(EditDefaultsOnly, Category = dropFactory)
 		TSubclassOf<class AActor> dropFactory;
+
+	//피격 효과음
+	UPROPERTY(EditDefaultsOnly, Category = Sound)
+		class USoundBase* HITSound;
+
 };

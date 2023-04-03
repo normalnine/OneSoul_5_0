@@ -24,6 +24,16 @@ UEnemy_Archer_FSM::UEnemy_Archer_FSM()
 	{
 		damageMontage = tempMontage.Object;
 	}
+	ConstructorHelpers::FObjectFinder<USoundBase> tempSound(TEXT("SoundWave'/Game/LJW/Enemys/sound/Demon_20.Demon_20'"));
+	if (tempSound.Succeeded())
+	{
+		SeeplayerSound = tempSound.Object;
+	}
+	ConstructorHelpers::FObjectFinder<USoundBase> tempHITSound(TEXT("SoundWave'/Game/LJW/Enemys/sound/zombie10.zombie10'"));
+	if (tempHITSound.Succeeded())
+	{
+		HITSound = tempHITSound.Object;
+	}
 }
 
 
@@ -81,6 +91,26 @@ void UEnemy_Archer_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 		UpdateReturnPos();
 		break;
 	}
+	FVector Ddir = target->GetActorLocation() - me->GetActorLocation();
+	FVector DdirSize = Ddir;
+	Ddir.Normalize();
+	float Ddotvalue = FVector::DotProduct(me->GetActorLocation(), Ddir);
+	float Dangle = UKismetMathLibrary::DegAcos(Ddotvalue);
+	//멀어지면 체력바안보이도록 수정
+	if (DdirSize.Size() > 2000)
+	{
+		me->HpWidget->SetVisibility(false);
+	}
+
+	if (Dangle > 155 && DdirSize.Size() < 500)
+	{
+		Hitback = true;
+	}
+	else
+	{
+		Hitback = false;
+	}
+
 }
 
 void UEnemy_Archer_FSM::IdleState()
@@ -252,8 +282,10 @@ void UEnemy_Archer_FSM::UpdateReturnPos()
 }
 void UEnemy_Archer_FSM::OnDamageProcess()
 {
+	//체력 유아이 보이도록
 	me->HpWidget->SetVisibility(true);
-	UE_LOG(LogTemp, Warning, TEXT("IMHIT"));
+	//피격효과음재생
+	UGameplayStatics::PlaySound2D(GetWorld(), HITSound);
 	//체력감소
 	//hp -= damage;
 	hp--;
@@ -293,6 +325,15 @@ void UEnemy_Archer_FSM::OnDamageProcess()
 		FString sectionName = FString::Printf(TEXT("Die"));
 		me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 		GetWorld()->SpawnActor<AActor>(dropFactory, me->GetActorTransform());
+		//사망효과음
+		UGameplayStatics::PlaySound2D(GetWorld(), SeeplayerSound);
+
+		AGameModeBase* CurrentMode = GetWorld()->GetAuthGameMode();
+		AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(CurrentMode);
+		if (CurrentGameModeBase != nullptr)
+		{
+			CurrentGameModeBase->AddCoins(10);
+		}
 
 	}
 	//애니메이션 상태 동기화

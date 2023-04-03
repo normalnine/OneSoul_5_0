@@ -7,6 +7,7 @@
 #include "Enemy_HpBar_WidgetComponent.h"
 #include <Components/CapsuleComponent.h>
 #include "OnsSoulPlayer.h"
+#include "Shield.h"
 
 AEnemy_Titan::AEnemy_Titan()
 {
@@ -48,6 +49,11 @@ void AEnemy_Titan::BeginPlay()
 
 	LcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	auto actor = UGameplayStatics::GetActorOfClass(GetWorld(), AOnsSoulPlayer::StaticClass());
+
+	player = Cast<AOnsSoulPlayer>(actor);
+
+
 }
 
 void AEnemy_Titan::OnOverlapBegin(class UPrimitiveComponent* selfComp, class AActor* otherActor, UPrimitiveComponent* otherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -64,8 +70,35 @@ void AEnemy_Titan::OnOverlapBegin(class UPrimitiveComponent* selfComp, class AAc
 		else
 		{
 			target->ReceiveDamage(1);
+			target->DirectionalHitReact(GetActorLocation());
+			target->HitReactSounds();
 		}
 
 
 	}
+
+	AShield* shield = Cast<AShield>(otherActor);
+	if (shield != nullptr)
+	{
+		if (player != nullptr)
+		{
+
+			//플레이어를 넉백시킨다
+			FVector imp = -1 * player->GetActorForwardVector() * 3000.0f;
+			player->GetCharacterMovement()->AddImpulse(imp, true);
+
+			//플레이어의 기력 감소
+			player->CurrentStamina = FMath::Clamp(player->CurrentStamina - 20.f, player->MinStamina, player->MaxStamina);
+
+			//플레이어의 기력 회복 몇초뒤에 호출해야하는데
+			FTimerHandle ddd;
+			GetWorld()->GetTimerManager().SetTimer(ddd, this, &AEnemy_Titan::reStamina, 2.0f, false);
+		}
+	}
+
+}
+void AEnemy_Titan::reStamina()
+{
+	player->SprintTimer();
+	player->RegenerateStamina();
 }

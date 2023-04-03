@@ -28,7 +28,16 @@ UEnemy_Skeleton_FSM::UEnemy_Skeleton_FSM()
 	{
 		damageMontage = tempMontage.Object;
 	}
-
+	ConstructorHelpers::FObjectFinder<USoundBase> tempSound(TEXT("SoundWave'/Game/LJW/Enemys/sound/Demon_20.Demon_20'"));
+	if (tempSound.Succeeded())
+	{
+		SeeplayerSound = tempSound.Object;
+	}
+	ConstructorHelpers::FObjectFinder<USoundBase> tempHITSound(TEXT("SoundWave'/Game/LJW/Enemys/sound/zombie10.zombie10'"));
+	if (tempHITSound.Succeeded())
+	{
+		HITSound = tempHITSound.Object;
+	}
 }
 
 
@@ -49,8 +58,8 @@ void UEnemy_Skeleton_FSM::BeginPlay()
 
 	originPos = me->GetActorLocation();
 
-
 	me->HpWidget->UpdateCurrHP(hp, maxhp);
+
 
 }
 
@@ -103,6 +112,11 @@ void UEnemy_Skeleton_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	FVector Ddir = target->GetActorLocation() - me->GetActorLocation();
 	FVector DdirSize = Ddir;
 	Ddir.Normalize();
+	//멀어지면 체력바안보이도록 수정
+	if (DdirSize.Size() > 2000)
+	{
+		me->HpWidget->SetVisibility(false);
+	}
 	float Ddotvalue = FVector::DotProduct(me->GetActorLocation(), Ddir);
 	float Dangle = UKismetMathLibrary::DegAcos(Ddotvalue);
 	if (Dangle > 155 && DdirSize.Size() < 500)
@@ -188,6 +202,7 @@ void UEnemy_Skeleton_FSM::MoveState()
 		//UE_LOG(LogTemp, Warning, TEXT("movetorandpos"));
 		// 랜덤한 위치까지 도착한 후 Idle 상태로 전환
 		MoveToPos(randPos);
+		
 	}
 }
 
@@ -202,7 +217,7 @@ void UEnemy_Skeleton_FSM::AttackState()
 	{	me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		ChangeState(EEnemyState1::Groggy);
 	}
-	if (currTime > 2)
+	if (currTime > 1.3f)
 	{
 
 		currTime = 0;
@@ -343,11 +358,12 @@ void UEnemy_Skeleton_FSM::UpdateReturnPos()
 
 void UEnemy_Skeleton_FSM::OnDamageProcess()
 {
+	//칼,방패 충돌체 끄기
 	me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
+	me->collisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	me->HpWidget->SetVisibility(true);
 	
-
+	UGameplayStatics::PlaySound2D(GetWorld(), HITSound);
 	//if (isShield)
 	//{
 	//	UE_LOG(LogTemp, Warning, TEXT("imGuard"));
@@ -413,6 +429,15 @@ void UEnemy_Skeleton_FSM::OnDamageProcess()
 			FString sectionName = FString::Printf(TEXT("Die"));
 			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 			GetWorld()->SpawnActor<AActor>(dropFactory, me->GetActorTransform());
+			//사망효과음
+			UGameplayStatics::PlaySound2D(GetWorld(), SeeplayerSound);
+
+			AGameModeBase* CurrentMode = GetWorld()->GetAuthGameMode();
+			AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(CurrentMode);
+			if (CurrentGameModeBase != nullptr)
+			{
+				CurrentGameModeBase->AddCoins(10);
+			}
 
 		}
 		//애니메이션 상태 동기화
@@ -522,6 +547,8 @@ bool UEnemy_Skeleton_FSM::IsTargetTrace()
 		{
 			if (hitInfo.GetActor()->GetName().Contains(TEXT("Player")))
 			{
+				
+
 				return true;
 			}
 
@@ -578,11 +605,7 @@ void UEnemy_Skeleton_FSM::ChangeState(EEnemyState1 state)
 	switch (mState)
 	{
 	case EEnemyState1::Attack:
-		{//공격할때 한번만 플레이어를 확인해서 플레이어 방향으로 설정
-		//FVector des = target->GetActorLocation();
-		//FVector dir = des - me->GetActorLocation();
-		//FRotator dirx = dir.Rotation();
-		//me->SetActorRotation(dirx);
+		{
 		}
 		break;
 	case EEnemyState1::Move:
@@ -615,7 +638,7 @@ void UEnemy_Skeleton_FSM::ChangeState(EEnemyState1 state)
 
 		//충돌안되게 설정
 		me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		
+	
 
 
 
@@ -650,6 +673,7 @@ void UEnemy_Skeleton_FSM::MoveToPos(FVector pos)
 	//만약에 목적지에 도착했다면
 	if (result == EPathFollowingRequestResult::AlreadyAtGoal)
 	{
+		
 		//Idle 상태로 전환
 		ChangeState(EEnemyState1::Idle);
 	}
