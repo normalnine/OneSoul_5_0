@@ -7,6 +7,8 @@
 #include <Components/TextBlock.h>
 #include "NPC_MenuUI.h"
 #include <Blueprint/WidgetBlueprintLibrary.h>
+#include "OnsSoulPlayer.h"
+#include <Kismet/GameplayStatics.h>
 
 void UNPC_LevelupUI::NativeConstruct()
 {
@@ -14,6 +16,7 @@ void UNPC_LevelupUI::NativeConstruct()
 	_confirm->OnClicked.AddDynamic(this, &UNPC_LevelupUI::LevelUp);
 	gameInst = Cast<UOneSoulGameInstance>(GetWorld()->GetGameInstance());
 	StatusInit(gameInst->currLevel);
+	player = Cast<AOnsSoulPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AOnsSoulPlayer::StaticClass()));
 }
 
 void UNPC_LevelupUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -55,4 +58,9 @@ void UNPC_LevelupUI::LevelUp()
 	gameInst->soul -= gameInst->statusData[gameInst->currLevel].requiredSouls;
 	gameInst->currLevel++;
 	StatusInit(gameInst->currLevel);
+	player->MaxHealth = gameInst->statusData[gameInst->currLevel].maxHP;
+	player->Health = gameInst->statusData[gameInst->currLevel].maxHP;
+
+	player->MaxStamina = gameInst->statusData[gameInst->currLevel].maxStamina;
+	player->CurrentStamina = gameInst->statusData[gameInst->currLevel].maxStamina;
 }
