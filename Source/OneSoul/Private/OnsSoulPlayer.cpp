@@ -36,6 +36,8 @@
 #include "NPC_MenuUI.h"
 #include "Interactions.h"
 #include "Interactions_DialogueUI.h"
+#include "EscUI.h"
+#include "OneSoulGameInstance.h"
 AOnsSoulPlayer::AOnsSoulPlayer()
       
 {
@@ -74,8 +76,7 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	SprintSpeed = 800.f;
 	WalkSpeed = 400.f;
 
-	MaxStamina = 100.f;
-	CurrentStamina = 100.f;
+	
 	MinStamina = 0.f;
 
 	IsAttacking = false;
@@ -90,10 +91,9 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	TargetingRadius = 100.f;
 	TargetRotationInterpSpeed = 9.f;
 
-	Health = 100.f;
-	MaxHealth = 100.f;
+	
 
-	SoulNum = 0;
+	
 
 	InventorySlots = 5;
 
@@ -121,6 +121,8 @@ void AOnsSoulPlayer::BeginPlay()
 	MainInventory = CreateWidget<UUserWidget>(GetWorld(),MainInventorys);
 	MainInventory -> SetVisibility(ESlateVisibility::Collapsed);
 	MainInventory -> AddToViewport();
+
+	
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && LevelStartMontage)
@@ -155,6 +157,14 @@ void AOnsSoulPlayer::BeginPlay()
 		break;
 	}
 
+	escUI = CreateWidget<UEscUI>(GetWorld(), escUIFactory);
+	gameInst = Cast<UOneSoulGameInstance>(GetWorld()->GetGameInstance());
+	MaxStamina = gameInst->statusData[gameInst->currLevel].maxStamina;
+	CurrentStamina = MaxStamina;
+	MaxHealth = gameInst->statusData[gameInst->currLevel].maxHP;
+	Health = MaxHealth;
+	SoulNum = gameInst->soul;
+	SpawnDefaultWeapon();
 }
 
 void AOnsSoulPlayer::Tick(float DeltaTime)
@@ -169,6 +179,7 @@ void AOnsSoulPlayer::Tick(float DeltaTime)
 	{
 		DisableLockOn();
 	}
+	SoulNum = gameInst->soul;
 
 }
 
@@ -190,6 +201,7 @@ void AOnsSoulPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Attack", IE_Released, this, &AOnsSoulPlayer::LMBUP);
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &AOnsSoulPlayer::EKeyPressed);
 	PlayerInputComponent->BindAction("Cancel", IE_Pressed, this, &AOnsSoulPlayer::QkeyPressed);
+	PlayerInputComponent->BindAction("Esc", IE_Pressed, this, &AOnsSoulPlayer::EsckeyPressed);
 	PlayerInputComponent->BindAction("Healing", IE_Pressed, this, &AOnsSoulPlayer::PotionDrinking);
 	PlayerInputComponent->BindAction("WeaponChange", IE_Pressed, this, &AOnsSoulPlayer::WeaponChange);
 	PlayerInputComponent->BindAction("ToggleInventory",IE_Pressed,this,&AOnsSoulPlayer::ToggleInventory);
@@ -288,8 +300,7 @@ void AOnsSoulPlayer::Destroyed()
 	  {
 	    SpawnDefaultWeapon();
 	  }
-
-
+	  
       UGameplayStatics:: GetPlayerController(this,0) -> SetShowMouseCursor(false);
       UGameplayStatics:: GetPlayerController(this, 0) -> SetInputMode(FInputModeGameOnly());
 	}
@@ -317,7 +328,7 @@ void AOnsSoulPlayer::DirectionalHitReact(const FVector& ImpactPoint)
 
 
 	const FVector Forward = GetActorForwardVector();
-	// ÀûÀÇ ¾×ÅÍ À§Ä¡ Z¿¡ ´ëÇÑ ÇÏ´Ü Ãæ°Ý ÁöÁ¡
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ Zï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	const FVector ImpactLowered(ImpactPoint.X, ImpactPoint.Y, GetActorLocation().Z);
 	const FVector ToHit = (ImpactLowered - GetActorLocation()).GetSafeNormal();
 
@@ -549,7 +560,7 @@ void AOnsSoulPlayer::EKeyPressed()
 	if (bTalking)
 	{
 		//UE_LOG(LogTemp,Warning,TEXT("TextUpdate"));
-		npc->Dialogue();
+		npc->Talk();
 		return;
 	}
 
@@ -658,6 +669,24 @@ void AOnsSoulPlayer::EKeyPressed()
 	 }
  }
    
+ void AOnsSoulPlayer::EsckeyPressed()
+ {
+	if (escUI != nullptr)
+	{
+		if (!escUI->IsInViewport())
+		{
+			escUI->AddToViewport();
+			GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
+
+		}
+		else
+		{
+			escUI->RemoveFromParent();
+			GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(false);
+		}
+	}
+ }
+
 void AOnsSoulPlayer::SetPlayerMaxSpeed(float MaxSpeed)
 {
  GetCharacterMovement()->MaxWalkSpeed = MaxSpeed;
@@ -1103,7 +1132,7 @@ void AOnsSoulPlayer::EquipShield(AShield* shield)
 {
 
 	shield->Equip(GetMesh(), FName("hand_l"), this, this);
-	FVector NewScale = FVector(15.0f, 15.0f, 15.0f); // Å©±â¸¦ µÎ ¹è·Î ¼³Á¤ÇÕ´Ï´Ù.
+	FVector NewScale = FVector(15.0f, 15.0f, 15.0f); // Å©ï¿½â¸¦ ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Õ´Ï´ï¿½.
 	shield->SetActorRelativeScale3D(NewScale);
 	canshield = true;
 }

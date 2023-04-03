@@ -29,37 +29,38 @@ public:
 	//virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class AOnsSoulPlayer* target;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = FSMComponent)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class UEnemyBossFSM* fsm;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class UEnemyBossAnim* anim;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class UCapsuleComponent* capsuleCompHead;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class USphereComponent* sphereCompHand_L;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class USphereComponent* sphereCompHand_R;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool bOverlap = false;
 
 	// 활성 / 비활성 하는 기능
+	UFUNCTION(BlueprintCallable)
 	void SetActive(bool bActive);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void BeginOverlapHead(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResul);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 		void BeginOverlapLeftHand(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResul);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 		void BeginOverlapRightHand(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResul);
 
 // 	UFUNCTION()

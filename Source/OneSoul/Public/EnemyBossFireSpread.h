@@ -29,18 +29,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USceneComponent* compScene;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class AEnemyBoss* enemy;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf <class AActor> collision;
 
 // 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 // 	class UNiagaraComponent* niagara;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float currTime = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float stopTime = 4.0f;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float delayTime = 0;
 		
 };

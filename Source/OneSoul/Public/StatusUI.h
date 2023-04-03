@@ -20,7 +20,9 @@ protected:
 public:
 	UPROPERTY(EditAnywhere)
 	class UOneSoulGameInstance* gameInst;
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
+	class UTextBlock* _nickname;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	class UTextBlock* _currLevel;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
@@ -40,6 +42,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	class UTextBlock* _maxStamina;
 	
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void StatusInit(int32 currLevel);
 };

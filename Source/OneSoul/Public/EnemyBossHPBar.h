@@ -19,28 +19,28 @@ public:
 
 
 public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UProgressBar* currHPBar;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UProgressBar* currHPBar2;
 
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* _accumulatedDamage;
 
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* _bossName;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class AEnemyBoss* me;
 
 public:
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void UpdateCurrHP(float curr, float max);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void UpdateBackCurrHP(float curr, float max);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void UpdateAccumulatedDamage(float damage);
 };

@@ -76,18 +76,7 @@ void UEnemyBossFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 		UpdateAttack();
 		break;
 	case EEnemyBossState::AttackDelay:
-	{	
-// 		currrotateDelayTime += DeltaTime;
-// 		if (currrotateDelayTime > rotateDelayTime)
- 		{
-			FVector dir = target->GetActorLocation() - me->GetActorLocation();
-			dir.Normalize();
-			FRotator targetRotation = FRotationMatrix::MakeFromX(dir).Rotator();
-			FRotator NewRotation = FMath::RInterpTo(me->GetActorRotation(), targetRotation, DeltaTime, 1.0f);
-			me->SetActorRotation(NewRotation);
-		}
-		UpdaetAttackDelay();
-	}
+		UpdaetAttackDelay();	
 		break;
 	case EEnemyBossState::Damaged:
 		UpdateDamaged();
@@ -95,9 +84,9 @@ void UEnemyBossFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	case EEnemyBossState::Die:
 		UpdateDie();
 		break;
-	case EEnemyBossState::ReturnPos:
-		UpdateReturnPos();
-		break;
+// 	case EEnemyBossState::ReturnPos:
+// 		UpdateReturnPos();
+// 		break;
 	}
 }
 
@@ -128,18 +117,19 @@ void UEnemyBossFSM::UpdateMove()
 	//1. 타겟을 향하는 방향을 구하고(target - me)
 	FVector dir = target->GetActorLocation() - me->GetActorLocation();
 
-	//처음 위치, 나의 현재 위치의 거리
-	float dist = FVector::Distance(originPos, me->GetActorLocation());
-
-	//만약에 dist 가 moveRange 보다 커지면 (움직일 수 있는 반경을 넘어갔다면)
-	if (dist > moveRange)
-	{
-		//상태를 ReturnPos 로 변경
-		UE_LOG(LogTemp, Warning, TEXT("ReturnPos"));
-		ChangeState(EEnemyBossState::ReturnPos);
-	}
-	//만약에 시야에 들어왔다면
-	else if (bTrace)
+// 	//처음 위치, 나의 현재 위치의 거리
+// 	float dist = FVector::Distance(originPos, me->GetActorLocation());
+// 
+// 	//만약에 dist 가 moveRange 보다 커지면 (움직일 수 있는 반경을 넘어갔다면)
+// // 	if (dist > moveRange)
+// // 	{
+// // 		//상태를 ReturnPos 로 변경
+// // 		UE_LOG(LogTemp, Warning, TEXT("ReturnPos"));
+// // 		ChangeState(EEnemyBossState::ReturnPos);
+// // 	}
+// 	//만약에 시야에 들어왔다면
+// 	else if (bTrace)
+	if (bTrace)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("bTrace"));
 // 		if (dist < avoidRange)
@@ -156,10 +146,13 @@ void UEnemyBossFSM::UpdateMove()
 		//그렇지 않으면
 		else
 		{
+			UE_LOG(LogTemp, Warning, TEXT("AddMovementInput"));
+
 			//2. 그 방향으로 이동하고 싶다.
-			//me->AddMovementInput(dir.GetSafeNormal());
+			me->AddMovementInput(dir.GetSafeNormal());
+			//me->SetActorRotation()
 			//ai 를 이용해서 목적지까지 이동하고 싶다.	
-			ai->MoveToLocation(target->GetActorLocation());
+			//ai->MoveToLocation(target->GetActorLocation());
 		}
 	}
 	//시야에 들어오지 않았다면
@@ -167,6 +160,7 @@ void UEnemyBossFSM::UpdateMove()
 	{
 		
 		// 랜덤한 위치까지 도착한 후 Idle 상태로 전환
+		UE_LOG(LogTemp, Warning, TEXT("randPos"));
 		MoveToPos(randPos);
 	}
 
@@ -200,6 +194,11 @@ void UEnemyBossFSM::UpdaetAttackDelay()
 			ChangeState(EEnemyBossState::Idle);
 		}
 	}
+	FVector dir = target->GetActorLocation() - me->GetActorLocation();
+	dir.Normalize();
+	FRotator targetRotation = FRotationMatrix::MakeFromX(dir).Rotator();
+	FRotator NewRotation = FMath::RInterpTo(me->GetActorRotation(), targetRotation, GetWorld()->DeltaTimeSeconds, 1.0f);
+	me->SetActorRotation(NewRotation);
 }
 
 void UEnemyBossFSM::UpdateDamaged()
@@ -229,8 +228,9 @@ void UEnemyBossFSM::UpdateDie()
 	//2. 만약에 p.Z 가 -200 보다 작으면 파괴한다
 	if (p.Z < -200)
 	{
+		gameInst->npcState = ENPCState::Complete;
 		me->Destroy();
-
+		
 		//나를 비활성화
 		//me->SetActive(false);
 		////EnemyManager 찾자
@@ -438,9 +438,14 @@ bool UEnemyBossFSM::IsTargetTrace()
 		if (EnemyBossHPBar == nullptr)
 		{
 			EnemyBossHPBar = CreateWidget<UEnemyBossHPBar>(GetWorld(), EnemyBossHPBarFactory);
-			EnemyBossHPBar->AddToViewport();
-			EnemyBossHPBar->UpdateCurrHP(currHP, maxHP);
-			EnemyBossHPBar->UpdateBackCurrHP(currHP, maxHP);
+			if (EnemyBossHPBar != nullptr)
+			{
+
+				EnemyBossHPBar->AddToViewport();
+				EnemyBossHPBar->UpdateCurrHP(currHP, maxHP);
+				EnemyBossHPBar->UpdateBackCurrHP(currHP, maxHP);
+
+			}
 
 		}
 
@@ -551,16 +556,19 @@ void UEnemyBossFSM::InitAttackPattern()
 
 void UEnemyBossFSM::SpawnFireball()
 {
+	if(bGroggy || bDieMove) return;
 	AEnemyBossFireball* fireball = GetWorld()->SpawnActor<AEnemyBossFireball>(FireballFactory, me->GetMesh()->GetSocketTransform(TEXT("MOUNTAIN_DRAGON_-Ponytail1Socket")));
 }
 
 void UEnemyBossFSM::SpawnFireSpread()
 {
+	if(bGroggy || bDieMove) return;
 	AEnemyBossFireSpread* fireSpread = GetWorld()->SpawnActor<AEnemyBossFireSpread>(FireSpreadFactory, me->GetMesh()->GetSocketTransform(TEXT("MOUNTAIN_DRAGON_-Ponytail1Socket")));	
 }
 
 void UEnemyBossFSM::SpawnLaser()
 {
+	if(bGroggy || bDieMove) return;
 	AEnemyBossLaser* Laser = GetWorld()->SpawnActor<AEnemyBossLaser>(LaserFactory, me->GetMesh()->GetSocketTransform(TEXT("MOUNTAIN_DRAGON_-Ponytail1Socket")));
 }
 
@@ -580,6 +588,8 @@ void UEnemyBossFSM::ResetDamageIfNoRecentDamage()
 
 void UEnemyBossFSM::SpawnGhost()
 {
+	if(bGroggy) return;
+
 	FTransform trans = me->GetActorTransform();
 
 	

@@ -142,6 +142,7 @@ void AEnemyBoss::BeginOverlapHead(UPrimitiveComponent* OverlappedComponent, AAct
 		if (target != nullptr)
 		{
 			target->ReceiveDamage(10);
+			target->DirectionalHitReact(GetActorLocation());
 		}
 		bOverlap = false;
 	}
@@ -156,6 +157,8 @@ void AEnemyBoss::BeginOverlapLeftHand(UPrimitiveComponent* OverlappedComponent, 
 		if (target != nullptr)
 		{
 			target->ReceiveDamage(10);
+			target->DirectionalHitReact(GetActorLocation());
+
 		}
 		bOverlap = false;
 	}
@@ -170,6 +173,8 @@ void AEnemyBoss::BeginOverlapRightHand(UPrimitiveComponent* OverlappedComponent,
 		if (target != nullptr)
 		{
 			target->ReceiveDamage(10);
+			target->DirectionalHitReact(GetActorLocation());
+
 		}
 		bOverlap = false;
 	}

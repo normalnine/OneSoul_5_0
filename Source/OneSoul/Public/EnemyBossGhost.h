@@ -23,29 +23,31 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USphereComponent* sphereComp;
 
 // 	UPROPERTY(EditAnywhere)
 // 	class UStaticMeshComponent* meshComp;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class AOnsSoulPlayer* target;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UParticleSystemComponent* particle;
 
 
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector dir;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float traceTime = 3.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float currTime = 0;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void BeginOverlapGhost(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResul);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void EndOverlapGhost(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 };

@@ -19,76 +19,76 @@ public:
 	virtual void NativeBeginPlay() override;
 
 public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class AEnemyBoss* enemy;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		EEnemyBossState state;
 
 	// 공격 상태 재생할지 여부
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = FSM)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FSM)
 		bool bAttackPlay0 = false;
 
 	// 공격 상태 재생할지 여부
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = FSM)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FSM)
 		bool bAttackPlay1 = false;
 
 	// 공격 상태 재생할지 여부
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = FSM)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FSM)
 		bool bAttackPlay2 = false;
 
 	// 공격 상태 재생할지 여부
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = FSM)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FSM)
 		bool bAttackPlay3 = false;
 
 	// 공격 상태 재생할지 여부
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = FSM)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FSM)
 		bool bAttackPlay4 = false;
 
 	// 공격 상태 재생할지 여부
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = FSM)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FSM)
 		bool bAttackPlay5 = false;
 
 	// 공격 상태 재생할지 여부
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = FSM)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FSM)
 		bool bAttackPlay6 = false;
 
 	// 공격 상태 재생할지 여부
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = FSM)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FSM)
 		bool bAttackPlay7 = false;
 
 	// 공격 상태 재생할지 여부
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = FSM)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FSM)
 		bool bAttackPlay8 = false;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 		void AnimNotify_DieEnd();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 		void AnimNotify_AttackStartHead();
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 		void AnimNotify_AttackStartLeftHand();
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 		void AnimNotify_AttackStartRightHand();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 		void AnimNotify_AttackEndHead();
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 		void AnimNotify_AttackEndLeftHand();
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 		void AnimNotify_AttackEndRightHand();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 		void AnimNotify_Fireball();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 		void AnimNotify_FireSpread();	
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 		void AnimNotify_Laser();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 		void AnimNotify_Ghost();
 
-		UFUNCTION()
+		UFUNCTION(BlueprintCallable)
 		void AnimNotify_Roar();
 };

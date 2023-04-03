@@ -37,21 +37,41 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UImage* image_back;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UImage* image_quest;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UVerticalBox* vb_quest;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UButton* btn_yes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UButton* btn_no;
 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class AOnsSoulPlayer* player;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UOneSoulGameInstance* gameInst;
 
 
-	UFUNCTION()
+
+	UFUNCTION(BlueprintCallable)
 	void LevelUp();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void Talk();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void Leave();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void PlayerInputEnable();
 
+	UFUNCTION(BlueprintCallable)
+	void Yes();	
+	UFUNCTION(BlueprintCallable)
+	void No();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool binding = true;
 };

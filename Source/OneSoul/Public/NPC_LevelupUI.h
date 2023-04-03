@@ -21,9 +21,11 @@ public:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 public:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UOneSoulGameInstance* gameInst;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
+	class UTextBlock* _nickname;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	class UTextBlock* _currLevel;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
@@ -53,10 +55,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	class UButton* _confirm;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void StatusInit(int32 currLevel);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void LevelUp();
 
 

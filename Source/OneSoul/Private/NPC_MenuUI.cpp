@@ -10,6 +10,8 @@
 #include <Components/TextBlock.h>
 #include <Components/VerticalBox.h>
 #include <Components/Image.h>
+#include "NPC.h"
+#include "OneSoulGameInstance.h"
 
 void UNPC_MenuUI::NativeConstruct()
 {
@@ -20,8 +22,11 @@ void UNPC_MenuUI::NativeConstruct()
 		btn_levelup->OnClicked.AddDynamic(this, &UNPC_MenuUI::LevelUp);
 		btn_talk->OnClicked.AddDynamic(this, &UNPC_MenuUI::Talk);
 		btn_leave->OnClicked.AddDynamic(this, &UNPC_MenuUI::Leave);
+		btn_yes->OnClicked.AddDynamic(this, &UNPC_MenuUI::Yes);
+		btn_no->OnClicked.AddDynamic(this, &UNPC_MenuUI::No);
 
 		player = Cast<AOnsSoulPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AOnsSoulPlayer::StaticClass()));
+		gameInst = Cast<UOneSoulGameInstance>(GetWorld()->GetGameInstance());
 
 		binding = false;
 	}
@@ -62,4 +67,18 @@ void UNPC_MenuUI::PlayerInputEnable()
 	PlayerController->SetIgnoreLookInput(false);
 	PlayerController->SetIgnoreMoveInput(false);
 	UE_LOG(LogTemp,Warning,TEXT("PlayerInputEnable"));
+}
+
+void UNPC_MenuUI::Yes()
+{
+	No();
+	gameInst->npcState = ENPCState::Incomplete;
+}
+
+void UNPC_MenuUI::No()
+{
+	vb_menuBox->SetVisibility(ESlateVisibility::Visible);
+	vb_quest->SetVisibility(ESlateVisibility::Hidden);
+	image_back->SetVisibility(ESlateVisibility::Visible);
+	image_quest->SetVisibility(ESlateVisibility::Hidden);
 }
