@@ -164,7 +164,6 @@ void AOnsSoulPlayer::BeginPlay()
 	MaxHealth = gameInst->statusData[gameInst->currLevel].maxHP;
 	Health = MaxHealth;
 	SoulNum = gameInst->soul;
-	SpawnDefaultWeapon();
 }
 
 void AOnsSoulPlayer::Tick(float DeltaTime)
