@@ -140,6 +140,8 @@ public:
 	float TmpDmg;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	int32 InventorySlots;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dead")
+	bool IsDead = false;
 
 	FTimerHandle HitReactTimer;
 
@@ -373,8 +375,8 @@ public:
    bool isMoveF = false;
    UPROPERTY(EditAnywhere)
    bool isMoveR = false;
-   UPROPERTY(VisibleAnywhere)
-	   UCameraComponent* Camera;
+   UPROPERTY(VisibleAnywhere,BlueprintReadWrite)
+   UCameraComponent* Camera;
    void notMoveF();
    void notMoveR();
    void Jumpp();

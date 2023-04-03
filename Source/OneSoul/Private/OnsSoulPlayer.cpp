@@ -284,7 +284,11 @@ void AOnsSoulPlayer::Destroyed()
 	{
 	  CurrentGameModeBase-> ReSpawnPlayer(this); 
 
-	 SpawnDefaultWeapon();
+	  if (IsDead == true)
+	  {
+	    SpawnDefaultWeapon();
+	  }
+
 
       UGameplayStatics:: GetPlayerController(this,0) -> SetShowMouseCursor(false);
       UGameplayStatics:: GetPlayerController(this, 0) -> SetInputMode(FInputModeGameOnly());
@@ -855,6 +859,8 @@ void AOnsSoulPlayer::Die()
 {
 
 	Tags.Add(FName("Dead"));
+
+	IsDead = true;
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && DeathMontage)
