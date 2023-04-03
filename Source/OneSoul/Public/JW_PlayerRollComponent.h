@@ -29,6 +29,7 @@ public:
 		UAnimMontage* BackStep;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool re = true;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool ba = true;
 
 };

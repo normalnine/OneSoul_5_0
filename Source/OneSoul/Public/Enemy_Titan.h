@@ -25,11 +25,11 @@ public:
 
 
 	//충돌 컴포넌트
-	UPROPERTY(VisibleAnywhere, Category = Collision)
+	UPROPERTY(VisibleAnywhere,BlueprintReadWrite, Category = Collision)
 		class UCapsuleComponent* LcollisionComp;
 
 	//충돌 컴포넌트
-	UPROPERTY(VisibleAnywhere, Category = Collision)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Collision)
 		class UCapsuleComponent* RcollisionComp;
 
 
@@ -52,5 +52,11 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		class UEnemy_HpBar_WidgetComponent* HpWidget;
+
+	//타깃
+	UPROPERTY(VisibleAnywhere, Category = FSM)
+		class AOnsSoulPlayer* player;
+	//플레이어 스테미나 회복
+	void reStamina();
 
 };

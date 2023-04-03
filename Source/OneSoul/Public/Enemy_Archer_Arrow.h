@@ -40,4 +40,10 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float RotationRate = 0.3f;
+
+	//Å¸±ê
+	UPROPERTY(VisibleAnywhere, Category = FSM)
+		class AOnsSoulPlayer* player;
+
+		void reStamina();
 };

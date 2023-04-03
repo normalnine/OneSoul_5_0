@@ -82,4 +82,8 @@ public:
 
 	//몸의 콜리전을 다시 키는함수
 	void oncoll();
+
+	//방패에 플레이어 칼 맞았을때 효과음
+	UPROPERTY(EditDefaultsOnly, Category = Sound)
+		class USoundBase* blockSound;
 };

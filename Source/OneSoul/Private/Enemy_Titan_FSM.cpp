@@ -25,7 +25,11 @@ UEnemy_Titan_FSM::UEnemy_Titan_FSM()
 	{
 		damageMontage = tempMontage.Object;
 	}
-
+	ConstructorHelpers::FObjectFinder<USoundBase> tempHITSound(TEXT("SoundWave'/Game/LJW/Enemys/sound/zombie10.zombie10'"));
+	if (tempHITSound.Succeeded())
+	{
+		HITSound = tempHITSound.Object;
+	}
 }
 
 
@@ -104,6 +108,12 @@ void UEnemy_Titan_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	Ddir.Normalize();
 	float Ddotvalue = FVector::DotProduct(me->GetActorLocation(), Ddir);
 	float Dangle = UKismetMathLibrary::DegAcos(Ddotvalue);
+	//멀어지면 체력바안보이도록 수정
+	if (DdirSize.Size() > 2000)
+	{
+		me->HpWidget->SetVisibility(false);
+	}
+	//뒷각인지 확인하는거
 	if (Dangle > 155 && DdirSize.Size() < 500)
 	{
 		Hitback = true;
@@ -232,14 +242,15 @@ void UEnemy_Titan_FSM::movetoPlayer()
 
 void UEnemy_Titan_FSM::AttackState()
 {
-	//몬스터가 플레이어 방향으로 공격하도록 하는 거
+	//몬스터가 플레이어 방향으로 공격하도록 하는 거 안함
 	FVector des = target->GetActorLocation();
 	FVector dir = des - me->GetActorLocation();
 	FRotator dirx = dir.Rotation();
 	//me->SetActorRotation(dirx);
 
-	me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	//애니메이션에서 끄고 키는걸로 수정
+	/*me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);*/
 
 	if (me->changeGroggy)
 	{
@@ -266,8 +277,9 @@ void UEnemy_Titan_FSM::AttackState1()
 	//FRotator dirx = dir.Rotation();
 	//me->SetActorRotation(dirx);
 
-	me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	//애니메이션에서 끄고 키는걸로 수정
+	/*me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);*/
 
 	currTime += GetWorld()->DeltaTimeSeconds;
 
@@ -292,8 +304,9 @@ void UEnemy_Titan_FSM::AttackState2()
 	//FRotator dirx = dir.Rotation();
 	//me->SetActorRotation(dirx);
 
-	me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	//애니메이션에서 끄고 키는걸로 수정
+	/*me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);*/
 
 	currTime += GetWorld()->DeltaTimeSeconds;
 
@@ -318,8 +331,9 @@ void UEnemy_Titan_FSM::AttackState3()
 	//FRotator dirx = dir.Rotation();
 	//me->SetActorRotation(dirx);
 
-	me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	//애니메이션에서 끄고 키는걸로 수정
+	/*me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);*/
 
 	currTime += GetWorld()->DeltaTimeSeconds;
 
@@ -385,7 +399,7 @@ void UEnemy_Titan_FSM::UpdaetAttackDelay()
 			{ChangeState(EEnemyState4::Attack1);}
 			else if(index ==1)
 			{ChangeState(EEnemyState4::Attack2);}
-			else
+			else if(index ==2)
 			{ChangeState(EEnemyState4::Attack3);}
 			
 		}
@@ -449,16 +463,19 @@ void UEnemy_Titan_FSM::OnDamageProcess()
 
 			//체력이 절반이면 2페이즈 진입
 			if (hp<10 && shout == true)
-			{
+			{	
 				UE_LOG(LogTemp, Warning, TEXT("2page"));
 				//몽타주실행
 				FString sectionName = FString::Printf(TEXT("Shout"));
 				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
-				
-				mState = EEnemyState4::MovetoTarget;
+				//슈퍼아머상태로 변경
+				superArmor=true;
+				//한번만 실행하려고 폴스로 바꿈
+				shout=false;
+				mState = EEnemyState4::AttackDelay;
 			}
 			//뒷각에서 맞았을때
-			if (Hitback)
+			if (Hitback&&!superArmor)
 			{
 				//몽타주실행
 				FString sectionName = FString::Printf(TEXT("Cri"));
@@ -469,9 +486,10 @@ void UEnemy_Titan_FSM::OnDamageProcess()
 			//슈퍼아머 상태가 아닐때, 즉 일반 피격모션
 			if (!(superArmor))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("damage"));
-			FString sectionName = FString::Printf(TEXT("Damage0"));
-			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+				//효과음재생
+				UGameplayStatics::PlaySound2D(GetWorld(), HITSound);
+				FString sectionName = FString::Printf(TEXT("Damage0"));
+				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 
 			//상태를 피격으로 전환
 			mState = EEnemyState4::Damage;
@@ -489,6 +507,12 @@ void UEnemy_Titan_FSM::OnDamageProcess()
 			FString sectionName = FString::Printf(TEXT("Die"));
 			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 			GetWorld()->SpawnActor<AActor>(dropFactory, me->GetActorTransform());
+			AGameModeBase* CurrentMode = GetWorld()->GetAuthGameMode();
+			AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(CurrentMode);
+			if (CurrentGameModeBase != nullptr)
+			{
+				CurrentGameModeBase->AddCoins(10);
+			}
 		}
 		//애니메이션 상태 동기화
 		anim->animState = mState;
@@ -542,7 +566,7 @@ bool UEnemy_Titan_FSM::IsTargetTrace()
 	float angle = UKismetMathLibrary::DegAcos(dotvalue);
 
 	//구한 값이 40보다 작고 적과 플레이어와의 거리가 지정한 거리보다 작으면
-	if (angle < 50 && dirSize.Size() < traceRange)
+	if (angle < 90 && dirSize.Size() < traceRange)
 	{
 
 

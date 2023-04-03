@@ -8,6 +8,7 @@
 #include "OnsSoulPlayer.h"
 #include <Kismet/GameplayStatics.h>
 #include "Enemy_Skeleton.h"
+#include "Enemy_Archer_Arrow.h"
 
 AShield::AShield()
 {
@@ -28,6 +29,24 @@ void AShield::Tick(float DeltaTime)
 	{
 	shieldcomp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
+
+	//if (reS)
+	//{
+	///*	UE_LOG(LogTemp, Warning, TEXT("reStamina1"));*/
+	//	currTime += GetWorld()->DeltaTimeSeconds;
+
+	//	//스테미나 호출하기
+	//	if (currTime > 1)
+	//	{
+	//		UE_LOG(LogTemp, Warning, TEXT("reStamina2"));
+	//		//플레이어의 기력 회복 호출해야하는데
+	//		reStamina();
+	//		currTime = 0;
+	//		reS = false;
+
+	//	}
+	//}
+	
 }
 
 void AShield::BeginPlay()
@@ -62,6 +81,8 @@ void AShield::AttachMeshToSocket(USceneComponent* InParent, const FName& InSocke
 
 void AShield::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OthrActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	
+
 	//몬스터를 캐스팅 
 	AEnemy_Skeleton* enemy1 = Cast<AEnemy_Skeleton>(OthrActor);
 	if (enemy1 != nullptr)
@@ -71,4 +92,29 @@ void AShield::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OthrAc
 		player->GetCharacterMovement()->AddImpulse(imp, true);
 	}
 
+
+	AEnemy_Archer_Arrow* arrow = Cast<AEnemy_Archer_Arrow>(OthrActor);
+	if (arrow != nullptr)
+	{
+		//공격을 막고 2초뒤에 기력을 채우기 위해 공격을 막을때마다 시간을 초기화
+		
+		UE_LOG(LogTemp, Warning, TEXT("shield?"));
+
+		FTimerHandle aaa;
+		GetWorld()->GetTimerManager().SetTimer(aaa, this, &AShield::reStamina, 1.0f, false);
+		
+	}
+
+}
+
+void AShield::noshield()
+{	
+	//쉴들 해지하려는 함수였는데 방법을 모르겠음
+	//player->DetachFromActor(shieldcomp);
+}
+void AShield::reStamina()
+{
+	
+	player->StopSprint();
+	player->RegenerateStamina();
 }

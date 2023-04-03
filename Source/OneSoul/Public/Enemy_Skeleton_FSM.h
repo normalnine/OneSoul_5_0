@@ -185,4 +185,12 @@ public:
 
 	int32 timerCount = 0;
 	FTimerHandle ddd;
+
+	//사망 효과음
+	UPROPERTY(EditDefaultsOnly, Category = Sound)
+		class USoundBase* SeeplayerSound;
+	//피격 효과음
+	UPROPERTY(EditDefaultsOnly, Category = Sound)
+		class USoundBase* HITSound;
+
 };

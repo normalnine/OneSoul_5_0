@@ -48,6 +48,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	int32 currLevel = 0;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	int32 soul = 1000;
 };

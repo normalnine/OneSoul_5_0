@@ -80,6 +80,12 @@ AEnemy_Skeleton::AEnemy_Skeleton()
 	//몬스터 캡슐에 칼이 맞으면
 	UCapsuleComponent* mycapsule = GetCapsuleComponent();
 	mycapsule->OnComponentBeginOverlap.AddDynamic(this, &AEnemy_Skeleton::OnOverlapME);
+
+	ConstructorHelpers::FObjectFinder<USoundBase> tempbSound(TEXT("SoundWave'/Game/LJW/Enemys/sound/070_Equip_10.070_Equip_10'"));
+	if (tempbSound.Succeeded())
+	{
+		blockSound = tempbSound.Object;
+	}
 	
 }
 
@@ -123,7 +129,11 @@ void AEnemy_Skeleton::OnOverlapBeginsword(class UPrimitiveComponent* selfComp, c
 			GetWorld()->SpawnActor<AActor>(effectfactory1, SwordCollisionComp->GetRelativeTransform(), params);
 			}
  			else
- 			{target->ReceiveDamage(1);}
+ 			{
+				target->ReceiveDamage(1);
+				target->DirectionalHitReact(GetActorLocation());
+				target->HitReactSounds();
+			}
  		
  
  		}
@@ -135,7 +145,11 @@ void AEnemy_Skeleton::OnOverlapBeginsword(class UPrimitiveComponent* selfComp, c
 			
 			FString sectionName = FString::Printf(TEXT("thing"));
 			PlayAnimMontage(fsm->damageMontage, 1.0f, FName(*sectionName));
-
+			//칼 방패 충돌체 끄기
+			SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			collisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			//효과음 발생
+			UGameplayStatics::PlaySound2D(GetWorld(), blockSound);
 
 			FActorSpawnParameters params;
 			params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -178,6 +192,9 @@ void AEnemy_Skeleton::OnOverlapBeginshield(class UPrimitiveComponent* selfComp, 
 		//방패에 맞으면 몸의 콜리전을 잠시 끄고 다시 키는거 - 방패 맞고 몸맞아서 따블로 맞으면 안되니까
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		
+		//효과음 발생
+		UGameplayStatics::PlaySound2D(GetWorld(), blockSound);
+
 		//UE_LOG(LogTemp, Warning, TEXT("imGuard"));
 		FString sectionName = FString::Printf(TEXT("Block"));
 		PlayAnimMontage(fsm->damageMontage, 1.0f, FName(*sectionName));

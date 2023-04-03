@@ -30,6 +30,17 @@ UEnemy_Magician_FSM::UEnemy_Magician_FSM()
 	{
 		damageMontage = tempMontage.Object;
 	}
+
+	ConstructorHelpers::FObjectFinder<USoundBase> tempSound(TEXT("SoundWave'/Game/LJW/Enemys/sound/Demon_20.Demon_20'"));
+	if (tempSound.Succeeded())
+	{
+		SeeplayerSound = tempSound.Object;
+	}
+	ConstructorHelpers::FObjectFinder<USoundBase> tempHITSound(TEXT("SoundWave'/Game/LJW/Enemys/sound/zombie10.zombie10'"));
+	if (tempHITSound.Succeeded())
+	{
+		HITSound = tempHITSound.Object;
+	}
 }
 
 
@@ -92,6 +103,12 @@ void UEnemy_Magician_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	Ddir.Normalize();
 	float Ddotvalue = FVector::DotProduct(me->GetActorLocation(), Ddir);
 	float Dangle = UKismetMathLibrary::DegAcos(Ddotvalue);
+	//멀어지면 체력바안보이도록 수정
+	if (DdirSize.Size() > 2000)
+	{
+		me->HpWidget->SetVisibility(false);
+	}
+
 	if (Dangle > 155 && DdirSize.Size() < 500)
 	{
 		Hitback = true;
@@ -238,11 +255,17 @@ void UEnemy_Magician_FSM::DamageState()
 		Hitback = false;
 	}
 	//damageDelayTime 이 지나면
-	if (IsWaitComplete(damageDelayTime))
+	currTime += GetWorld()->DeltaTimeSeconds;
+
+
+	if (currTime > 2)
 	{
-		//Move 상태
+
+		currTime = 0;
+
 		ChangeState(EEnemyState3::Idle);
 	}
+		
 }
 void UEnemy_Magician_FSM::DieState()
 {
@@ -278,8 +301,9 @@ void UEnemy_Magician_FSM::UpdateReturnPos()
 }
 void UEnemy_Magician_FSM::OnDamageProcess()
 {
-	UE_LOG(LogTemp, Warning, TEXT("IMHIT"));
-
+	//피격효과음
+	UGameplayStatics::PlaySound2D(GetWorld(), HITSound);
+	//체력 위젯 보이도록
 	me->HpWidget->SetVisibility(true);
 	//체력감소
 	//hp -= damage;
@@ -321,7 +345,15 @@ void UEnemy_Magician_FSM::OnDamageProcess()
 		FString sectionName = FString::Printf(TEXT("Die"));
 		me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 		GetWorld()->SpawnActor<AActor>(dropFactory, me->GetActorTransform());
+		//사망효과음
+		UGameplayStatics::PlaySound2D(GetWorld(), SeeplayerSound);
 
+		AGameModeBase* CurrentMode = GetWorld()->GetAuthGameMode();
+		AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(CurrentMode);
+		if (CurrentGameModeBase != nullptr)
+		{
+			CurrentGameModeBase->AddCoins(10);
+		}
 	}
 	//애니메이션 상태 동기화
 	anim->animState = mState;
@@ -440,13 +472,13 @@ bool UEnemy_Magician_FSM::IsWaitComplete(float delayTime)
 void UEnemy_Magician_FSM::ChangeState(EEnemyState3 state)
 {
 	//상태 변경 로그를 출력하자
-	//UEnum* enumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EEnemyState"), true);
-	//if (enumPtr != nullptr)
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("%s -----> %s"),
-	//		*enumPtr->GetNameStringByIndex((int32)mState),
-	//		*enumPtr->GetNameStringByIndex((int32)state));
-	//}
+	/*UEnum* enumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EEnemyState"), true);
+	if (enumPtr != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s -----> %s"),
+			*enumPtr->GetNameStringByIndex((int32)mState),
+			*enumPtr->GetNameStringByIndex((int32)state));
+	}*/
 
 	//현재 상태를 갱신
 	mState = state;

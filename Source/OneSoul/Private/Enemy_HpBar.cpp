@@ -12,7 +12,7 @@ void UEnemy_HpBar::NativeConstruct()
 }
 void UEnemy_HpBar::UpdateCurrHP(float curr, float max)
 {
-	UE_LOG(LogTemp, Warning, TEXT("4"));
+	//UE_LOG(LogTemp, Warning, TEXT("4"));
 	//hp 를 0 ~ 1 사이로 표현
 	float hp = curr / max;
 

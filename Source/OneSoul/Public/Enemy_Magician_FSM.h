@@ -180,4 +180,12 @@ public:
 		//소울스폰
 		UPROPERTY(EditDefaultsOnly, Category = dropFactory)
 			TSubclassOf<class AActor> dropFactory;
+
+		//사망 효과음
+		UPROPERTY(EditDefaultsOnly, Category = Sound)
+			class USoundBase* SeeplayerSound;
+
+		//피격 효과음
+		UPROPERTY(EditDefaultsOnly, Category = Sound)
+			class USoundBase* HITSound;
 };

@@ -35,9 +35,14 @@ public:
 			const FHitResult& SweepResult);
 
 	UPROPERTY(EditAnywhere)
-	UCapsuleComponent* shieldcomp;
+	class UCapsuleComponent* shieldcomp;
 
 	//Å¸±ê
 	UPROPERTY(VisibleAnywhere, Category = FSM)
 		class AOnsSoulPlayer* player;
+
+		void noshield();
+		void reStamina();
+		int32 currTime = 0;
+		bool reS = false;
 };
