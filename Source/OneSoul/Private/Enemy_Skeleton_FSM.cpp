@@ -14,6 +14,8 @@
 #include <NavigationSystem.h>
 #include <Kismet/KismetMathLibrary.h>
 #include "OnsSoulPlayer.h"
+#include "../OneSoulGameMode.h"
+#include <Components/SphereComponent.h>
 
 
 // Sets default values for this component's properties
@@ -362,7 +364,6 @@ void UEnemy_Skeleton_FSM::OnDamageProcess()
 	me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	me->collisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	me->HpWidget->SetVisibility(true);
-	
 	UGameplayStatics::PlaySound2D(GetWorld(), HITSound);
 	//if (isShield)
 	//{
@@ -438,7 +439,7 @@ void UEnemy_Skeleton_FSM::OnDamageProcess()
 			{
 				CurrentGameModeBase->AddCoins(10);
 			}
-
+			
 		}
 		//애니메이션 상태 동기화
 		anim->animState = mState;

@@ -54,6 +54,8 @@ public:
 	class UTextBlock* _afterMaxStamina;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	class UButton* _confirm;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class AOnsSoulPlayer* player;
 
 	UFUNCTION(BlueprintCallable)
 	void StatusInit(int32 currLevel);
