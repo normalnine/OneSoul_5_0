@@ -15,7 +15,7 @@ class ONESOUL_API UEnemy_HpBar_WidgetComponent : public UWidgetComponent
 	GENERATED_BODY()
 public:
 	UPROPERTY()
-	UEnemy_HpBar* HpWidget;
+	class UEnemy_HpBar* HpWidget;
 
 	void UpdateCurrHP(float curr, float max);
 };

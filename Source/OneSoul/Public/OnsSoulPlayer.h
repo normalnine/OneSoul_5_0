@@ -276,6 +276,7 @@ protected:
 	void LMBUP();
 	void EKeyPressed();
 	void QkeyPressed();
+	void EsckeyPressed();
 	void PotionDrinking();
 	void WeaponChange();
 	void ToggleInventory();
@@ -392,6 +393,10 @@ public:
    bool bTalking = false;
    class ANPC* npc;
    class AInteractions* interaction;
+   UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class UEscUI> escUIFactory;
+	class UEscUI* escUI;
+	class UOneSoulGameInstance* gameInst;
 
    AController* MeController;
 
