@@ -192,5 +192,11 @@ public:
 	//피격 효과음
 	UPROPERTY(EditDefaultsOnly, Category = Sound)
 		class USoundBase* HITSound;
+	//색바꾸려는 변수
+	class UMaterialInstanceDynamic* mat;
 
+	//원래색으로 돌아가는 함수
+	void ColorOff();
+	//색깔 나오는 시간 핸들
+	FTimerHandle colorHandle;
 };

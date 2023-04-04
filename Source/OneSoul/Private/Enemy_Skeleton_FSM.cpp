@@ -62,6 +62,9 @@ void UEnemy_Skeleton_FSM::BeginPlay()
 
 	me->HpWidget->UpdateCurrHP(hp, maxhp);
 
+	mat = UMaterialInstanceDynamic::Create(me->GetMesh()->GetMaterial(0), this);
+
+	me->GetMesh()->SetMaterial(0, mat);
 
 }
 
@@ -210,7 +213,7 @@ void UEnemy_Skeleton_FSM::MoveState()
 
 void UEnemy_Skeleton_FSM::AttackState()
 {
-	me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	/*me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);*/
 
 	anim->animState = mState;
 
@@ -231,8 +234,8 @@ void UEnemy_Skeleton_FSM::AttackState()
 
 void UEnemy_Skeleton_FSM::AttackCombo1()
 {
-	superArm = true;
-	me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	/*superArm = true;*/
+	/*me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);*/
 	currTime += GetWorld()->DeltaTimeSeconds;
 
 		
@@ -407,9 +410,17 @@ void UEnemy_Skeleton_FSM::OnDamageProcess()
 				}
 				else
 				{
-					//UE_LOG(LogTemp, Warning, TEXT("defultattack"));
-				
-			
+					//일반피격
+
+					//색을 빨간색으로 변경
+					mat->SetVectorParameterValue(TEXT("EmissiveColor"), FVector4(1, 0, 0, 1));
+					mat->SetScalarParameterValue(TEXT("Glow"), 1.0f);
+					//다시 원색으로 초기화
+					GetWorld()->GetTimerManager().ClearTimer(colorHandle);
+					GetWorld()->GetTimerManager().SetTimer(colorHandle, this, &UEnemy_Skeleton_FSM::ColorOff, 0.05f, false);
+
+					FVector imp = target->GetActorForwardVector() * 500.0f;
+					me->GetCharacterMovement()->AddImpulse(imp, true);
 					currentTime = 0;
 					//피격 애니메이션 재생
 					FString sectionName = FString::Printf(TEXT("Damage0"));
@@ -432,13 +443,6 @@ void UEnemy_Skeleton_FSM::OnDamageProcess()
 			GetWorld()->SpawnActor<AActor>(dropFactory, me->GetActorTransform());
 			//사망효과음
 			UGameplayStatics::PlaySound2D(GetWorld(), SeeplayerSound);
-
-			AGameModeBase* CurrentMode = GetWorld()->GetAuthGameMode();
-			AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(CurrentMode);
-			if (CurrentGameModeBase != nullptr)
-			{
-				CurrentGameModeBase->AddCoins(10);
-			}
 			
 		}
 		//애니메이션 상태 동기화
@@ -680,3 +684,9 @@ void UEnemy_Skeleton_FSM::MoveToPos(FVector pos)
 	}
 }
 
+void UEnemy_Skeleton_FSM::ColorOff()
+{
+
+	mat->SetVectorParameterValue(TEXT("EmissiveColor"), FVector4(1, 1, 1, 1));
+	mat->SetScalarParameterValue(TEXT("Glow"), 0);
+}

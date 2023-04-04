@@ -330,7 +330,8 @@ void UEnemy_Magician_FSM::OnDamageProcess()
 			//피격 애니메이션 재생
 			FString sectionName = FString::Printf(TEXT("Damage0"));
 			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
-
+			FVector imp = target->GetActorForwardVector() * 500.0f;
+			me->GetCharacterMovement()->AddImpulse(imp, true);
 			mState = EEnemyState3::Damage;
 		}
 
@@ -348,12 +349,6 @@ void UEnemy_Magician_FSM::OnDamageProcess()
 		//사망효과음
 		UGameplayStatics::PlaySound2D(GetWorld(), SeeplayerSound);
 
-		AGameModeBase* CurrentMode = GetWorld()->GetAuthGameMode();
-		AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(CurrentMode);
-		if (CurrentGameModeBase != nullptr)
-		{
-			CurrentGameModeBase->AddCoins(10);
-		}
 	}
 	//애니메이션 상태 동기화
 	anim->animState = mState;

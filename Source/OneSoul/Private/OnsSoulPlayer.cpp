@@ -32,12 +32,13 @@
 #include <Blueprint/WidgetBlueprintLibrary.h>
 #include "EnemyBossDieUI.h"
 #include "NPC_LevelupUI.h"
-
+#include "Components/CapsuleComponent.h"
 #include "NPC_MenuUI.h"
 #include "Interactions.h"
 #include "Interactions_DialogueUI.h"
 #include "EscUI.h"
 #include "OneSoulGameInstance.h"
+#include <GameFramework/PlayerController.h>
 AOnsSoulPlayer::AOnsSoulPlayer()
       
 {
@@ -181,6 +182,24 @@ void AOnsSoulPlayer::Tick(float DeltaTime)
 	}
 	SoulNum = gameInst->soul;
 
+	//플레이어 카메라 흔들리는 효과
+	if (camShake == true)
+	{
+		//2. 현재시간을 흐르게 하고
+		currCamShakeTime += DeltaTime;
+		//3. 만약에 현재시간이 기준시간보다 작으면
+		if (currCamShakeTime < camShakeTime)
+		{
+			Shake();
+		}
+		//5. 그렇지 않으면 초기화(현재시간, bFire, 카메라위치)
+		else
+		{
+			currCamShakeTime = 0;
+			camShake = false;
+			Camera->SetRelativeLocation(FVector::ZeroVector);
+		}
+	}
 }
 
 void AOnsSoulPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -833,6 +852,34 @@ void AOnsSoulPlayer::DropWeapon()
 void AOnsSoulPlayer::ReceiveDamage(float Damge)
 {
   Health = FMath:: Clamp(Health - Damge,0.f,MaxHealth);
+  //피격시 애니메이션블루프린트에서 설정한 값이 씹히는거를 풀어주는 부분
+  //구르기할때
+  if (compPlayerRoll->re ==false)
+  {
+	  compPlayerRoll->re = true;
+	  FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator();
+	  while (It)
+	  {
+		  APlayerController* Pcon = It->Get();
+		  // 가져온 플레이어 컨트롤러 객체로 처리
+		  ++It;
+		  EnableInput(Pcon);
+	  }
+  }
+  //빽스탭할때
+  if (compPlayerRoll->ba == false)
+  {
+	  compPlayerRoll->ba = true;
+	  FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator();
+	  while (It)
+	  {
+		  APlayerController* Pcon = It->Get();
+		  // 가져온 플레이어 컨트롤러 객체로 처리
+		  ++It;
+		  EnableInput(Pcon);
+	  }
+  }
+
 }
 
 void AOnsSoulPlayer::LMBDown()
@@ -1143,4 +1190,12 @@ void AOnsSoulPlayer::Jumpp()
 	{
 		Jump();
 	}
+}
+void AOnsSoulPlayer::Shake()
+{
+	camShake = true;
+	//4. 카메라를 랜덤하게 위치시키자
+	float randY = FMath::RandRange(-randA,randB);
+	float randZ = FMath::RandRange(-randA,randB);
+	Camera->SetRelativeLocation(FVector(0, randY, randZ));
 }

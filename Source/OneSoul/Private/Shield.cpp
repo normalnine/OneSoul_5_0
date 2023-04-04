@@ -9,6 +9,7 @@
 #include <Kismet/GameplayStatics.h>
 #include "Enemy_Skeleton.h"
 #include "Enemy_Archer_Arrow.h"
+#include "Enemy_Magician_magic.h"
 
 AShield::AShield()
 {
@@ -46,7 +47,7 @@ void AShield::Tick(float DeltaTime)
 
 	//	}
 	//}
-	
+	// 
 }
 
 void AShield::BeginPlay()
@@ -84,25 +85,30 @@ void AShield::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OthrAc
 	
 
 	//몬스터를 캐스팅 
-	AEnemy_Skeleton* enemy1 = Cast<AEnemy_Skeleton>(OthrActor);
-	if (enemy1 != nullptr)
-	{
-		//플레이어를 넉백시킨다
-		FVector imp = -1 * player->GetActorForwardVector() * 1000.0f;
-		player->GetCharacterMovement()->AddImpulse(imp, true);
-	}
+	//AEnemy_Skeleton* enemy1 = Cast<AEnemy_Skeleton>(OthrActor);
+	//if (enemy1 != nullptr)
+	//{
+	//	//플레이어를 넉백시킨다
+	//	FVector imp = -1 * player->GetActorForwardVector() * 1000.0f;
+	//	player->GetCharacterMovement()->AddImpulse(imp, true);
+
+	//}
 
 
 	AEnemy_Archer_Arrow* arrow = Cast<AEnemy_Archer_Arrow>(OthrActor);
 	if (arrow != nullptr)
 	{
 		//공격을 막고 2초뒤에 기력을 채우기 위해 공격을 막을때마다 시간을 초기화
-		
-		UE_LOG(LogTemp, Warning, TEXT("shield?"));
-
+		FVector imp = -1 * player->GetActorForwardVector() * 500.0f;
+		player->GetCharacterMovement()->AddImpulse(imp, true);
 		FTimerHandle aaa;
 		GetWorld()->GetTimerManager().SetTimer(aaa, this, &AShield::reStamina, 1.0f, false);
-		
+		player->Shake();
+	}
+	AEnemy_Magician_magic* magic = Cast<AEnemy_Magician_magic>(OthrActor);
+	if (magic!=nullptr)
+	{
+		player->Shake();
 	}
 
 }

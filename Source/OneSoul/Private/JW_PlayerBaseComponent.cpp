@@ -3,6 +3,7 @@
 
 #include "JW_PlayerBaseComponent.h"
 #include "OnsSoulPlayer.h"
+#include "OneSoulPlayerAnimInstance.h"
 
 // Sets default values for this component's properties
 UJW_PlayerBaseComponent::UJW_PlayerBaseComponent()
@@ -43,4 +44,9 @@ void UJW_PlayerBaseComponent::SetupInputBinding(class UInputComponent* PlayerInp
 void UJW_PlayerBaseComponent::CriAttack()
 {
 	playerAnim->Montage_Play(criattack);
+}
+
+void UJW_PlayerBaseComponent::SAR()
+{
+	playerAnim->Montage_Play(shieldAttackReact);
 }

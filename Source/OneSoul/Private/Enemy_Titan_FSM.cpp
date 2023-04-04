@@ -490,7 +490,8 @@ void UEnemy_Titan_FSM::OnDamageProcess()
 				UGameplayStatics::PlaySound2D(GetWorld(), HITSound);
 				FString sectionName = FString::Printf(TEXT("Damage0"));
 				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
-
+				FVector imp = target->GetActorForwardVector() * 500.0f;
+				me->GetCharacterMovement()->AddImpulse(imp, true);
 			//상태를 피격으로 전환
 			mState = EEnemyState4::Damage;
 			currentTime = 0;
@@ -507,12 +508,6 @@ void UEnemy_Titan_FSM::OnDamageProcess()
 			FString sectionName = FString::Printf(TEXT("Die"));
 			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 			GetWorld()->SpawnActor<AActor>(dropFactory, me->GetActorTransform());
-			AGameModeBase* CurrentMode = GetWorld()->GetAuthGameMode();
-			AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(CurrentMode);
-			if (CurrentGameModeBase != nullptr)
-			{
-				CurrentGameModeBase->AddCoins(10);
-			}
 		}
 		//애니메이션 상태 동기화
 		anim->animState = mState;

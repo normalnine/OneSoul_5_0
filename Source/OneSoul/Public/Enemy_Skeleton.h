@@ -31,11 +31,11 @@ public:
 		class UEnemy_Skeleton_FSM* fsm;
 
 	//충돌 컴포넌트
-	UPROPERTY(VisibleAnywhere, Category = Collision)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Collision)
 		class USphereComponent* collisionComp;
 
 	//충돌 컴포넌트
-	UPROPERTY(VisibleAnywhere, Category = Collision)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Collision)
 		class UCapsuleComponent* SwordCollisionComp;
 
 	UFUNCTION()

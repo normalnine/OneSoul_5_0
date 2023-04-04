@@ -106,7 +106,7 @@ void UJW_PlayerRollComponent::Roll()
  
  				//구를때 플레이어 충돌끄기 - NoCollision으로 하면 플레이어가 안움직여서 
  				//합칠때 새로운 충돌타입을 만들어서 몬스터랑 안겹치는걸로다가 넣었다가 다시 바꾸기
- 				me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+ 				me->GetCapsuleComponent()->SetCollisionObjectType(ECC_GameTraceChannel9);
  
  
  
@@ -125,7 +125,7 @@ void UJW_PlayerRollComponent::Roll()
 void UJW_PlayerRollComponent::onColl()
 {
 	//원래 출동타입으로 바꿔주기
-	me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    me->GetCapsuleComponent()->SetCollisionObjectType(ECC_Pawn);
 
 	
 }

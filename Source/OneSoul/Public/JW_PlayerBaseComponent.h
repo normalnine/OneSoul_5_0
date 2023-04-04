@@ -36,4 +36,9 @@ public:
 
 		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montages)
 			UAnimMontage* criattack;
+
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montages)
+			UAnimMontage* shieldAttackReact;
+
+			void SAR();
 };
