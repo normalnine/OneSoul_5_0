@@ -12,6 +12,7 @@
 #include "Components/WidgetComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -65,10 +66,19 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	SpringArm -> SetupAttachment(GetRootComponent());
 	SpringArm -> TargetArmLength = 300.f;
 	SpringArm -> bUsePawnControlRotation = true;
+	SpringArm -> SetRelativeLocation(FVector(0.f,0.f,120.f));
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera -> SetupAttachment(SpringArm);
 	Camera -> bUsePawnControlRotation = false;
+	Camera -> SetRelativeRotation(FRotator(-10.f,0.f,0.f));
+
+	Light = CreateDefaultSubobject<USpotLightComponent>(TEXT("SpotLight"));
+	Light -> SetupAttachment(GetRootComponent());
+	Light -> SetRelativeLocationAndRotation(FVector(428.964464f, -203.396706f, 365.360429f),FRotator(-49.345297f, 155.226589f, 24.157479f));
+	Light -> InnerConeAngle = 36.392002f;
+	Light -> OuterConeAngle = 38.312f;
+	Light -> Intensity = 30000.f;
 
 	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollision"));
 	Sphere -> SetupAttachment(GetRootComponent());
@@ -1032,7 +1042,7 @@ void AOnsSoulPlayer::WeaponChange()
 
 void AOnsSoulPlayer::ToggleInventory()
 {
-
+   
 	if (IsPaused)
 	{    
 	    IsPaused = false;
@@ -1044,11 +1054,13 @@ void AOnsSoulPlayer::ToggleInventory()
 	else
 	{
 		IsPaused = true;
+
 		
 		GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
 		MainInventory -> SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		UGameplayStatics::GetPlayerController(this, 0)->SetInputMode(FInputModeGameAndUI());
 	}
+
 }
 
 void AOnsSoulPlayer::PlayPotionHealMontage()

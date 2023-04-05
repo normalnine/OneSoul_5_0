@@ -22,6 +22,7 @@ class AReSpawn;
 class USphereComponent;
 class UUserWidget;
 class UInventoryGrid;
+class USpotLightComponent;
 
 UENUM(BlueprintType)
 enum class EActionState : uint8
@@ -140,6 +141,8 @@ public:
 	float TmpDmg;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	int32 InventorySlots;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	bool IsTab =false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dead")
 	bool IsDead = false;
 
@@ -293,6 +296,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* Sphere;
+
+	UPROPERTY(VisibleAnywhere)
+	USpotLightComponent* Light;
 
 	UPROPERTY(EditAnywhere)
 	UUserWidget* MainInventory;
