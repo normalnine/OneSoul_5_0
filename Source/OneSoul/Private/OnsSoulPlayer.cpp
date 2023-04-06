@@ -124,6 +124,7 @@ void AOnsSoulPlayer::BeginPlay()
 	Tags.Add(FName("OneSoulCharacter"));
 
 	Sphere -> OnComponentBeginOverlap.AddDynamic(this,&AOnsSoulPlayer::OnSphereOverlap);
+	Sphere -> OnComponentEndOverlap.AddDynamic(this,&AOnsSoulPlayer::OnSphereEndOverlap);
 
 	ReSpawnWiget = CreateWidget<UUserWidget>(GetWorld(), Respawn);
 	YouDieWiget = CreateWidget<UUserWidget>(GetWorld(),YouDie);
@@ -132,7 +133,9 @@ void AOnsSoulPlayer::BeginPlay()
 	MainInventory -> SetVisibility(ESlateVisibility::Collapsed);
 	MainInventory -> AddToViewport();
 
-	
+	GetWorld()->SpawnActor<class AActor>(PickupWeapon,GetActorTransform());
+	GetWorld()->SpawnActor<class AActor>(PickupPotion, GetActorTransform());
+	GetWorld()->SpawnActor<class AActor>(PickupSheid, GetActorTransform());
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && LevelStartMontage)
@@ -306,11 +309,6 @@ void AOnsSoulPlayer::Destroyed()
 	{
 	  CurrentGameModeBase-> ReSpawnPlayer(this); 
 
-	  if (IsDead == true)
-	  {
-	    SpawnDefaultWeapon();
-	  }
-	  
       UGameplayStatics:: GetPlayerController(this,0) -> SetShowMouseCursor(false);
       UGameplayStatics:: GetPlayerController(this, 0) -> SetInputMode(FInputModeGameOnly());
 	}
@@ -329,6 +327,20 @@ void AOnsSoulPlayer::OnSphereOverlap(
 {
   SpawnTarget = Cast<AReSpawn>(OthrActor);
 
+}
+
+void AOnsSoulPlayer::OnSphereEndOverlap(
+                                        UPrimitiveComponent* OverlappedComponent,
+										AActor* OthrActor,
+										UPrimitiveComponent* OtherComp,
+										int32 OtherBodyIndex)
+{
+ SpawnTarget = Cast<AReSpawn>(OthrActor);
+
+ if (SpawnTarget)
+ {
+	 SpawnTarget = nullptr;
+ }
 }
 
 void AOnsSoulPlayer::DirectionalHitReact(const FVector& ImpactPoint)
@@ -497,6 +509,11 @@ void AOnsSoulPlayer::GetPickupItem(AItem* Item)
  }
 }
 
+void AOnsSoulPlayer::RemoveLookOn()
+{
+  RetargetPlueprint->Destroy();
+}
+
 void AOnsSoulPlayer::ToggleLockOn()
 {
    ANormalEnemy_YG* Enemy = Cast<ANormalEnemy_YG>(Taget);
@@ -508,6 +525,7 @@ void AOnsSoulPlayer::ToggleLockOn()
 	else
 	{
 		DisableLockOn();
+		RetargetPlueprint -> Destroy();
 	}
 }
 
@@ -632,6 +650,7 @@ void AOnsSoulPlayer::EKeyPressed()
 
  if (SpawnTarget && SpawnTarget -> GetReSpawnBox())
  {   
+
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (AnimInstance && SpawnMontage)
 		{
@@ -653,16 +672,17 @@ void AOnsSoulPlayer::EKeyPressed()
 				CurrentGameModeBase->PotionNum = 5.f;
 			}
 
-			PlayerSpawnTimer();
-
+		  PlayerSpawnTimer();
+		  
          if(ReSpawnWiget == nullptr) return;
  
 		  ReSpawnWiget-> AddToViewport();
 
 	      GetWorld() -> GetTimerManager().SetTimer(SpawnWigetTimer,this,&AOnsSoulPlayer::ReSpawnRemoveWidget,2.f);
-		   
-	   }
-	}
+
+ 	   }
+		 
+ }
 
  }
 
@@ -798,6 +818,24 @@ void AOnsSoulPlayer::UpdateTargetingControlRotation()
 		FRotator NewRotation = UKismetMathLibrary::MakeRotator(CurrentRot.Roll, YZ.Pitch, YZ.Yaw);
 
 		Controller->SetControlRotation(NewRotation);
+
+		if (RetargetPlueprint == nullptr)
+		{
+		 RetargetPlueprint = GetWorld()->SpawnActor<class AActor>(RetargetPlueprints, TargetActor->GetActorTransform());
+		}
+		else
+		{
+
+			RetargetPlueprint->Destroy();
+
+			RetargetPlueprint = GetWorld()->SpawnActor<class AActor>(RetargetPlueprints, TargetActor->GetActorTransform());
+		}
+	   
+	}
+	else
+	{
+		RetargetPlueprint -> Destroy();
+		DisableLockOn();
 	}
 
 }
@@ -1008,7 +1046,7 @@ void AOnsSoulPlayer::PotionDrinking()
 
 	    AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(CurrentMode);
 
-        if(Health >= 100) return;
+        if(Health >= MaxHealth) return;
 
 	    if (CurrentGameModeBase-> PotionNum > 0)
 	    {
@@ -1050,6 +1088,8 @@ void AOnsSoulPlayer::ToggleInventory()
 		GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(false);
 		MainInventory->SetVisibility(ESlateVisibility::Collapsed);
 		UGameplayStatics::GetPlayerController(this, 0)->SetInputMode(FInputModeGameOnly());
+
+		IsTab = false;
 	}
 	else
 	{
@@ -1059,6 +1099,8 @@ void AOnsSoulPlayer::ToggleInventory()
 		GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
 		MainInventory -> SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		UGameplayStatics::GetPlayerController(this, 0)->SetInputMode(FInputModeGameAndUI());
+
+		IsTab = true;
 	}
 
 }

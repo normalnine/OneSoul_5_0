@@ -23,6 +23,7 @@ class USphereComponent;
 class UUserWidget;
 class UInventoryGrid;
 class USpotLightComponent;
+class AActor;
 
 UENUM(BlueprintType)
 enum class EActionState : uint8
@@ -78,6 +79,13 @@ public:
 			int32 OtherBodyIndex,
 			bool bFromSweep,
 			const FHitResult& SweepResult);
+
+	UFUNCTION()
+	virtual void OnSphereEndOverlap(
+			     UPrimitiveComponent* OverlappedComponent,
+			     AActor* OthrActor,
+			     UPrimitiveComponent* OtherComp,
+			     int32 OtherBodyIndex);
 
 	UFUNCTION(BlueprintCallable, Category = "Attack")
 	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnable);
@@ -145,6 +153,18 @@ public:
 	bool IsTab =false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dead")
 	bool IsDead = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "spawn")
+	bool IsReSpawn;
+	UPROPERTY(EditAnywhere,Category="Retargeting")
+	TSubclassOf<class AActor> RetargetPlueprints;
+	UPROPERTY(EditAnywhere, Category = "Retargeting")
+    class AActor* RetargetPlueprint;
+	UPROPERTY(EditAnywhere, Category = "PickupActor")
+	TSubclassOf<class AActor> PickupPotion;
+	UPROPERTY(EditAnywhere, Category = "PickupActor")
+	TSubclassOf<class AActor> PickupWeapon;
+	UPROPERTY(EditAnywhere, Category = "PickupActor")
+	TSubclassOf<class AActor> PickupSheid;
 
 	FTimerHandle HitReactTimer;
 
@@ -157,6 +177,8 @@ public:
 	FTimerHandle SpawnWigetTimer;
 
 	FTimerHandle YouDieTimer;
+
+	FTimerHandle ReTargeting;
 
 	bool bCanHitReact;
 
@@ -265,6 +287,8 @@ public:
 	void SwapWeapon(AWeapon* WeaponToSwap);
 	UFUNCTION(BlueprintCallable, Category = "Pickup")
 	void GetPickupItem(AItem* Item);
+	UFUNCTION(BlueprintCallable, Category = "Retargeting")
+	void RemoveLookOn();
 
 protected:
 	virtual void BeginPlay() override;
