@@ -192,11 +192,16 @@ void AOnsSoulPlayer::Tick(float DeltaTime)
 		{
 			Shake();
 		}
-		//5. 그렇지 않으면 초기화(현재시간, bFire, 카메라위치)
+		//5. 그렇지 않으면 초기화(현재시간, 카메라위치)
 		else
 		{
 			currCamShakeTime = 0;
 			camShake = false;
+			camShakeTime=1.0f;
+			randA = 1.0f;
+			randB = 1.0f;
+			randC = 1.0f;
+			randD = 1.0f;
 			Camera->SetRelativeLocation(FVector::ZeroVector);
 		}
 	}
@@ -535,7 +540,6 @@ void AOnsSoulPlayer::PlayHitReactMontage()
 
 void AOnsSoulPlayer::Attack()
 { 
-
 		UAnimInstance* AnimInstance = (GetMesh()->GetAnimInstance());
 		IsAttacking = true;
 
@@ -1196,6 +1200,6 @@ void AOnsSoulPlayer::Shake()
 	camShake = true;
 	//4. 카메라를 랜덤하게 위치시키자
 	float randY = FMath::RandRange(-randA,randB);
-	float randZ = FMath::RandRange(-randA,randB);
+	float randZ = FMath::RandRange(-randC,randD);
 	Camera->SetRelativeLocation(FVector(0, randY, randZ));
 }

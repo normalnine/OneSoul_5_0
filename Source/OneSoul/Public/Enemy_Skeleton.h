@@ -32,7 +32,7 @@ public:
 
 	//충돌 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Collision)
-		class USphereComponent* collisionComp;
+		class UCapsuleComponent* collisionComp;
 
 	//충돌 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Collision)
@@ -86,4 +86,7 @@ public:
 	//방패에 플레이어 칼 맞았을때 효과음
 	UPROPERTY(EditDefaultsOnly, Category = Sound)
 		class USoundBase* blockSound;
+
+
+		bool one = false;
 };

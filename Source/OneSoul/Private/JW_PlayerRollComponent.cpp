@@ -108,7 +108,9 @@ void UJW_PlayerRollComponent::Roll()
  				//합칠때 새로운 충돌타입을 만들어서 몬스터랑 안겹치는걸로다가 넣었다가 다시 바꾸기
  				me->GetCapsuleComponent()->SetCollisionObjectType(ECC_GameTraceChannel9);
  
- 
+           /*     me->randA=0;
+                me->randB=0;
+                me->Shake();*/
  
  				//다시 충돌체 활성화 시켜주기
  				FTimerHandle on;

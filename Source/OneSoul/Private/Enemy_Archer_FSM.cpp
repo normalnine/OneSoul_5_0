@@ -376,7 +376,7 @@ void UEnemy_Archer_FSM::groggy()
 
 void UEnemy_Archer_FSM::moveBack()
 {
-	FVector imp = (target->GetActorForwardVector()) * 5000.0f;
+	FVector imp = (target->GetActorForwardVector()) * 2000.0f;
 	me->GetCharacterMovement()->AddImpulse(imp, true);
 }
 

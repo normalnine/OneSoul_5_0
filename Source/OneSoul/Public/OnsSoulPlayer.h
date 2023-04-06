@@ -408,6 +408,9 @@ public:
 	void Shake();
 	float randA = 1.0f;
 	float randB = 1.0f;
+	float randC = 1.0f;
+	float randD = 1.0f;
+
     AController* MeController;
 
    void ExchangeInventoryItems(int32 CurrentItemIndex, int32 NewItemIndex);

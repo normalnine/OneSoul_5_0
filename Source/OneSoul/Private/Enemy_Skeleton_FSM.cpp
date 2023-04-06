@@ -82,6 +82,9 @@ void UEnemy_Skeleton_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	case EEnemyState1::Move:
 		MoveState();
 		break;
+	case EEnemyState1::MovetoTarget:
+		movetoPlayer();
+		break;
 	case EEnemyState1::Attack:
 		AttackState();
 		break;
@@ -211,6 +214,22 @@ void UEnemy_Skeleton_FSM::MoveState()
 	}
 }
 
+void UEnemy_Skeleton_FSM::movetoPlayer()
+{
+	ai->MoveToLocation(target->GetActorLocation());
+
+	FVector dir = target->GetActorLocation() - me->GetActorLocation();
+	//만약에 target - me 거리가 공격범위보다 작으면
+	if (dir.Length() < attackRange)
+	{
+		ChangeState(EEnemyState1::Attack);
+	}
+	if (dir.Length()>traceRange)
+	{
+		ChangeState(EEnemyState1::Move);
+	}
+}
+
 void UEnemy_Skeleton_FSM::AttackState()
 {
 	/*me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);*/
@@ -236,6 +255,11 @@ void UEnemy_Skeleton_FSM::AttackCombo1()
 {
 	/*superArm = true;*/
 	/*me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);*/
+	if (me->changeGroggy)
+	{
+		me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		ChangeState(EEnemyState1::Groggy);
+	}
 	currTime += GetWorld()->DeltaTimeSeconds;
 
 		
@@ -251,6 +275,12 @@ void UEnemy_Skeleton_FSM::AttackCombo1()
 
 void UEnemy_Skeleton_FSM::AttackCombo2()
 {
+	
+	if (me->changeGroggy)
+	{
+		me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		ChangeState(EEnemyState1::Groggy);
+	}
 	currTime += GetWorld()->DeltaTimeSeconds;
 	if (currTime > 1)
 	{
@@ -324,7 +354,7 @@ void UEnemy_Skeleton_FSM::UpdaetAttackDelay()
 		else
 		{
 
-			ChangeState(EEnemyState1::Move);
+			ChangeState(EEnemyState1::MovetoTarget);
 		}
 	}
 }
@@ -344,7 +374,7 @@ void UEnemy_Skeleton_FSM::DamageState()
 	{
 		me->SetActorEnableCollision(ECollisionEnabled::QueryOnly);
 		
-		ChangeState(EEnemyState1::Attack);
+		ChangeState(EEnemyState1::MovetoTarget);
 	}
 }
 void UEnemy_Skeleton_FSM::DieState()
@@ -365,9 +395,10 @@ void UEnemy_Skeleton_FSM::OnDamageProcess()
 {
 	//칼,방패 충돌체 끄기
 	me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	me->collisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	me->HpWidget->SetVisibility(true);
 	UGameplayStatics::PlaySound2D(GetWorld(), HITSound);
+	//방패콜리전끄기 몬스터 틱에서 온오프
+	isShield=false;
 	//if (isShield)
 	//{
 	//	UE_LOG(LogTemp, Warning, TEXT("imGuard"));
@@ -379,14 +410,23 @@ void UEnemy_Skeleton_FSM::OnDamageProcess()
 	//{
 		//체력감소
 		//hp -= damage;
-		hp--;
+		
+		/*if (!me->one)
+		{*/
+			hp--;
+			/*	UE_LOG(LogTemp, Warning, TEXT("me"));
+			}*/
+		
 		//피격되었을때 hp표시줄을 보여주는거 한번만 실행되면됨
 		me->HpWidget->UpdateCurrHP(hp,maxhp);
 		
 		if (hp > 0)
 		{	if (!(superArm))
 			{
-		
+				target->camShakeTime=0.2f;
+				target->randC = 0.5; target->randD = 0.5;
+				target->Shake();
+
 				if (cri)
 				{	
 				/*	FB = true;*/
@@ -412,12 +452,12 @@ void UEnemy_Skeleton_FSM::OnDamageProcess()
 				{
 					//일반피격
 
-					//색을 빨간색으로 변경
-					mat->SetVectorParameterValue(TEXT("EmissiveColor"), FVector4(1, 0, 0, 1));
-					mat->SetScalarParameterValue(TEXT("Glow"), 1.0f);
-					//다시 원색으로 초기화
-					GetWorld()->GetTimerManager().ClearTimer(colorHandle);
-					GetWorld()->GetTimerManager().SetTimer(colorHandle, this, &UEnemy_Skeleton_FSM::ColorOff, 0.05f, false);
+					////색을 빨간색으로 변경
+					//mat->SetVectorParameterValue(TEXT("EmissiveColor"), FVector4(1, 0, 0, 1));
+					//mat->SetScalarParameterValue(TEXT("Glow"), 1.0f);
+					////다시 원색으로 초기화
+					//GetWorld()->GetTimerManager().ClearTimer(colorHandle);
+					//GetWorld()->GetTimerManager().SetTimer(colorHandle, this, &UEnemy_Skeleton_FSM::ColorOff, 0.05f, false);
 
 					FVector imp = target->GetActorForwardVector() * 500.0f;
 					me->GetCharacterMovement()->AddImpulse(imp, true);
@@ -469,6 +509,7 @@ void UEnemy_Skeleton_FSM::groggy()
 {
 	cri = true;
 	anim->animState = mState;
+	me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	currTime += GetWorld()->DeltaTimeSeconds;
 
@@ -494,7 +535,7 @@ void UEnemy_Skeleton_FSM::moveBack()
 		//뒤로살짝밀려가게
 		/*int32 a;
 		if (FB){a=-1;}else{a=1;}*/
-		FVector imp = /*a * */(target->GetActorForwardVector()) * 5000.0f;
+		FVector imp = /*a * */(target->GetActorForwardVector()) * 2000.0f;
 		me->GetCharacterMovement()->AddImpulse(imp, true);
 	
 
@@ -538,8 +579,8 @@ bool UEnemy_Skeleton_FSM::IsTargetTrace()
 	//acos
 	float angle = UKismetMathLibrary::DegAcos(dotvalue);
 
-	//구한 값이 40보다 작고 적과 플레이어와의 거리가 지정한 거리보다 작으면
-	if (angle < 50 && dirSize.Size() < traceRange)
+	//구한 값이 시야각 보다 작고 적과 플레이어와의 거리가 지정한 거리보다 작으면
+	if (angle < 90 && dirSize.Size() < traceRange)
 	{
 
 

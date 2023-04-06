@@ -8,6 +8,7 @@
 #include <Components/CapsuleComponent.h>
 #include "OnsSoulPlayer.h"
 #include "Shield.h"
+#include "Weapon.h"
 
 AEnemy_Titan::AEnemy_Titan()
 {
@@ -92,13 +93,35 @@ void AEnemy_Titan::OnOverlapBegin(class UPrimitiveComponent* selfComp, class AAc
 
 			//플레이어의 기력 회복 몇초뒤에 호출해야하는데
 			FTimerHandle ddd;
-			GetWorld()->GetTimerManager().SetTimer(ddd, this, &AEnemy_Titan::reStamina, 2.0f, false);
+			GetWorld()->GetTimerManager().SetTimer(ddd, this, &AEnemy_Titan::reStamina, 1.0f, false);
 		}
 	}
 
 }
 void AEnemy_Titan::reStamina()
 {
+	player->StopSprint();
 	player->SprintTimer();
 	player->RegenerateStamina();
+}
+
+void AEnemy_Titan::OnOverlapME(class UPrimitiveComponent* selfComp, class AActor* otherActor, UPrimitiveComponent* otherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	AWeapon* weapon = Cast<AWeapon>(otherActor);
+	if (weapon != nullptr)
+	{
+		FActorSpawnParameters params;
+		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+
+		//FVector HitLocation = SweepResult.Location;
+		FName HitLocation = SweepResult.BoneName;
+		GetWorld()->SpawnActor<AActor>(HitresultFactory, GetMesh()->GetSocketLocation(TEXT("*HitLocation")), weapon->GetActorRotation() - GetActorRotation(), params);
+
+
+		/*	FString LocationString = HitLocation.ToString();
+
+			UKismetSystemLibrary::PrintString(this, LocationString, true, true, FLinearColor::Green); */
+
+	}
 }

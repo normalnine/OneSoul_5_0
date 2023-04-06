@@ -11,6 +11,7 @@ enum class EEnemyState1 : uint8
 {
 	Idle,
 	Move,
+	MovetoTarget,
 	Attack,
 	Attackcombo1,
 	Attackcombo2,
@@ -45,6 +46,8 @@ public:
 	void IdleState();
 	//이동상태
 	void MoveState();
+	//타겟한테 이동
+	void movetoPlayer();
 	//공격상태
 	void AttackState();
 	//콤보공격1
@@ -111,7 +114,7 @@ public:
 		float attackRange = 120.0f;
 
 	//쫓아 갈 수 있는 범위
-	float traceRange = 1000;
+	float traceRange = 2000;
 
 	//공격대기시간
 	UPROPERTY(EditAnywhere, Category = FSM)

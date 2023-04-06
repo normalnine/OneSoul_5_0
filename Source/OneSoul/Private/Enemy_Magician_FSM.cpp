@@ -230,14 +230,15 @@ void UEnemy_Magician_FSM::UpdaetAttackDelay()
 		FVector dir = target->GetActorLocation() - me->GetActorLocation();
 		float dist = dir.Length();
 
-		if (dist < 1000)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("RUN"));
-			ChangeState(EEnemyState3::Run);
-			/*	EEnemyState3::Run;
-				anim->animState = mState;*/
-		}
-		else if (dist < attackRange)
+		//if (dist < 1000)
+		//{
+		//	UE_LOG(LogTemp, Warning, TEXT("RUN"));
+		//	ChangeState(EEnemyState3::Run);
+		//	/*	EEnemyState3::Run;
+		//		anim->animState = mState;*/
+		//}
+		//else 
+		if (dist < attackRange)
 		{
 		
 			ChangeState(EEnemyState3::Attack);
@@ -402,7 +403,7 @@ void UEnemy_Magician_FSM::groggy()
 
 void UEnemy_Magician_FSM::moveBack()
 {
-	FVector imp =(target->GetActorForwardVector()) * 5000.0f;
+	FVector imp =(target->GetActorForwardVector()) * 2000.0f;
 	me->GetCharacterMovement()->AddImpulse(imp, true);
 }
 
