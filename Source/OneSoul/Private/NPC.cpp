@@ -14,6 +14,7 @@
 #include <Components/Image.h>
 #include "OneSoulGameInstance.h"
 #include <Components/HorizontalBox.h>
+#include <Camera/CameraComponent.h>
 
 // Sets default values
 ANPC::ANPC()
@@ -23,8 +24,6 @@ ANPC::ANPC()
 
 	boxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("Box Component"));
 	boxComp->SetupAttachment(RootComponent);
-
-
 }
 
 // Called when the game starts or when spawned

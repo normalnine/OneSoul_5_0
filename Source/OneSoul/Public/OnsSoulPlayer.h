@@ -407,4 +407,5 @@ public:
 
    void TalkStartOREnd();
    void MoveCamera();
+   ACameraActor* GetNPCCamera();
 };

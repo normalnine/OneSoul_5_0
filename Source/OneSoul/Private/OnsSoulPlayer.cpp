@@ -38,6 +38,7 @@
 #include "Interactions_DialogueUI.h"
 #include "EscUI.h"
 #include "OneSoulGameInstance.h"
+#include <Camera/CameraActor.h>
 AOnsSoulPlayer::AOnsSoulPlayer()
       
 {
@@ -1186,11 +1187,40 @@ void AOnsSoulPlayer::MoveCamera()
 {
 	if (bTalking)
 	{	
-		SetActorLocation(npc->GetActorLocation()+npc->GetActorLocation().ForwardVector*-200);
-		Camera->SetRelativeLocation(FVector(300, 0, 90));	
+		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		FRotator playerRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), npc->GetActorLocation());
+		PlayerController->SetControlRotation(playerRotation);
+
+
+		// Get a reference to the NPC's camera actor
+		ACameraActor* NPCCamera = GetNPCCamera();
+
+		if (PlayerController && NPCCamera)
+		{
+			SetActorLocation(npc->GetActorLocation()+npc->GetActorLocation().ForwardVector*-200);
+			// Switch the player's view to the NPC's camera
+			PlayerController->SetViewTargetWithBlend(NPCCamera, 0.5f, EViewTargetBlendFunction::VTBlend_Cubic, 0.0f, false);
+		}
 	}
 	else
 	{
-		Camera->SetRelativeLocation(FVector(0));
+		GetWorld()->GetFirstPlayerController()->SetViewTargetWithBlend(GetWorld()->GetFirstPlayerController()->GetPawn(), 0.5f, EViewTargetBlendFunction::VTBlend_Cubic);
 	}
+}
+
+ACameraActor* AOnsSoulPlayer::GetNPCCamera()
+{
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACameraActor::StaticClass(), FoundActors);
+
+	for (AActor* Actor : FoundActors)
+	{
+		ACameraActor* CameraActor = Cast<ACameraActor>(Actor);
+		if (CameraActor && CameraActor->GetName().Contains("NPC"))
+		{
+			return CameraActor;
+		}
+	}
+
+	return nullptr;
 }
