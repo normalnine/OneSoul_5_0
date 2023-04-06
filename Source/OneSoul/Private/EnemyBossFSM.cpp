@@ -19,6 +19,7 @@
 #include "EnemyBossGhost.h"
 #include "EnemyBossDieUI.h"
 #include "OneSoulGameInstance.h"
+#include <Materials/MaterialInterface.h>
 
 // Sets default values for this component's properties
 UEnemyBossFSM::UEnemyBossFSM()
@@ -146,7 +147,7 @@ void UEnemyBossFSM::UpdateMove()
 		//그렇지 않으면
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("AddMovementInput"));
+			//UE_LOG(LogTemp, Warning, TEXT("AddMovementInput"));
 
 			//2. 그 방향으로 이동하고 싶다.
 			me->AddMovementInput(dir.GetSafeNormal());
@@ -219,39 +220,21 @@ void UEnemyBossFSM::UpdateDie()
 	//만약에 bDieMove 가 false 라면 함수를 나가라
 	//if (bDieMove == false) return;
 
-	//P = P0 + vt
-	//1. 아래로 내려가는 위치를 구한다.
-	FVector p0 = me->GetActorLocation();
-	FVector vt = FVector::DownVector * dieSpeed * GetWorld()->DeltaTimeSeconds;
-	FVector p = p0 + vt;
-	//me->Destroy();
-	//2. 만약에 p.Z 가 -200 보다 작으면 파괴한다
-	if (p.Z < -200)
+	UMaterialInstanceDynamic* CharacterMaterial = me->GetMesh()->CreateDynamicMaterialInstance(0);
+	if (CharacterMaterial)
+	{
+		UE_LOG(LogTemp, Error, TEXT("CharacterMaterial"));
+		CurrentOpacity-=0.002f;
+
+		CharacterMaterial->SetScalarParameterValue(TEXT("Opacity"), CurrentOpacity);
+		me->GetMesh()->SetMaterial(0, CharacterMaterial);
+	}
+
+	if (CurrentOpacity < 0)
 	{
 		gameInst->npcState = ENPCState::Complete;
 		me->Destroy();
-		
-		//나를 비활성화
-		//me->SetActive(false);
-		////EnemyManager 찾자
-		//AActor* actor = UGameplayStatics::GetActorOfClass(GetWorld(), AEnemyManager::StaticClass());
-		//AEnemyManager* am = Cast<AEnemyManager>(actor);
-		////찾은 놈에서 enemyArray 에 나를 다시 담자
-		//am->enemyArray.Add(me);
-		//currHP 를 maxHP
-		//currHP = maxHP;
-		//상태를 Idle
-		//ChangeState(EEnemyBossState::Idle);
-		//몽타주를 멈춰준다
-		//me->StopAnimMontage(damageMontage);
-		//bDieMove 를 false 로!
-		//bDieMove = false;
-	}
-	//3. 그렇지 않으면 해당 위치로 셋팅한다
-	else
-	{
-		me->SetActorLocation(p);
-	}
+	}	
 }
 
 void UEnemyBossFSM::UpdateReturnPos()
@@ -356,6 +339,12 @@ void UEnemyBossFSM::ChangeState(EEnemyBossState state)
 			gameInst = Cast<UOneSoulGameInstance>(GetWorld()->GetGameInstance());
 			gameInst->soul += soul;
 		}
+
+		UMaterialInterface* Material = Cast<UMaterialInterface>(StaticLoadObject(UMaterialInterface::StaticClass(), nullptr, TEXT("Material'/Game/QuadrapedCreatures/MountainDragon/Materials/M_MOUNTAIN_DRAGON_2.M_MOUNTAIN_DRAGON_2'")));
+		if (Material)
+		{
+			me->GetMesh()->SetMaterial(0, Material);
+		}
 		
 		
 		//Die 몽타주 실행
@@ -369,7 +358,7 @@ void UEnemyBossFSM::ReceiveDamage(float damage)
 	//피를 줄이자
 	currHP -= damage;
 	EnemyBossHPBar->UpdateCurrHP(currHP, maxHP);
-
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), slashedSound, me->GetActorLocation());
 	FTimerHandle WaitHandle;
 	float WaitTime = 1.0f; //시간을 설정하고
 	GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()

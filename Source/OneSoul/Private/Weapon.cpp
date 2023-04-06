@@ -216,6 +216,8 @@ void AWeapon::OnBoxOverlap(
 		if (Boss != nullptr)
 		{
 			Boss->fsm->ReceiveDamage(100);
+			FActorSpawnParameters SpawnParameters;
+			GetWorld()->SpawnActor<AActor>(bloodEffect, GetActorTransform());
 		}
 		if (Boss == nullptr)
 		{

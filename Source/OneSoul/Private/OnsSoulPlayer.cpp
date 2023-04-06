@@ -165,6 +165,11 @@ void AOnsSoulPlayer::BeginPlay()
 	Health = MaxHealth;
 	SoulNum = gameInst->soul;
 	SpawnDefaultWeapon();
+	
+	if (gameInst->bInLobby)
+	{
+		SetActorLocation(gameInst->lastLoc);
+	}
 }
 
 void AOnsSoulPlayer::Tick(float DeltaTime)
@@ -1117,6 +1122,8 @@ void AOnsSoulPlayer::notMoveR()
 	isMoveR = false;
 }
 
+
+
 void AOnsSoulPlayer::ExchangeInventoryItems(int32 CurrentItemIndex, int32 NewItemIndex)
 {
 	if ((CurrentItemIndex == NewItemIndex) && (NewItemIndex >= Inventory.Num())) return;
@@ -1142,5 +1149,48 @@ void AOnsSoulPlayer::Jumpp()
 	if (compPlayerRoll->re)
 	{
 		Jump();
+	}
+}
+
+void AOnsSoulPlayer::TalkStartOREnd()
+{
+	APlayerCameraManager* camManager = UGameplayStatics::GetPlayerCameraManager(this, 0);
+	camManager->StartCameraFade(0, 1.0f, 0.5f, FLinearColor::Black, false, false);
+
+	// Get all widgets in the viewport
+	TArray<UUserWidget*> Widgets;
+	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(UGameplayStatics::GetPlayerController(this, 0), Widgets, UUserWidget::StaticClass());
+
+	// Loop through the widgets and find the HUD widget
+	for (UUserWidget* Widget : Widgets)
+	{
+		if (Widget->IsA(UOneSoulOverlay::StaticClass())) // replace "UYourHUDWidgetClass" with the class name of your HUD widget
+		{
+			// Remove the HUD widget from the viewport
+			if (bTalking)
+			{
+				Widget->SetVisibility(ESlateVisibility::Hidden);
+			}
+			else
+			{
+				Widget->SetVisibility(ESlateVisibility::Visible);
+			}			
+			break;
+		}
+	}
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AOnsSoulPlayer::MoveCamera, 0.5f, false);
+}
+
+void AOnsSoulPlayer::MoveCamera()
+{
+	if (bTalking)
+	{	
+		SetActorLocation(npc->GetActorLocation()+npc->GetActorLocation().ForwardVector*-200);
+		Camera->SetRelativeLocation(FVector(300, 0, 90));	
+	}
+	else
+	{
+		Camera->SetRelativeLocation(FVector(0));
 	}
 }

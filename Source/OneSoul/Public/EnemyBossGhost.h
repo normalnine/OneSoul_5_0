@@ -34,7 +34,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UParticleSystemComponent* particle;
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USoundBase* spawnSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector dir;
@@ -47,7 +49,4 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void BeginOverlapGhost(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResul);
-
-	UFUNCTION(BlueprintCallable)
-	void EndOverlapGhost(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 };

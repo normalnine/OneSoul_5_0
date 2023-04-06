@@ -13,6 +13,7 @@
 #include <Components/VerticalBox.h>
 #include <Components/Image.h>
 #include "OneSoulGameInstance.h"
+#include <Components/HorizontalBox.h>
 
 // Sets default values
 ANPC::ANPC()
@@ -100,10 +101,11 @@ void ANPC::OpenMenuUI()
 
 void ANPC::PlayerInputDisable()
 {
+	
 // 	FInputModeUIOnly InputMode;
 // 	InputMode.SetWidgetToFocus(npcMenuUI->TakeWidget());
 // 	PlayerController->SetInputMode(InputMode);
-	PlayerController->bShowMouseCursor = true;
+	PlayerController->SetShowMouseCursor(true);
 	PlayerController->SetIgnoreLookInput(true);
 	PlayerController->SetIgnoreMoveInput(true);
 }
@@ -140,9 +142,9 @@ void ANPC::Dialogue(TArray<FString> dialogueText)
 		dialogueIndex = 0;
 
 		npcMenuUI->text_dialogue->SetVisibility(ESlateVisibility::Hidden);
-
+		npcMenuUI->hb_next->SetVisibility(ESlateVisibility::Hidden);
+		
 		npcMenuUI->text_dialogue->SetText(FText::FromString(dialogueText[dialogueIndex]));
-
 		if (gameInst->npcState == ENPCState::Quest)
 		{
 			npcMenuUI->image_quest->SetVisibility(ESlateVisibility::Visible);
@@ -152,7 +154,7 @@ void ANPC::Dialogue(TArray<FString> dialogueText)
 		{
 			npcMenuUI->vb_menuBox->SetVisibility(ESlateVisibility::Visible);
 			npcMenuUI->image_back->SetVisibility(ESlateVisibility::Visible);
-
+			player->TalkStartOREnd();
 			if (gameInst->npcState == ENPCState::Complete)
 			{
 				gameInst->npcState = ENPCState::Normal;

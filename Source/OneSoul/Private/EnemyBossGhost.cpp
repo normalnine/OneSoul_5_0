@@ -36,9 +36,9 @@ void AEnemyBossGhost::BeginPlay()
 	Super::BeginPlay();
 
 	sphereComp->OnComponentBeginOverlap.AddDynamic(this, &AEnemyBossGhost::BeginOverlapGhost);
-	sphereComp->OnComponentEndOverlap.AddDynamic(this, &AEnemyBossGhost::EndOverlapGhost);
 	
 	target = Cast<AOnsSoulPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AOnsSoulPlayer::StaticClass()));
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), spawnSound, GetActorLocation());
 }
 
 // Called every frame
@@ -77,9 +77,3 @@ void AEnemyBossGhost::BeginOverlapGhost(UPrimitiveComponent* OverlappedComponent
 
 	}
 }
-
-void AEnemyBossGhost::EndOverlapGhost(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-
-}
-

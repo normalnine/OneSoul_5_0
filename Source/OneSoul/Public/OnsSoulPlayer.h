@@ -399,8 +399,12 @@ public:
 	TSubclassOf<class UEscUI> escUIFactory;
 	class UEscUI* escUI;
 	class UOneSoulGameInstance* gameInst;
+	
 
    AController* MeController;
 
    void ExchangeInventoryItems(int32 CurrentItemIndex, int32 NewItemIndex);
+
+   void TalkStartOREnd();
+   void MoveCamera();
 };

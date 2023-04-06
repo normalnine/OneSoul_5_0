@@ -46,13 +46,15 @@ public:
 	class UButton* btn_yes;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UButton* btn_no;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UHorizontalBox* hb_next;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class AOnsSoulPlayer* player;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UOneSoulGameInstance* gameInst;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class APlayerController* PlayerController;
 
 
 	UFUNCTION(BlueprintCallable)

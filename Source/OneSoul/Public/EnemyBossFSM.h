@@ -190,6 +190,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTimerHandle GhostHandle;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UOneSoulGameInstance* gameInst;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USoundBase* slashedSound;
+
 	
 
 public:
@@ -266,7 +272,7 @@ public:
 	//Roar АјАн
 	UFUNCTION(BlueprintCallable)
 	void Roar();
-
+		
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UOneSoulGameInstance* gameInst;
+	float CurrentOpacity = 1.0f;
 };

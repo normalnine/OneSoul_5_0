@@ -95,4 +95,6 @@ public:
 
    FORCEINLINE UBoxComponent* GetWeaponBox() const {return WeaponBox;}
 
+   UPROPERTY(EditAnywhere, Category = "Weapon")
+   class TSubclassOf<AActor> bloodEffect;
 };

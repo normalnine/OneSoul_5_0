@@ -65,4 +65,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ENPCState npcState = ENPCState::Quest;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector lastLoc;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bInLobby = false;
 };

@@ -12,6 +12,10 @@
 #include <Components/Image.h>
 #include "NPC.h"
 #include "OneSoulGameInstance.h"
+#include <GameFramework/HUD.h>
+#include <Blueprint/WidgetBlueprintLibrary.h>
+#include "OneSoulOverlay.h"
+#include <Components/HorizontalBox.h>
 
 void UNPC_MenuUI::NativeConstruct()
 {
@@ -27,13 +31,14 @@ void UNPC_MenuUI::NativeConstruct()
 
 		player = Cast<AOnsSoulPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AOnsSoulPlayer::StaticClass()));
 		gameInst = Cast<UOneSoulGameInstance>(GetWorld()->GetGameInstance());
+		PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
 
 		binding = false;
 	}
 }
 
 void UNPC_MenuUI::LevelUp()
-{
+{	
 	SetVisibility(ESlateVisibility::Hidden);
 	return;
 }
@@ -41,9 +46,12 @@ void UNPC_MenuUI::LevelUp()
 void UNPC_MenuUI::Talk()
 {
 	player->bTalking = true;
+	player->TalkStartOREnd();
+	
 	text_dialogue->SetVisibility(ESlateVisibility::Visible);
 	vb_menuBox->SetVisibility(ESlateVisibility::Hidden);
 	image_back->SetVisibility(ESlateVisibility::Hidden);
+	hb_next->SetVisibility(ESlateVisibility::Visible);
 	return; 
 }
 
@@ -58,8 +66,6 @@ void UNPC_MenuUI::Leave()
 void UNPC_MenuUI::PlayerInputEnable()
 {
 	text_dialogue->SetVisibility(ESlateVisibility::Hidden);
-
-	APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
 
 	FInputModeGameOnly InputMode;
 	PlayerController->SetInputMode(InputMode);
@@ -81,4 +87,5 @@ void UNPC_MenuUI::No()
 	vb_quest->SetVisibility(ESlateVisibility::Hidden);
 	image_back->SetVisibility(ESlateVisibility::Visible);
 	image_quest->SetVisibility(ESlateVisibility::Hidden);
+	player->TalkStartOREnd();
 }
