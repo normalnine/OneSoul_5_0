@@ -133,12 +133,6 @@ void AOnsSoulPlayer::BeginPlay()
 	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
 	AItem* OverlappingWidget = Cast<AItem>(OverlappingItem);
 
-	if (OverlappingWeapon)
-	{
-		EquipWeapon(OverlappingWeapon);
-		OverlappingWidget->GetPickupWiget()->SetVisibility(false);
-	}
-
 	ReSpawnWiget = CreateWidget<UUserWidget>(GetWorld(), Respawn);
 	YouDieWiget = CreateWidget<UUserWidget>(GetWorld(),YouDie);
 
@@ -512,9 +506,13 @@ void AOnsSoulPlayer::StopSprint()
 
 void AOnsSoulPlayer::SpawnDefaultWeapon()
 {
+	EKeyButton = true;
+
+
 	if (DefaulWeaponClass)
 	{
 	  AWeapon* DefaultWeapon = GetWorld() -> SpawnActor<AWeapon>(DefaulWeaponClass);
+
 
 	  const USkeletalMeshSocket* HandSocket = GetMesh() -> GetSocketByName(FName("RightHandSoket"));
 
@@ -522,6 +520,9 @@ void AOnsSoulPlayer::SpawnDefaultWeapon()
 	  {
 		  HandSocket -> AttachActor(DefaultWeapon,GetMesh());
 	  }
+	
+		  SwapWeapon(DefaultWeapon);
+
     }
 }
 
@@ -604,6 +605,9 @@ void AOnsSoulPlayer::Attack()
 
 void AOnsSoulPlayer::EKeyPressed()
 {
+    
+	EKeyButton=true;
+    
 	TArray<UUserWidget*> FoundWidgets;
 	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), FoundWidgets, UEnemyBossDieUI::StaticClass(), true);
 
