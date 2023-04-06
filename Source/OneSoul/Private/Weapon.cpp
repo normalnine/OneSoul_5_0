@@ -145,7 +145,7 @@ void AWeapon::OnBoxOverlap(
 
 		  if (Enemy3 != nullptr)
 		  {
-			  UE_LOG(LogTemp, Warning, TEXT("AEnemy_Archer"));
+			  //UE_LOG(LogTemp, Warning, TEXT("AEnemy_Archer"));
 			  Enemy3->fsm->OnDamageProcess();
 		  }
 
@@ -154,7 +154,7 @@ void AWeapon::OnBoxOverlap(
 		  {
 			  if (Enemy1->fsm->cri || Enemy1->fsm->Hitback)
 			  {
-				  UE_LOG(LogTemp, Warning, TEXT("asdadasddasd"));
+				  //UE_LOG(LogTemp, Warning, TEXT("asdadasddasd"));
 				  //플레이어를 캐스팅
 				  AOnsSoulPlayer* me = Cast<AOnsSoulPlayer>(GetOwner());
 				  //플레이어에 컴포넌트호출해서 거기에 있는 크리티컬어택 몽타주 실행
@@ -173,8 +173,11 @@ void AWeapon::OnBoxOverlap(
 			  }
 			  else
 			  {
-				  Enemy1->fsm->OnDamageProcess();
-				  //Enemy1->fsm->moveBack();
+				 // if (!Enemy1->one)
+				 // {
+					 
+					 // Enemy1->fsm->OnDamageProcess();
+				 // }
 			  }
 
 		  }

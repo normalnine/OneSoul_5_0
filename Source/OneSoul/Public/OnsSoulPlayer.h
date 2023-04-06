@@ -430,7 +430,18 @@ public:
 	class UEscUI* escUI;
 	class UOneSoulGameInstance* gameInst;
 
-   AController* MeController;
+	//플레이어 카메라 흔들리게 하려는 요소들
+	bool camShake = false;
+	float currCamShakeTime = 0;
+	float camShakeTime = 1;
+	UFUNCTION(BlueprintCallable)
+	void Shake();
+	float randA = 1.0f;
+	float randB = 1.0f;
+	float randC = 1.0f;
+	float randD = 1.0f;
+
+    AController* MeController;
 
    void ExchangeInventoryItems(int32 CurrentItemIndex, int32 NewItemIndex);
 };

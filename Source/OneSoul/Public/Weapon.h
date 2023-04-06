@@ -51,8 +51,7 @@ protected:
 
 private:
      
-	 UPROPERTY(VisibleAnywhere,Category = "Weapon")
-     UBoxComponent* WeaponBox;
+
 
 	 UPROPERTY(VisibleAnywhere)
 	 USceneComponent* BoxTraceStart;
@@ -95,4 +94,6 @@ public:
 
    FORCEINLINE UBoxComponent* GetWeaponBox() const {return WeaponBox;}
 
+   UPROPERTY(VisibleAnywhere, Category = "Weapon")
+	   UBoxComponent* WeaponBox;
 };

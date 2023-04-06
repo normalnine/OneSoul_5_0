@@ -5,9 +5,12 @@
 #include "Enemy_Skeleton_FSM.h"
 #include "OnsSoulPlayer.h"
 #include "Enemy_HpBar.h"
+#include "Weapon.h"
 #include "Enemy_HpBar_WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "JW_ParryGuardComponent.h"
+#include "JW_PlayerBaseComponent.h"
+#include "OneSoulPlayerAnimInstance.h"
 #include "Enemy_Skeleton_Anim.h"
 #include <Components/CapsuleComponent.h>
 #include <Components/SphereComponent.h>
@@ -61,7 +64,7 @@ AEnemy_Skeleton::AEnemy_Skeleton()
 	SwordCollisionComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("SwordCollision"));
 	SwordCollisionComp->SetupAttachment(SwordMeshComp);
 
-	collisionComp =CreateDefaultSubobject<USphereComponent>(TEXT("ShieldCollision"));
+	collisionComp =CreateDefaultSubobject<UCapsuleComponent>(TEXT("ShieldCollision"));
 	collisionComp->SetupAttachment(ShieldMeshComp);
 
 
@@ -86,14 +89,13 @@ AEnemy_Skeleton::AEnemy_Skeleton()
 	{
 		blockSound = tempbSound.Object;
 	}
-	
+	SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AEnemy_Skeleton::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	HpWidget->UpdateCurrHP(fsm->hp, fsm->maxhp);
 
 	
@@ -123,6 +125,17 @@ void AEnemy_Skeleton::OnOverlapBeginsword(class UPrimitiveComponent* selfComp, c
  		{
  			if (target->parrying)
  			{
+				//FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator();
+				//while (It)
+				//{
+				//	APlayerController* Pcon = It->Get();
+				//	// 가져온 플레이어 컨트롤러 객체로 처리
+				//	++It;
+				//	player->EnableInput(Pcon);
+				//}
+
+				//효과음 발생
+				UGameplayStatics::PlaySound2D(GetWorld(), blockSound);
 			changeGroggy = true;
 			FActorSpawnParameters params;
 			params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -133,6 +146,7 @@ void AEnemy_Skeleton::OnOverlapBeginsword(class UPrimitiveComponent* selfComp, c
 				target->ReceiveDamage(1);
 				target->DirectionalHitReact(GetActorLocation());
 				target->HitReactSounds();
+
 			}
  		
  
@@ -164,9 +178,12 @@ void AEnemy_Skeleton::OnOverlapBeginsword(class UPrimitiveComponent* selfComp, c
 				{
 				
 					//플레이어를 넉백시킨다
-					FVector imp = -1 * player->GetActorForwardVector() * 1000.0f;
+					FVector imp = -1 * player->GetActorForwardVector() * 3000.0f;
 					player->GetCharacterMovement()->AddImpulse(imp, true);
-	
+
+					//플레이어 카메라 흔들리기
+					player->Shake();
+
 					//플레이어의 기력 감소
 					player->CurrentStamina = FMath::Clamp(player->CurrentStamina - 10.f, player->MinStamina, player->MaxStamina);
 
@@ -189,20 +206,39 @@ void AEnemy_Skeleton::OnOverlapBeginshield(class UPrimitiveComponent* selfComp, 
 		//튕겨지는 이펙트 생성
 		GetWorld()->SpawnActor<AActor>(effectfactory,weapon->GetActorTransform(), params);
 		
+		//피격호출안되도록 먼저 막기
+		one=true;
+		UE_LOG(LogTemp, Warning, TEXT("shield"));
 		//방패에 맞으면 몸의 콜리전을 잠시 끄고 다시 키는거 - 방패 맞고 몸맞아서 따블로 맞으면 안되니까
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		
 		//효과음 발생
 		UGameplayStatics::PlaySound2D(GetWorld(), blockSound);
-
-		//UE_LOG(LogTemp, Warning, TEXT("imGuard"));
+	
+		//몽타주실행
 		FString sectionName = FString::Printf(TEXT("Block"));
 		PlayAnimMontage(fsm->damageMontage, 1.0f, FName(*sectionName));
+		//스테이트 변경
 		fsm->mState = EEnemyState1::Shield;
+		//플레이어 불러오기
+		auto actor = UGameplayStatics::GetActorOfClass(GetWorld(), AOnsSoulPlayer::StaticClass());
+		player = Cast<AOnsSoulPlayer>(actor);
+		//플레이어 카메라 흔들리기
+		player->Shake();
+		//플레이어가 방패를 때려서 반동 애니메이션 재생
+		player->compPlayerBase->SAR();
+		//플레이어 칼 콜리전 끄기
+		weapon->WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		//플레이어 뒤로 넉백시키기
+		FVector imp = player->GetActorForwardVector() * -3000.0f;
+		player->GetCharacterMovement()->AddImpulse(imp, true);
+		//공격안되는 버그있어서 다시 공격하려면
+		player->IsAttacking=false;
+		
 
 		//1초 뒤에 몸의 콜리전을 키는 함수호출
 		FTimerHandle ddd;
-		GetWorld()->GetTimerManager().SetTimer(ddd, this, &AEnemy_Skeleton::oncoll, 1.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(ddd, this, &AEnemy_Skeleton::oncoll, 1.5f, false);
 	}
 }
 
@@ -225,7 +261,7 @@ void AEnemy_Skeleton::OnOverlapME(class UPrimitiveComponent* selfComp, class AAc
 		FName HitLocation = SweepResult.BoneName;
 		GetWorld()->SpawnActor<AActor>(HitresultFactory, GetMesh()->GetSocketLocation(TEXT("*HitLocation")),weapon->GetActorRotation()-GetActorRotation(),params);
 
-
+		fsm->OnDamageProcess();
 		/*	FString LocationString = HitLocation.ToString();
 
 			UKismetSystemLibrary::PrintString(this, LocationString, true, true, FLinearColor::Green); */
@@ -235,5 +271,6 @@ void AEnemy_Skeleton::OnOverlapME(class UPrimitiveComponent* selfComp, class AAc
 
 void AEnemy_Skeleton::oncoll()
 {
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	one=false;
 }
