@@ -101,8 +101,8 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	bCanHitReact = false;
 
 	bIsTargeting = false;
-	TargetingDistance = 900.f;
-	TargetingRadius = 100.f;
+	TargetingDistance = 1000.f;
+	TargetingRadius = 200.f;
 	TargetRotationInterpSpeed = 9.f;
 
 	
@@ -129,6 +129,15 @@ void AOnsSoulPlayer::BeginPlay()
 
 	Sphere -> OnComponentBeginOverlap.AddDynamic(this,&AOnsSoulPlayer::OnSphereOverlap);
 	Sphere -> OnComponentEndOverlap.AddDynamic(this,&AOnsSoulPlayer::OnSphereEndOverlap);
+
+	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
+	AItem* OverlappingWidget = Cast<AItem>(OverlappingItem);
+
+	if (OverlappingWeapon)
+	{
+		EquipWeapon(OverlappingWeapon);
+		OverlappingWidget->GetPickupWiget()->SetVisibility(false);
+	}
 
 	ReSpawnWiget = CreateWidget<UUserWidget>(GetWorld(), Respawn);
 	YouDieWiget = CreateWidget<UUserWidget>(GetWorld(),YouDie);
@@ -340,7 +349,7 @@ void AOnsSoulPlayer::Destroyed()
 	if (AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(World->GetAuthGameMode()))
 	{
 	  CurrentGameModeBase-> ReSpawnPlayer(this); 
-
+	 
       UGameplayStatics:: GetPlayerController(this,0) -> SetShowMouseCursor(false);
       UGameplayStatics:: GetPlayerController(this, 0) -> SetInputMode(FInputModeGameOnly());
 	}
@@ -1126,14 +1135,19 @@ void AOnsSoulPlayer::WeaponChange()
 {
 	if (CanArm())
 	{
+	 IsAttacking = true;
 	  Arm();
-	  IsAttacking = false;
-	  
+	  GetWorldTimerManager().SetTimer(PotionDrinkingTimer, this, &AOnsSoulPlayer::PotionAttakTimer, 1.5f);
 	}
 	else if (CanDisarm())
 	{
-		Disarm();
-		IsAttacking =false;
+	  IsAttacking=true;
+	  Disarm();	
+	  GetWorldTimerManager().SetTimer(PotionDrinkingTimer, this, &AOnsSoulPlayer::PotionAttakTimer, 1.5f);
+	}
+	else
+	{
+		IsAttacking = false;
 	}
 }
 
@@ -1156,7 +1170,7 @@ void AOnsSoulPlayer::ToggleInventory()
 
 		
 		GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
-		MainInventory -> SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		MainInventory -> SetVisibility(ESlateVisibility::Visible);
 		UGameplayStatics::GetPlayerController(this, 0)->SetInputMode(FInputModeGameAndUI());
 
 		IsTab = true;

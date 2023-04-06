@@ -103,6 +103,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	UUserWidget* YouDieWiget;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UUserWidget* MainInventory;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sprint")
 	float SprintSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sprint")
@@ -323,9 +325,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	USpotLightComponent* Light;
-
-	UPROPERTY(EditAnywhere)
-	UUserWidget* MainInventory;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> MainInventorys;
