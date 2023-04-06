@@ -979,7 +979,6 @@ void AOnsSoulPlayer::Disarm()
 	PlayEquipMontage(FName("UnEquip"));
 	CharacterState = ECharacterState::ECS_Unequipped;
 	ActionState = EActionState::EAS_EquippingWeapon;
-	IsAttacking = false;
 }
 
 void AOnsSoulPlayer::Arm()
@@ -987,7 +986,6 @@ void AOnsSoulPlayer::Arm()
 	PlayEquipMontage(FName("Equip"));
 	CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
 	ActionState = EActionState::EAS_EquippingWeapon;
-	IsAttacking = false;
 }
 
 void AOnsSoulPlayer::PlayEquipMontage(const FName& SectionName)
@@ -1070,11 +1068,13 @@ void AOnsSoulPlayer::WeaponChange()
 	if (CanArm())
 	{
 	  Arm();
+	  IsAttacking = false;
+	  
 	}
 	else if (CanDisarm())
 	{
 		Disarm();
-
+		IsAttacking =false;
 	}
 }
 
