@@ -12,6 +12,7 @@
 #include "Components/WidgetComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -65,10 +66,19 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	SpringArm -> SetupAttachment(GetRootComponent());
 	SpringArm -> TargetArmLength = 300.f;
 	SpringArm -> bUsePawnControlRotation = true;
+	SpringArm -> SetRelativeLocation(FVector(0.f,0.f,120.f));
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera -> SetupAttachment(SpringArm);
 	Camera -> bUsePawnControlRotation = false;
+	Camera -> SetRelativeRotation(FRotator(-10.f,0.f,0.f));
+
+	Light = CreateDefaultSubobject<USpotLightComponent>(TEXT("SpotLight"));
+	Light -> SetupAttachment(GetRootComponent());
+	Light -> SetRelativeLocationAndRotation(FVector(428.964464f, -203.396706f, 365.360429f),FRotator(-49.345297f, 155.226589f, 24.157479f));
+	Light -> InnerConeAngle = 36.392002f;
+	Light -> OuterConeAngle = 38.312f;
+	Light -> Intensity = 30000.f;
 
 	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollision"));
 	Sphere -> SetupAttachment(GetRootComponent());
@@ -114,6 +124,7 @@ void AOnsSoulPlayer::BeginPlay()
 	Tags.Add(FName("OneSoulCharacter"));
 
 	Sphere -> OnComponentBeginOverlap.AddDynamic(this,&AOnsSoulPlayer::OnSphereOverlap);
+	Sphere -> OnComponentEndOverlap.AddDynamic(this,&AOnsSoulPlayer::OnSphereEndOverlap);
 
 	ReSpawnWiget = CreateWidget<UUserWidget>(GetWorld(), Respawn);
 	YouDieWiget = CreateWidget<UUserWidget>(GetWorld(),YouDie);
@@ -122,7 +133,9 @@ void AOnsSoulPlayer::BeginPlay()
 	MainInventory -> SetVisibility(ESlateVisibility::Collapsed);
 	MainInventory -> AddToViewport();
 
-	
+	GetWorld()->SpawnActor<class AActor>(PickupWeapon,GetActorTransform());
+	GetWorld()->SpawnActor<class AActor>(PickupPotion, GetActorTransform());
+	GetWorld()->SpawnActor<class AActor>(PickupSheid, GetActorTransform());
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && LevelStartMontage)
@@ -296,11 +309,6 @@ void AOnsSoulPlayer::Destroyed()
 	{
 	  CurrentGameModeBase-> ReSpawnPlayer(this); 
 
-	  if (IsDead == true)
-	  {
-	    SpawnDefaultWeapon();
-	  }
-	  
       UGameplayStatics:: GetPlayerController(this,0) -> SetShowMouseCursor(false);
       UGameplayStatics:: GetPlayerController(this, 0) -> SetInputMode(FInputModeGameOnly());
 	}
@@ -319,6 +327,20 @@ void AOnsSoulPlayer::OnSphereOverlap(
 {
   SpawnTarget = Cast<AReSpawn>(OthrActor);
 
+}
+
+void AOnsSoulPlayer::OnSphereEndOverlap(
+                                        UPrimitiveComponent* OverlappedComponent,
+										AActor* OthrActor,
+										UPrimitiveComponent* OtherComp,
+										int32 OtherBodyIndex)
+{
+ SpawnTarget = Cast<AReSpawn>(OthrActor);
+
+ if (SpawnTarget)
+ {
+	 SpawnTarget = nullptr;
+ }
 }
 
 void AOnsSoulPlayer::DirectionalHitReact(const FVector& ImpactPoint)
@@ -487,6 +509,11 @@ void AOnsSoulPlayer::GetPickupItem(AItem* Item)
  }
 }
 
+void AOnsSoulPlayer::RemoveLookOn()
+{
+  RetargetPlueprint->Destroy();
+}
+
 void AOnsSoulPlayer::ToggleLockOn()
 {
    ANormalEnemy_YG* Enemy = Cast<ANormalEnemy_YG>(Taget);
@@ -498,6 +525,7 @@ void AOnsSoulPlayer::ToggleLockOn()
 	else
 	{
 		DisableLockOn();
+		RetargetPlueprint -> Destroy();
 	}
 }
 
@@ -622,6 +650,7 @@ void AOnsSoulPlayer::EKeyPressed()
 
  if (SpawnTarget && SpawnTarget -> GetReSpawnBox())
  {   
+
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (AnimInstance && SpawnMontage)
 		{
@@ -643,16 +672,17 @@ void AOnsSoulPlayer::EKeyPressed()
 				CurrentGameModeBase->PotionNum = 5.f;
 			}
 
-			PlayerSpawnTimer();
-
+		  PlayerSpawnTimer();
+		  
          if(ReSpawnWiget == nullptr) return;
  
 		  ReSpawnWiget-> AddToViewport();
 
 	      GetWorld() -> GetTimerManager().SetTimer(SpawnWigetTimer,this,&AOnsSoulPlayer::ReSpawnRemoveWidget,2.f);
-		   
-	   }
-	}
+
+ 	   }
+		 
+ }
 
  }
 
@@ -788,6 +818,24 @@ void AOnsSoulPlayer::UpdateTargetingControlRotation()
 		FRotator NewRotation = UKismetMathLibrary::MakeRotator(CurrentRot.Roll, YZ.Pitch, YZ.Yaw);
 
 		Controller->SetControlRotation(NewRotation);
+
+		if (RetargetPlueprint == nullptr)
+		{
+		 RetargetPlueprint = GetWorld()->SpawnActor<class AActor>(RetargetPlueprints, TargetActor->GetActorTransform());
+		}
+		else
+		{
+
+			RetargetPlueprint->Destroy();
+
+			RetargetPlueprint = GetWorld()->SpawnActor<class AActor>(RetargetPlueprints, TargetActor->GetActorTransform());
+		}
+	   
+	}
+	else
+	{
+		RetargetPlueprint -> Destroy();
+		DisableLockOn();
 	}
 
 }
@@ -931,7 +979,6 @@ void AOnsSoulPlayer::Disarm()
 	PlayEquipMontage(FName("UnEquip"));
 	CharacterState = ECharacterState::ECS_Unequipped;
 	ActionState = EActionState::EAS_EquippingWeapon;
-	IsAttacking = false;
 }
 
 void AOnsSoulPlayer::Arm()
@@ -939,7 +986,6 @@ void AOnsSoulPlayer::Arm()
 	PlayEquipMontage(FName("Equip"));
 	CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
 	ActionState = EActionState::EAS_EquippingWeapon;
-	IsAttacking = false;
 }
 
 void AOnsSoulPlayer::PlayEquipMontage(const FName& SectionName)
@@ -998,7 +1044,7 @@ void AOnsSoulPlayer::PotionDrinking()
 
 	    AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(CurrentMode);
 
-        if(Health >= 100) return;
+        if(Health >= MaxHealth) return;
 
 	    if (CurrentGameModeBase-> PotionNum > 0)
 	    {
@@ -1022,17 +1068,19 @@ void AOnsSoulPlayer::WeaponChange()
 	if (CanArm())
 	{
 	  Arm();
+	  IsAttacking = false;
+	  
 	}
 	else if (CanDisarm())
 	{
 		Disarm();
-
+		IsAttacking =false;
 	}
 }
 
 void AOnsSoulPlayer::ToggleInventory()
 {
-
+   
 	if (IsPaused)
 	{    
 	    IsPaused = false;
@@ -1040,15 +1088,21 @@ void AOnsSoulPlayer::ToggleInventory()
 		GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(false);
 		MainInventory->SetVisibility(ESlateVisibility::Collapsed);
 		UGameplayStatics::GetPlayerController(this, 0)->SetInputMode(FInputModeGameOnly());
+
+		IsTab = false;
 	}
 	else
 	{
 		IsPaused = true;
+
 		
 		GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
 		MainInventory -> SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		UGameplayStatics::GetPlayerController(this, 0)->SetInputMode(FInputModeGameAndUI());
+
+		IsTab = true;
 	}
+
 }
 
 void AOnsSoulPlayer::PlayPotionHealMontage()
