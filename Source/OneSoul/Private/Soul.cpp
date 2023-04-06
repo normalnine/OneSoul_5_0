@@ -13,9 +13,16 @@ void ASoul::OnSphereOverlap(
             bool bFromSweep,
             const FHitResult& SweepResult)
 {
+	
+
 	IPickUpInterface* PickupInterface = Cast<IPickUpInterface>(OthrActor);
 	if (PickupInterface)
 	{
+		if (gameInst == nullptr)
+		{
+			gameInst = Cast<UOneSoulGameInstance>(GetWorld()->GetGameInstance());
+			gameInst->soul += Souls;
+		}
 		PickupInterface -> AddSouls(this);
 		
 		SpawnPickupSystem();

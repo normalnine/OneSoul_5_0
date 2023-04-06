@@ -51,8 +51,7 @@ protected:
 
 private:
      
-	 UPROPERTY(VisibleAnywhere,Category = "Weapon")
-     UBoxComponent* WeaponBox;
+
 
 	 UPROPERTY(VisibleAnywhere)
 	 USceneComponent* BoxTraceStart;
@@ -97,4 +96,7 @@ public:
 
    UPROPERTY(EditAnywhere, Category = "Weapon")
    class TSubclassOf<AActor> bloodEffect;
+
+   UPROPERTY(VisibleAnywhere, Category = "Weapon")
+	   UBoxComponent* WeaponBox;
 };

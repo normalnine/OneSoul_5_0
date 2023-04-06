@@ -27,7 +27,7 @@ protected:
 private:
 
     UPROPERTY(EditAnywhere,Category = "Souls")
-	int32 Souls;
+	int32 Souls = 100;
 
 
 public:
@@ -36,4 +36,7 @@ public:
 	
 	UPROPERTY(EditAnywhere, Category = "Souls")
 	bool bSoulDie = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		class UOneSoulGameInstance* gameInst;
 };

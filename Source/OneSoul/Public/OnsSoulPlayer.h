@@ -22,6 +22,8 @@ class AReSpawn;
 class USphereComponent;
 class UUserWidget;
 class UInventoryGrid;
+class USpotLightComponent;
+class AActor;
 
 UENUM(BlueprintType)
 enum class EActionState : uint8
@@ -77,6 +79,13 @@ public:
 			int32 OtherBodyIndex,
 			bool bFromSweep,
 			const FHitResult& SweepResult);
+
+	UFUNCTION()
+	virtual void OnSphereEndOverlap(
+			     UPrimitiveComponent* OverlappedComponent,
+			     AActor* OthrActor,
+			     UPrimitiveComponent* OtherComp,
+			     int32 OtherBodyIndex);
 
 	UFUNCTION(BlueprintCallable, Category = "Attack")
 	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnable);
@@ -140,8 +149,22 @@ public:
 	float TmpDmg;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	int32 InventorySlots;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	bool IsTab =false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dead")
 	bool IsDead = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "spawn")
+	bool IsReSpawn;
+	UPROPERTY(EditAnywhere,Category="Retargeting")
+	TSubclassOf<class AActor> RetargetPlueprints;
+	UPROPERTY(EditAnywhere, Category = "Retargeting")
+    class AActor* RetargetPlueprint;
+	UPROPERTY(EditAnywhere, Category = "PickupActor")
+	TSubclassOf<class AActor> PickupPotion;
+	UPROPERTY(EditAnywhere, Category = "PickupActor")
+	TSubclassOf<class AActor> PickupWeapon;
+	UPROPERTY(EditAnywhere, Category = "PickupActor")
+	TSubclassOf<class AActor> PickupSheid;
 
 	FTimerHandle HitReactTimer;
 
@@ -154,6 +177,8 @@ public:
 	FTimerHandle SpawnWigetTimer;
 
 	FTimerHandle YouDieTimer;
+
+	FTimerHandle ReTargeting;
 
 	bool bCanHitReact;
 
@@ -262,6 +287,8 @@ public:
 	void SwapWeapon(AWeapon* WeaponToSwap);
 	UFUNCTION(BlueprintCallable, Category = "Pickup")
 	void GetPickupItem(AItem* Item);
+	UFUNCTION(BlueprintCallable, Category = "Retargeting")
+	void RemoveLookOn();
 
 protected:
 	virtual void BeginPlay() override;
@@ -293,6 +320,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* Sphere;
+
+	UPROPERTY(VisibleAnywhere)
+	USpotLightComponent* Light;
 
 	UPROPERTY(EditAnywhere)
 	UUserWidget* MainInventory;
@@ -401,7 +431,18 @@ public:
 	class UOneSoulGameInstance* gameInst;
 	
 
-   AController* MeController;
+	//플레이어 카메라 흔들리게 하려는 요소들
+	bool camShake = false;
+	float currCamShakeTime = 0;
+	float camShakeTime = 1;
+	UFUNCTION(BlueprintCallable)
+	void Shake();
+	float randA = 1.0f;
+	float randB = 1.0f;
+	float randC = 1.0f;
+	float randD = 1.0f;
+
+    AController* MeController;
 
    void ExchangeInventoryItems(int32 CurrentItemIndex, int32 NewItemIndex);
 

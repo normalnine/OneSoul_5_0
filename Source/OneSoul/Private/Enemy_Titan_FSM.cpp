@@ -148,10 +148,11 @@ void UEnemy_Titan_FSM::IdleState()
 {
 	
 	superArmor=false;
-
+	FVector Ddir = target->GetActorLocation() - me->GetActorLocation();
+	FVector DdirSize = Ddir;
 	//시야에 들어오면 움직이기 시작
-	if (IsTargetTrace())
-	{	//UE_LOG(LogTemp, Warning, TEXT("I_SEE"));
+	if (DdirSize.Size() < 2000)
+	{	
 		if (jumptotarget)
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("JUMPTOYOU"));
@@ -194,14 +195,28 @@ void UEnemy_Titan_FSM::MoveState()
 		{
 			
 			int32 index = FMath::RandRange(0, 1);
-			if (index == 0)
+			//hp가 적어지면 공격패턴 추가
+			if (hp < 11)
+			{
+				index = FMath::RandRange(1, 3);
+			}
+			else if (index == 0)
 			{
 				ChangeState(EEnemyState4::Attack0);
 			}
-			else
+			else if(index == 1)
 			{
 				ChangeState(EEnemyState4::Attack1);
 			}
+			else if (index == 2)
+			{
+				ChangeState(EEnemyState4::Attack2);
+			}
+			else if (index == 3)
+			{
+				ChangeState(EEnemyState4::Attack3);
+			}
+		
 		}
 		//그렇지 않으면
 		else
@@ -229,13 +244,25 @@ void UEnemy_Titan_FSM::movetoPlayer()
 	{
 
 		int32 index = FMath::RandRange(0, 1);
+		if (hp<11)
+		{
+			 index = FMath::RandRange(1,3);
+		}
 		if (index == 0)
 		{
 			ChangeState(EEnemyState4::Attack0);
 		}
-		else
+		else if (index == 1)
 		{
 			ChangeState(EEnemyState4::Attack1);
+		}
+		else if (index == 2)
+		{
+			ChangeState(EEnemyState4::Attack2);
+		}
+		else if (index == 3)
+		{
+			ChangeState(EEnemyState4::Attack3);
 		}
 	}
 }
@@ -406,7 +433,7 @@ void UEnemy_Titan_FSM::UpdaetAttackDelay()
 		else
 		{
 
-			ChangeState(EEnemyState4::Move);
+			ChangeState(EEnemyState4::MovetoTarget);
 		}
 	}
 }
@@ -416,12 +443,14 @@ void UEnemy_Titan_FSM::DamageState()
 	if (IsWaitComplete(damageDelayTime))
 	{
 		//Move 상태
-		ChangeState(EEnemyState4::Move);
+		ChangeState(EEnemyState4::MovetoTarget);
 	}
 }
 void UEnemy_Titan_FSM::DieState()
 {
 	me->HpWidget->SetVisibility(false);
+	me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	//아직 죽음 애니메이션이 끝나지 않았다면
 	//바닥내려가지 않도록 처리
 	/*if (anim->bDieDone == false)
@@ -456,7 +485,11 @@ void UEnemy_Titan_FSM::OnDamageProcess()
 	me->HpWidget->SetVisibility(true);
 	hp--;
 	me->HpWidget->UpdateCurrHP(hp, maxhp);
-	
+	//플레이어 카메라 흔들리게 하는 효과 셋팅값
+	target->camShakeTime = 0.4f;
+	target->randC = 0.7; target->randD = 0.7;
+	target->Shake();
+
 		//체력이 남아있다면
 		if (hp > 0)
 		{
@@ -490,7 +523,8 @@ void UEnemy_Titan_FSM::OnDamageProcess()
 				UGameplayStatics::PlaySound2D(GetWorld(), HITSound);
 				FString sectionName = FString::Printf(TEXT("Damage0"));
 				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
-
+				FVector imp = target->GetActorForwardVector() * 500.0f;
+				me->GetCharacterMovement()->AddImpulse(imp, true);
 			//상태를 피격으로 전환
 			mState = EEnemyState4::Damage;
 			currentTime = 0;
@@ -507,12 +541,6 @@ void UEnemy_Titan_FSM::OnDamageProcess()
 			FString sectionName = FString::Printf(TEXT("Die"));
 			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 			GetWorld()->SpawnActor<AActor>(dropFactory, me->GetActorTransform());
-			AGameModeBase* CurrentMode = GetWorld()->GetAuthGameMode();
-			AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(CurrentMode);
-			if (CurrentGameModeBase != nullptr)
-			{
-				CurrentGameModeBase->AddCoins(10);
-			}
 		}
 		//애니메이션 상태 동기화
 		anim->animState = mState;

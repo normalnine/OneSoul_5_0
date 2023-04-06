@@ -31,11 +31,11 @@ public:
 		class UEnemy_Skeleton_FSM* fsm;
 
 	//충돌 컴포넌트
-	UPROPERTY(VisibleAnywhere, Category = Collision)
-		class USphereComponent* collisionComp;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Collision)
+		class UCapsuleComponent* collisionComp;
 
 	//충돌 컴포넌트
-	UPROPERTY(VisibleAnywhere, Category = Collision)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Collision)
 		class UCapsuleComponent* SwordCollisionComp;
 
 	UFUNCTION()
@@ -86,4 +86,7 @@ public:
 	//방패에 플레이어 칼 맞았을때 효과음
 	UPROPERTY(EditDefaultsOnly, Category = Sound)
 		class USoundBase* blockSound;
+
+
+		bool one = false;
 };

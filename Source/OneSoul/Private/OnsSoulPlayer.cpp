@@ -12,6 +12,7 @@
 #include "Components/WidgetComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -32,13 +33,16 @@
 #include <Blueprint/WidgetBlueprintLibrary.h>
 #include "EnemyBossDieUI.h"
 #include "NPC_LevelupUI.h"
-
+#include "Components/CapsuleComponent.h"
 #include "NPC_MenuUI.h"
 #include "Interactions.h"
 #include "Interactions_DialogueUI.h"
 #include "EscUI.h"
 #include "OneSoulGameInstance.h"
+
 #include <Camera/CameraActor.h>
+
+#include <GameFramework/PlayerController.h>
 AOnsSoulPlayer::AOnsSoulPlayer()
       
 {
@@ -66,10 +70,19 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	SpringArm -> SetupAttachment(GetRootComponent());
 	SpringArm -> TargetArmLength = 300.f;
 	SpringArm -> bUsePawnControlRotation = true;
+	SpringArm -> SetRelativeLocation(FVector(0.f,0.f,120.f));
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera -> SetupAttachment(SpringArm);
 	Camera -> bUsePawnControlRotation = false;
+	Camera -> SetRelativeRotation(FRotator(-10.f,0.f,0.f));
+
+	Light = CreateDefaultSubobject<USpotLightComponent>(TEXT("SpotLight"));
+	Light -> SetupAttachment(GetRootComponent());
+	Light -> SetRelativeLocationAndRotation(FVector(428.964464f, -203.396706f, 365.360429f),FRotator(-49.345297f, 155.226589f, 24.157479f));
+	Light -> InnerConeAngle = 36.392002f;
+	Light -> OuterConeAngle = 38.312f;
+	Light -> Intensity = 30000.f;
 
 	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollision"));
 	Sphere -> SetupAttachment(GetRootComponent());
@@ -115,6 +128,7 @@ void AOnsSoulPlayer::BeginPlay()
 	Tags.Add(FName("OneSoulCharacter"));
 
 	Sphere -> OnComponentBeginOverlap.AddDynamic(this,&AOnsSoulPlayer::OnSphereOverlap);
+	Sphere -> OnComponentEndOverlap.AddDynamic(this,&AOnsSoulPlayer::OnSphereEndOverlap);
 
 	ReSpawnWiget = CreateWidget<UUserWidget>(GetWorld(), Respawn);
 	YouDieWiget = CreateWidget<UUserWidget>(GetWorld(),YouDie);
@@ -123,7 +137,9 @@ void AOnsSoulPlayer::BeginPlay()
 	MainInventory -> SetVisibility(ESlateVisibility::Collapsed);
 	MainInventory -> AddToViewport();
 
-	
+	GetWorld()->SpawnActor<class AActor>(PickupWeapon,GetActorTransform());
+	GetWorld()->SpawnActor<class AActor>(PickupPotion, GetActorTransform());
+	GetWorld()->SpawnActor<class AActor>(PickupSheid, GetActorTransform());
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && LevelStartMontage)
@@ -187,6 +203,29 @@ void AOnsSoulPlayer::Tick(float DeltaTime)
 	}
 	SoulNum = gameInst->soul;
 
+	//플레이어 카메라 흔들리는 효과
+	if (camShake == true)
+	{
+		//2. 현재시간을 흐르게 하고
+		currCamShakeTime += DeltaTime;
+		//3. 만약에 현재시간이 기준시간보다 작으면
+		if (currCamShakeTime < camShakeTime)
+		{
+			Shake();
+		}
+		//5. 그렇지 않으면 초기화(현재시간, 카메라위치)
+		else
+		{
+			currCamShakeTime = 0;
+			camShake = false;
+			camShakeTime=1.0f;
+			randA = 1.0f;
+			randB = 1.0f;
+			randC = 1.0f;
+			randD = 1.0f;
+			Camera->SetRelativeLocation(FVector::ZeroVector);
+		}
+	}
 }
 
 void AOnsSoulPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -302,11 +341,6 @@ void AOnsSoulPlayer::Destroyed()
 	{
 	  CurrentGameModeBase-> ReSpawnPlayer(this); 
 
-	  if (IsDead == true)
-	  {
-	    SpawnDefaultWeapon();
-	  }
-	  
       UGameplayStatics:: GetPlayerController(this,0) -> SetShowMouseCursor(false);
       UGameplayStatics:: GetPlayerController(this, 0) -> SetInputMode(FInputModeGameOnly());
 	}
@@ -325,6 +359,20 @@ void AOnsSoulPlayer::OnSphereOverlap(
 {
   SpawnTarget = Cast<AReSpawn>(OthrActor);
 
+}
+
+void AOnsSoulPlayer::OnSphereEndOverlap(
+                                        UPrimitiveComponent* OverlappedComponent,
+										AActor* OthrActor,
+										UPrimitiveComponent* OtherComp,
+										int32 OtherBodyIndex)
+{
+ SpawnTarget = Cast<AReSpawn>(OthrActor);
+
+ if (SpawnTarget)
+ {
+	 SpawnTarget = nullptr;
+ }
 }
 
 void AOnsSoulPlayer::DirectionalHitReact(const FVector& ImpactPoint)
@@ -493,6 +541,11 @@ void AOnsSoulPlayer::GetPickupItem(AItem* Item)
  }
 }
 
+void AOnsSoulPlayer::RemoveLookOn()
+{
+  RetargetPlueprint->Destroy();
+}
+
 void AOnsSoulPlayer::ToggleLockOn()
 {
    ANormalEnemy_YG* Enemy = Cast<ANormalEnemy_YG>(Taget);
@@ -504,6 +557,7 @@ void AOnsSoulPlayer::ToggleLockOn()
 	else
 	{
 		DisableLockOn();
+		RetargetPlueprint -> Destroy();
 	}
 }
 
@@ -522,7 +576,6 @@ void AOnsSoulPlayer::PlayHitReactMontage()
 
 void AOnsSoulPlayer::Attack()
 { 
-
 		UAnimInstance* AnimInstance = (GetMesh()->GetAnimInstance());
 		IsAttacking = true;
 
@@ -628,6 +681,7 @@ void AOnsSoulPlayer::EKeyPressed()
 
  if (SpawnTarget && SpawnTarget -> GetReSpawnBox())
  {   
+
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (AnimInstance && SpawnMontage)
 		{
@@ -649,16 +703,17 @@ void AOnsSoulPlayer::EKeyPressed()
 				CurrentGameModeBase->PotionNum = 5.f;
 			}
 
-			PlayerSpawnTimer();
-
+		  PlayerSpawnTimer();
+		  
          if(ReSpawnWiget == nullptr) return;
  
 		  ReSpawnWiget-> AddToViewport();
 
 	      GetWorld() -> GetTimerManager().SetTimer(SpawnWigetTimer,this,&AOnsSoulPlayer::ReSpawnRemoveWidget,2.f);
-		   
-	   }
-	}
+
+ 	   }
+		 
+ }
 
  }
 
@@ -794,6 +849,24 @@ void AOnsSoulPlayer::UpdateTargetingControlRotation()
 		FRotator NewRotation = UKismetMathLibrary::MakeRotator(CurrentRot.Roll, YZ.Pitch, YZ.Yaw);
 
 		Controller->SetControlRotation(NewRotation);
+
+		if (RetargetPlueprint == nullptr)
+		{
+		 RetargetPlueprint = GetWorld()->SpawnActor<class AActor>(RetargetPlueprints, TargetActor->GetActorTransform());
+		}
+		else
+		{
+
+			RetargetPlueprint->Destroy();
+
+			RetargetPlueprint = GetWorld()->SpawnActor<class AActor>(RetargetPlueprints, TargetActor->GetActorTransform());
+		}
+	   
+	}
+	else
+	{
+		RetargetPlueprint -> Destroy();
+		DisableLockOn();
 	}
 
 }
@@ -839,6 +912,34 @@ void AOnsSoulPlayer::DropWeapon()
 void AOnsSoulPlayer::ReceiveDamage(float Damge)
 {
   Health = FMath:: Clamp(Health - Damge,0.f,MaxHealth);
+  //피격시 애니메이션블루프린트에서 설정한 값이 씹히는거를 풀어주는 부분
+  //구르기할때
+  if (compPlayerRoll->re ==false)
+  {
+	  compPlayerRoll->re = true;
+	  FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator();
+	  while (It)
+	  {
+		  APlayerController* Pcon = It->Get();
+		  // 가져온 플레이어 컨트롤러 객체로 처리
+		  ++It;
+		  EnableInput(Pcon);
+	  }
+  }
+  //빽스탭할때
+  if (compPlayerRoll->ba == false)
+  {
+	  compPlayerRoll->ba = true;
+	  FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator();
+	  while (It)
+	  {
+		  APlayerController* Pcon = It->Get();
+		  // 가져온 플레이어 컨트롤러 객체로 처리
+		  ++It;
+		  EnableInput(Pcon);
+	  }
+  }
+
 }
 
 void AOnsSoulPlayer::LMBDown()
@@ -937,7 +1038,6 @@ void AOnsSoulPlayer::Disarm()
 	PlayEquipMontage(FName("UnEquip"));
 	CharacterState = ECharacterState::ECS_Unequipped;
 	ActionState = EActionState::EAS_EquippingWeapon;
-	IsAttacking = false;
 }
 
 void AOnsSoulPlayer::Arm()
@@ -945,7 +1045,6 @@ void AOnsSoulPlayer::Arm()
 	PlayEquipMontage(FName("Equip"));
 	CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
 	ActionState = EActionState::EAS_EquippingWeapon;
-	IsAttacking = false;
 }
 
 void AOnsSoulPlayer::PlayEquipMontage(const FName& SectionName)
@@ -1004,7 +1103,7 @@ void AOnsSoulPlayer::PotionDrinking()
 
 	    AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(CurrentMode);
 
-        if(Health >= 100) return;
+        if(Health >= MaxHealth) return;
 
 	    if (CurrentGameModeBase-> PotionNum > 0)
 	    {
@@ -1028,17 +1127,19 @@ void AOnsSoulPlayer::WeaponChange()
 	if (CanArm())
 	{
 	  Arm();
+	  IsAttacking = false;
+	  
 	}
 	else if (CanDisarm())
 	{
 		Disarm();
-
+		IsAttacking =false;
 	}
 }
 
 void AOnsSoulPlayer::ToggleInventory()
 {
-
+   
 	if (IsPaused)
 	{    
 	    IsPaused = false;
@@ -1046,15 +1147,21 @@ void AOnsSoulPlayer::ToggleInventory()
 		GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(false);
 		MainInventory->SetVisibility(ESlateVisibility::Collapsed);
 		UGameplayStatics::GetPlayerController(this, 0)->SetInputMode(FInputModeGameOnly());
+
+		IsTab = false;
 	}
 	else
 	{
 		IsPaused = true;
+
 		
 		GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
 		MainInventory -> SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		UGameplayStatics::GetPlayerController(this, 0)->SetInputMode(FInputModeGameAndUI());
+
+		IsTab = true;
 	}
+
 }
 
 void AOnsSoulPlayer::PlayPotionHealMontage()
@@ -1223,4 +1330,12 @@ ACameraActor* AOnsSoulPlayer::GetNPCCamera()
 	}
 
 	return nullptr;
+}
+void AOnsSoulPlayer::Shake()
+{
+	camShake = true;
+	//4. 카메라를 랜덤하게 위치시키자
+	float randY = FMath::RandRange(-randA,randB);
+	float randZ = FMath::RandRange(-randC,randD);
+	Camera->SetRelativeLocation(FVector(0, randY, randZ));
 }
