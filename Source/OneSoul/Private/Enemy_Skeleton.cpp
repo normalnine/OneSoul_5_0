@@ -208,7 +208,7 @@ void AEnemy_Skeleton::OnOverlapBeginshield(class UPrimitiveComponent* selfComp, 
 		
 		//피격호출안되도록 먼저 막기
 		one=true;
-		UE_LOG(LogTemp, Warning, TEXT("shield"));
+		
 		//방패에 맞으면 몸의 콜리전을 잠시 끄고 다시 키는거 - 방패 맞고 몸맞아서 따블로 맞으면 안되니까
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		
@@ -258,10 +258,10 @@ void AEnemy_Skeleton::OnOverlapME(class UPrimitiveComponent* selfComp, class AAc
 
 
 		//FVector HitLocation = SweepResult.Location;
-		FName HitLocation = SweepResult.BoneName;
-		GetWorld()->SpawnActor<AActor>(HitresultFactory, GetMesh()->GetSocketLocation(TEXT("*HitLocation")),weapon->GetActorRotation()-GetActorRotation(),params);
+		/*FName HitLocation = SweepResult.BoneName;
+		GetWorld()->SpawnActor<AActor>(HitresultFactory, GetMesh()->GetSocketLocation(TEXT("*HitLocation")),weapon->GetActorRotation()-GetActorRotation(),params);*/
 
-		fsm->OnDamageProcess();
+		fsm->OnDamageProcess(1);
 		/*	FString LocationString = HitLocation.ToString();
 
 			UKismetSystemLibrary::PrintString(this, LocationString, true, true, FLinearColor::Green); */

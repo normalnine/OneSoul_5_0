@@ -110,15 +110,9 @@ void AEnemy_Titan::OnOverlapME(class UPrimitiveComponent* selfComp, class AActor
 	AWeapon* weapon = Cast<AWeapon>(otherActor);
 	if (weapon != nullptr)
 	{
-		FActorSpawnParameters params;
-		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		
 
-
-		//FVector HitLocation = SweepResult.Location;
-		FName HitLocation = SweepResult.BoneName;
-		GetWorld()->SpawnActor<AActor>(HitresultFactory, GetMesh()->GetSocketLocation(TEXT("*HitLocation")), weapon->GetActorRotation() - GetActorRotation(), params);
-
-
+		UE_LOG(LogTemp, Warning, TEXT("titan"));
 		/*	FString LocationString = HitLocation.ToString();
 
 			UKismetSystemLibrary::PrintString(this, LocationString, true, true, FLinearColor::Green); */

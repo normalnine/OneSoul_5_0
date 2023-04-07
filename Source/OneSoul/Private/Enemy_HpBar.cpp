@@ -19,3 +19,8 @@ void UEnemy_HpBar::UpdateCurrHP(float curr, float max)
 	//Progress bar UI °»½Å
 	HpBar->SetPercent(hp);
 }
+
+void UEnemy_HpBar::UpdateDamage(float damage)
+{
+	_howDamage->SetText(FText::AsNumber(damage));
+}

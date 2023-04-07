@@ -18,4 +18,6 @@ public:
 	class UEnemy_HpBar* HpWidget;
 
 	void UpdateCurrHP(float curr, float max);
+
+	void UpdateDamage(float damage);
 };

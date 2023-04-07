@@ -62,10 +62,6 @@ void UEnemy_Skeleton_FSM::BeginPlay()
 
 	me->HpWidget->UpdateCurrHP(hp, maxhp);
 
-	mat = UMaterialInstanceDynamic::Create(me->GetMesh()->GetMaterial(0), this);
-
-	me->GetMesh()->SetMaterial(0, mat);
-
 }
 
 
@@ -125,21 +121,25 @@ void UEnemy_Skeleton_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	{
 		me->HpWidget->SetVisibility(false);
 	}
-	float Ddotvalue = FVector::DotProduct(me->GetActorLocation(), Ddir);
+	float Ddotvalue = FVector::DotProduct(me->GetActorForwardVector(), Ddir);
 	float Dangle = UKismetMathLibrary::DegAcos(Ddotvalue);
-	if (Dangle > 155 && DdirSize.Size() < 500)
+	//몬스터의 뒷각에 있으면서 몬스터와의 거리가 200미만일때
+	if (Dangle > 170 && DdirSize.Size() < 300)
 	{
 		Hitback = true;
+		/*UE_LOG(LogTemp, Warning, TEXT("Hitback = true;"));*/
 	}
 	else
 	{
 		Hitback = false;
+		/*UE_LOG(LogTemp, Warning, TEXT("Hitback = false;"));*/
 	}
 
 }
 
 void UEnemy_Skeleton_FSM::IdleState()
 {
+	/*UE_LOG(LogTemp, Warning, TEXT("IdleState"));*/
 	isShield = false;
 	//시야에 들어오면 움직이기 시작
 	if (IsTargetTrace())
@@ -159,6 +159,7 @@ void UEnemy_Skeleton_FSM::IdleState()
 }
 void UEnemy_Skeleton_FSM::MoveState()
 {
+	/*UE_LOG(LogTemp, Warning, TEXT("MoveState"));*/
 	// 시야에 들어왔는지 여부
 	bool bTrace = IsTargetTrace();
 
@@ -216,6 +217,7 @@ void UEnemy_Skeleton_FSM::MoveState()
 
 void UEnemy_Skeleton_FSM::movetoPlayer()
 {
+	//UE_LOG(LogTemp, Warning, TEXT("movetoPlayer"));
 	ai->MoveToLocation(target->GetActorLocation());
 
 	FVector dir = target->GetActorLocation() - me->GetActorLocation();
@@ -232,6 +234,7 @@ void UEnemy_Skeleton_FSM::movetoPlayer()
 
 void UEnemy_Skeleton_FSM::AttackState()
 {
+	/*UE_LOG(LogTemp, Warning, TEXT("AttackState"));*/
 	/*me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);*/
 
 	anim->animState = mState;
@@ -253,6 +256,7 @@ void UEnemy_Skeleton_FSM::AttackState()
 
 void UEnemy_Skeleton_FSM::AttackCombo1()
 {
+	/*UE_LOG(LogTemp, Warning, TEXT("AttackCombo1"));*/
 	/*superArm = true;*/
 	/*me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);*/
 	if (me->changeGroggy)
@@ -275,6 +279,7 @@ void UEnemy_Skeleton_FSM::AttackCombo1()
 
 void UEnemy_Skeleton_FSM::AttackCombo2()
 {
+	/*UE_LOG(LogTemp, Warning, TEXT("AttackCombo2"));*/
 	
 	if (me->changeGroggy)
 	{
@@ -307,6 +312,7 @@ void UEnemy_Skeleton_FSM::AttackCombo3()
 
 void UEnemy_Skeleton_FSM::BlockAttack()
 {
+	/*UE_LOG(LogTemp, Warning, TEXT("BlockAttack"));*/
 	isShield = true;
 
 	anim->animState = mState;
@@ -327,6 +333,7 @@ void UEnemy_Skeleton_FSM::BlockAttack()
 
 void UEnemy_Skeleton_FSM::UpdaetAttackDelay()
 {
+	/*UE_LOG(LogTemp, Warning, TEXT("UpdaetAttackDelay"));*/
 	superArm = false;
 	if (IsWaitComplete(attackDelayTime))
 	{
@@ -359,7 +366,8 @@ void UEnemy_Skeleton_FSM::UpdaetAttackDelay()
 	}
 }
 void UEnemy_Skeleton_FSM::DamageState()
-{	
+{
+	/*UE_LOG(LogTemp, Warning, TEXT("DamageState"));*/
 	if (cri)
 	{
 		cri = false;
@@ -391,7 +399,7 @@ void UEnemy_Skeleton_FSM::UpdateReturnPos()
 
 
 
-void UEnemy_Skeleton_FSM::OnDamageProcess()
+void UEnemy_Skeleton_FSM::OnDamageProcess(float damage)
 {
 	//칼,방패 충돌체 끄기
 	me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -399,27 +407,17 @@ void UEnemy_Skeleton_FSM::OnDamageProcess()
 	UGameplayStatics::PlaySound2D(GetWorld(), HITSound);
 	//방패콜리전끄기 몬스터 틱에서 온오프
 	isShield=false;
-	//if (isShield)
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("imGuard"));
-	//	FString sectionName = FString::Printf(TEXT("Block"));
-	//	me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
-	//	mState = EEnemyState1::Shield;
-	//}
-	//else
-	//{
+
 		//체력감소
-		//hp -= damage;
-		
-		/*if (!me->one)
-		{*/
-			hp--;
-			/*	UE_LOG(LogTemp, Warning, TEXT("me"));
-			}*/
+		hp -= damage;
 		
 		//피격되었을때 hp표시줄을 보여주는거 한번만 실행되면됨
 		me->HpWidget->UpdateCurrHP(hp,maxhp);
-		
+		allDamage+=damage;
+		me->HpWidget->UpdateDamage(allDamage);
+		onedam = true;
+		FTimerHandle dam;
+		GetWorld()->GetTimerManager().SetTimer(dam, this, &UEnemy_Skeleton_FSM::resetDamage, 3.0f, false);
 		if (hp > 0)
 		{	if (!(superArm))
 			{
@@ -430,6 +428,11 @@ void UEnemy_Skeleton_FSM::OnDamageProcess()
 				if (cri)
 				{	
 				/*	FB = true;*/
+					//플레이어를 보면서 뒤로 밀려가기
+					FVector lookVot = target->GetActorLocation() - me->GetActorLocation();
+					FRotator lookRot = lookVot.Rotation();
+					me->SetActorRotation(lookRot);
+
 					FString sectionName = FString::Printf(TEXT("Cri"));
 					me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 					FTimerHandle aaa;
@@ -438,10 +441,12 @@ void UEnemy_Skeleton_FSM::OnDamageProcess()
 				}
 				else if (Hitback)
 				{
-					/*FB = false;*/
-					/*FRotator addRotator = me->GetActorRotation();
-					addRotator.Yaw += 90.0f;
-					me->SetActorRotation(addRotator);*/
+					//방향설정
+					FVector lookVot =me->GetActorLocation()-target->GetActorLocation();
+					FRotator lookRot = lookVot.Rotation();
+					FRotator PY = FRotator(0,-90,0);
+					me->SetActorRotation(lookRot+PY);
+
 					FString sectionName = FString::Printf(TEXT("BackAttack"));
 					me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 					FTimerHandle aaa;
@@ -451,14 +456,6 @@ void UEnemy_Skeleton_FSM::OnDamageProcess()
 				else
 				{
 					//일반피격
-
-					////색을 빨간색으로 변경
-					//mat->SetVectorParameterValue(TEXT("EmissiveColor"), FVector4(1, 0, 0, 1));
-					//mat->SetScalarParameterValue(TEXT("Glow"), 1.0f);
-					////다시 원색으로 초기화
-					//GetWorld()->GetTimerManager().ClearTimer(colorHandle);
-					//GetWorld()->GetTimerManager().SetTimer(colorHandle, this, &UEnemy_Skeleton_FSM::ColorOff, 0.05f, false);
-
 					FVector imp = target->GetActorForwardVector() * 500.0f;
 					me->GetCharacterMovement()->AddImpulse(imp, true);
 					currentTime = 0;
@@ -491,11 +488,6 @@ void UEnemy_Skeleton_FSM::OnDamageProcess()
 	}
 
 
-
-
-//}
-
-
 bool UEnemy_Skeleton_FSM::GetRandomPositionInNavMesh(FVector centerLocation, float radius, FVector& dest)
 {
 	auto ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
@@ -507,6 +499,7 @@ bool UEnemy_Skeleton_FSM::GetRandomPositionInNavMesh(FVector centerLocation, flo
 
 void UEnemy_Skeleton_FSM::groggy()
 {
+	/*UE_LOG(LogTemp, Warning, TEXT("groggy"));*/
 	cri = true;
 	anim->animState = mState;
 	me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -562,6 +555,22 @@ void UEnemy_Skeleton_FSM::gof()
 			GetWorld()->GetTimerManager().ClearTimer(ddd);
 		}
 	}
+}
+
+void UEnemy_Skeleton_FSM::resetDamage()
+{
+	if (onedam)
+	{
+		onedam = false;
+		FTimerHandle dam;
+		GetWorld()->GetTimerManager().SetTimer(dam, this, &UEnemy_Skeleton_FSM::resetDamage, 3.0f, false);
+	}
+	else
+	{
+		allDamage = 0;
+		me->HpWidget->UpdateDamage(0);
+	}
+	
 }
 
 bool UEnemy_Skeleton_FSM::IsTargetTrace()
@@ -626,14 +635,6 @@ bool UEnemy_Skeleton_FSM::IsWaitComplete(float delayTime)
 
 void UEnemy_Skeleton_FSM::ChangeState(EEnemyState1 state)
 {
-	//상태 변경 로그를 출력하자
-	//UEnum* enumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EEnemyState"), true);
-	//if (enumPtr != nullptr)
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("%s -----> %s"),
-	//		*enumPtr->GetNameStringByIndex((int32)mState),
-	//		*enumPtr->GetNameStringByIndex((int32)state));
-	//}
 
 	//현재 상태를 갱신
 	mState = state;
@@ -723,11 +724,4 @@ void UEnemy_Skeleton_FSM::MoveToPos(FVector pos)
 		//Idle 상태로 전환
 		ChangeState(EEnemyState1::Idle);
 	}
-}
-
-void UEnemy_Skeleton_FSM::ColorOff()
-{
-
-	mat->SetVectorParameterValue(TEXT("EmissiveColor"), FVector4(1, 1, 1, 1));
-	mat->SetScalarParameterValue(TEXT("Glow"), 0);
 }

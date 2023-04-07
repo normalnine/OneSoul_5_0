@@ -57,7 +57,7 @@ void UJW_PlayerRollComponent::Roll()
  	if (playerAnim->Montage_IsPlaying(BackStep) == false)
  	{
  		//방향키가 안눌리고 있을때 + 공중에 없을때
- 		if (me->isMoveF == false && me->isMoveR == false && !(me->GetCharacterMovement()->IsFalling()))
+ 		if (me->isMoveF == false && me->isMoveR == false && !(me->GetCharacterMovement()->IsFalling()) && me->imguard==false)
  		{
  			//스테미나가 있을때만 작동하기
  			if (me->CurrentStamina>0)
@@ -66,33 +66,41 @@ void UJW_PlayerRollComponent::Roll()
                 //날라가는 버그때문에 변경
 				/*FVector imp = -1 * me->GetActorForwardVector() * 10000.0f;
 				me->GetCharacterMovement()->AddImpulse(imp, true);*/
+             
  				//스테미나 감소
                 me->CurrentStamina = FMath::Clamp(me->CurrentStamina - 15.f, me->MinStamina, me->MaxStamina);
              
- 
+				//강제로 공격을 실행시킨상태로 만든뒤
+				me->IsAttacking = true;
  
 
                 //다시 스테미나 채우기
-                me->SprintTimer();
-                me->RegenerateStamina();
+				me->StopSprint();
+				me->RegenerateStamina();
+
+                me->GetCapsuleComponent()->SetCollisionObjectType(ECC_GameTraceChannel9);
+				FTimerHandle on;
+				GetWorld()->GetTimerManager().SetTimer(on, this, &UJW_PlayerRollComponent::onColl, 0.7f, false);
  			}
  			
  		}
  
  
- 		// 몽타주가 실행 안 할때  구르기 애니메이션 실행하기 + 공중에 없을때
- 		else if (playerAnim->Montage_IsPlaying(Rolling) == false && !(me->GetCharacterMovement()->IsFalling()))
+ 		// 몽타주가 실행 안 할때  구르기 애니메이션 실행하기 + 공중에 없을때 + 방어하고있지않을때
+ 		else if (playerAnim->Montage_IsPlaying(Rolling) == false && !(me->GetCharacterMovement()->IsFalling())&&me->imguard==false)
  		{
  			//스테미나가 있을때만 작동하기
  			if (me->CurrentStamina > 0)
  			{
+
  				//일단구르기
  				playerAnim->Montage_Play(Rolling);
  
  				//스테미나 감소
                 me->CurrentStamina = FMath::Clamp(me->CurrentStamina - 15.f, me->MinStamina, me->MaxStamina);
 			
- 
+                //강제로 공격을 실행시킨상태로 만든뒤
+                me->IsAttacking=true;
  				//앞으로 밀려나게 주기
                 //날라가는 버그때문에 변경
 				/*FVector imp = me->GetActorForwardVector() * 10000.0f;
@@ -129,6 +137,6 @@ void UJW_PlayerRollComponent::onColl()
 	//원래 출동타입으로 바꿔주기
     me->GetCapsuleComponent()->SetCollisionObjectType(ECC_Pawn);
 
-	
+    me->IsAttacking = false;
 }
 

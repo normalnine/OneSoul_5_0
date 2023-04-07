@@ -373,9 +373,6 @@ private:
 	UParticleSystem* SpawnEffect;
 
 	UPROPERTY()
-	UOneSoulOverlay* OneSoulOverlay;
-
-	UPROPERTY()
 	ANormalEnemy_YG* Taget;
 
 	UPROPERTY()
@@ -421,7 +418,7 @@ public:
    bool parrying = false;
    
    bool canshield = false;
-
+   UPROPERTY(EditAnywhere, BlueprintReadWrite)
    bool bTalking = false;
    class ANPC* npc;
    class AInteractions* interaction;
@@ -445,8 +442,14 @@ public:
     AController* MeController;
 
    void ExchangeInventoryItems(int32 CurrentItemIndex, int32 NewItemIndex);
-
    void TalkStartOREnd();
    void MoveCamera();
    ACameraActor* GetNPCCamera();
+
+   UPROPERTY(BlueprintReadWrite)
+	   UOneSoulOverlay* OneSoulOverlay;
+   UFUNCTION(BlueprintCallable)
+   void setUI();
+   UPROPERTY(EditAnywhere, BlueprintReadWrite)
+   bool dontshow = false;
 };

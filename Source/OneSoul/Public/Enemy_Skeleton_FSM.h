@@ -75,7 +75,7 @@ public:
 
 	//피격 알림 이벤트 함수
 	UFUNCTION(BlueprintCallable)
-		void OnDamageProcess();
+		void OnDamageProcess(float damage);
 
 	//타겠을 쫒아갈수있나?
 	bool IsTargetTrace();
@@ -111,7 +111,7 @@ public:
 
 	//공격범위
 	UPROPERTY(EditAnywhere, Category = FSM)
-		float attackRange = 120.0f;
+		float attackRange = 200.0f;
 
 	//쫓아 갈 수 있는 범위
 	float traceRange = 2000;
@@ -195,11 +195,11 @@ public:
 	//피격 효과음
 	UPROPERTY(EditDefaultsOnly, Category = Sound)
 		class USoundBase* HITSound;
-	//색바꾸려는 변수
-	class UMaterialInstanceDynamic* mat;
 
-	//원래색으로 돌아가는 함수
-	void ColorOff();
-	//색깔 나오는 시간 핸들
-	FTimerHandle colorHandle;
+		void resetDamage();
+
+		//데미지 누적
+		float allDamage = 0;
+		//3초동안만 실행 누적실행 안되게
+		bool onedam = true;
 };
