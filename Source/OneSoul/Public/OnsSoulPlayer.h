@@ -24,6 +24,7 @@ class UUserWidget;
 class UInventoryGrid;
 class USpotLightComponent;
 class AActor;
+class AShield;
 
 UENUM(BlueprintType)
 enum class EActionState : uint8
@@ -161,6 +162,10 @@ public:
 	bool IsReSpawnCheck=false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
 	bool EKeyButton=false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	AShield* OverlappingShiled;
+
 	UPROPERTY(EditAnywhere,Category="Retargeting")
 	TSubclassOf<class AActor> RetargetPlueprints;
 	UPROPERTY(EditAnywhere, Category = "Retargeting")
@@ -295,6 +300,8 @@ public:
 	void GetPickupItem(AItem* Item);
 	UFUNCTION(BlueprintCallable, Category = "Retargeting")
 	void RemoveLookOn();
+	UFUNCTION(BlueprintCallable)
+	bool SheidNull();
 
 protected:
 	virtual void BeginPlay() override;
@@ -422,7 +429,7 @@ public:
 	   bool imguard = false;
    UPROPERTY(EditAnywhere, BlueprintReadWrite)
    bool parrying = false;
-   
+   UPROPERTY(EditAnywhere, BlueprintReadWrite)
    bool canshield = false;
 
    bool bTalking = false;

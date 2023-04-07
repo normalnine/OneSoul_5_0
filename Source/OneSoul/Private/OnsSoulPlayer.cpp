@@ -191,10 +191,6 @@ void AOnsSoulPlayer::BeginPlay()
 		SetActorLocation(gameInst->lastLoc);
 	}
 
-	if (IsReSpawnCheck == true)
-	{
-		ReSpawnWiget = nullptr;
-	}
 }
 
 void AOnsSoulPlayer::Tick(float DeltaTime)
@@ -348,10 +344,12 @@ void AOnsSoulPlayer::Destroyed()
 	if (AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(World->GetAuthGameMode()))
 	{
 	  CurrentGameModeBase-> ReSpawnPlayer(this); 
-	 
-	  ReSpawnWiget= nullptr;
 
-	  IsReSpawnCheck = true;
+
+	  if (SpawnTarget->GetReSpawnBox())
+	  {
+	   ReSpawnWiget = nullptr;
+	  }
 
 	  EnableInput(UGameplayStatics::GetPlayerController(this, 0));
       UGameplayStatics:: GetPlayerController(this,0) -> SetShowMouseCursor(false);
@@ -566,6 +564,14 @@ void AOnsSoulPlayer::RemoveLookOn()
   RetargetPlueprint->Destroy();
 }
 
+bool AOnsSoulPlayer::SheidNull()
+{
+
+ OverlappingShiled = nullptr;
+
+ return true;
+}
+
 void AOnsSoulPlayer::ToggleLockOn()
 {
    ANormalEnemy_YG* Enemy = Cast<ANormalEnemy_YG>(Taget);
@@ -615,8 +621,6 @@ void AOnsSoulPlayer::Attack()
 
 void AOnsSoulPlayer::EKeyPressed()
 {
-    
-	EKeyButton=true;
     
 	TArray<UUserWidget*> FoundWidgets;
 	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), FoundWidgets, UEnemyBossDieUI::StaticClass(), true);
@@ -689,7 +693,7 @@ void AOnsSoulPlayer::EKeyPressed()
 	}
  AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
  AItem* OverlappingWidget = Cast<AItem>(OverlappingItem);
- AShield* OverlappingShiled = Cast<AShield>(OverlappingItem);
+ OverlappingShiled = Cast<AShield>(OverlappingItem);
  if (OverlappingShiled)
  {
 	 EquipShield(OverlappingShiled);
@@ -727,12 +731,15 @@ void AOnsSoulPlayer::EKeyPressed()
 			}
 
 		  PlayerSpawnTimer();
-		  
+
          if(ReSpawnWiget == nullptr) return;
  
+		  EKeyButton = true;
+
 		  ReSpawnWiget-> AddToViewport();
 
 	      GetWorld() -> GetTimerManager().SetTimer(SpawnWigetTimer,this,&AOnsSoulPlayer::ReSpawnRemoveWidget,2.f);
+
 
  	   }
 		 
@@ -888,7 +895,7 @@ void AOnsSoulPlayer::UpdateTargetingControlRotation()
 	}
 	else
 	{
-		RetargetPlueprint -> Destroy();
+		RetargetPlueprint->Destroy();
 		DisableLockOn();
 	}
 
