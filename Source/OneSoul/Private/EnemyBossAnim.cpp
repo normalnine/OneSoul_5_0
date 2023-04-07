@@ -90,6 +90,11 @@ void UEnemyBossAnim::AnimNotify_Ghost()
 
 void UEnemyBossAnim::AnimNotify_Roar()
 {
-	enemy->fsm->Roar();
+	enemy->fsm->Roar(2000.0f);
+}
+
+void UEnemyBossAnim::AnimNotify_CameraShake()
+{
+	enemy->fsm->CameraShake();
 }
 

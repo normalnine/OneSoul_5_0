@@ -9,6 +9,7 @@
 #include <Components/SceneComponent.h>
 #include <Particles/ParticleSystemComponent.h>
 #include "OnsSoulPlayer.h"
+#include "EnemyBossFSM.h"
 
 // Sets default values
 AEnemyBossLaser::AEnemyBossLaser()
@@ -61,7 +62,8 @@ void AEnemyBossLaser::BeginOverlapLaser(UPrimitiveComponent* OverlappedComponent
 	{
 		target->ReceiveDamage(10);
 		target->DirectionalHitReact(GetActorLocation());
-
+		enemy->fsm->CameraShake();
+		enemy->fsm->Roar(1000.0f);
 	}
 }
 

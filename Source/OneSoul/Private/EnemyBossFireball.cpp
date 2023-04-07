@@ -5,10 +5,11 @@
 #include <Components/SphereComponent.h>
 #include <Components/StaticMeshComponent.h>
 #include <Engine/StaticMesh.h>
-//#include "OneSoulCharacter.h"
 #include <Kismet/GameplayStatics.h>
 #include "OnsSoulPlayer.h"
 #include <Particles/ParticleSystemComponent.h>
+#include "EnemyBoss.h"
+#include "EnemyBossFSM.h"
 // Sets default values
 AEnemyBossFireball::AEnemyBossFireball()
 {
@@ -45,6 +46,9 @@ void AEnemyBossFireball::BeginPlay()
 
 	sphereComp->OnComponentBeginOverlap.AddDynamic(this, &AEnemyBossFireball::BeginOverlapFireball);
 	sphereComp->OnComponentEndOverlap.AddDynamic(this, &AEnemyBossFireball::EndOverlapFireball);
+
+	enemy = Cast<AEnemyBoss>(UGameplayStatics::GetActorOfClass(GetWorld(), AEnemyBoss::StaticClass()));
+
 }
 
 // Called every frame
@@ -66,8 +70,8 @@ void AEnemyBossFireball::BeginOverlapFireball(UPrimitiveComponent* OverlappedCom
 		{
 			target->ReceiveDamage(10);
 			target->DirectionalHitReact(GetActorLocation());
-
-			bOverlap = false;
+			enemy->fsm->CameraShake();
+;			bOverlap = false;
 		}		
 	}
 }

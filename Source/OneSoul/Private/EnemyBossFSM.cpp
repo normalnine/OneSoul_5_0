@@ -20,6 +20,9 @@
 #include "EnemyBossDieUI.h"
 #include "OneSoulGameInstance.h"
 #include <Materials/MaterialInterface.h>
+#include <Components/AudioComponent.h>
+#include <Particles/ParticleSystemComponent.h>
+
 
 // Sets default values for this component's properties
 UEnemyBossFSM::UEnemyBossFSM()
@@ -132,7 +135,7 @@ void UEnemyBossFSM::UpdateMove()
 // 	else if (bTrace)
 	if (bTrace)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("bTrace"));
+		//UE_LOG(LogTemp, Warning, TEXT("bTrace"));
 // 		if (dist < avoidRange)
 // 		{
 // 			MoveToPos(randPos);
@@ -150,10 +153,10 @@ void UEnemyBossFSM::UpdateMove()
 			//UE_LOG(LogTemp, Warning, TEXT("AddMovementInput"));
 
 			//2. 그 방향으로 이동하고 싶다.
-			me->AddMovementInput(dir.GetSafeNormal());
+			//me->AddMovementInput(dir.GetSafeNormal());
 			//me->SetActorRotation()
 			//ai 를 이용해서 목적지까지 이동하고 싶다.	
-			//ai->MoveToLocation(target->GetActorLocation());
+			ai->MoveToLocation(target->GetActorLocation());
 		}
 	}
 	//시야에 들어오지 않았다면
@@ -161,7 +164,7 @@ void UEnemyBossFSM::UpdateMove()
 	{
 		
 		// 랜덤한 위치까지 도착한 후 Idle 상태로 전환
-		UE_LOG(LogTemp, Warning, TEXT("randPos"));
+		//UE_LOG(LogTemp, Warning, TEXT("randPos"));
 		MoveToPos(randPos);
 	}
 
@@ -223,7 +226,7 @@ void UEnemyBossFSM::UpdateDie()
 	UMaterialInstanceDynamic* CharacterMaterial = me->GetMesh()->CreateDynamicMaterialInstance(0);
 	if (CharacterMaterial)
 	{
-		UE_LOG(LogTemp, Error, TEXT("CharacterMaterial"));
+		//UE_LOG(LogTemp, Error, TEXT("CharacterMaterial"));
 		CurrentOpacity-=0.002f;
 
 		CharacterMaterial->SetScalarParameterValue(TEXT("Opacity"), CurrentOpacity);
@@ -316,18 +319,26 @@ void UEnemyBossFSM::ChangeState(EEnemyBossState state)
 		float WaitTime = 2.0f; //시간을 설정하고
 		GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
 			{
-				me->StopAnimMontage(damageMontage);
-				bGroggy = false;
-				ChangeState(EEnemyBossState::Idle);
+				if (currHP > 0)
+				{
+					me->StopAnimMontage(damageMontage);
+					bGroggy = false;
+					ChangeState(EEnemyBossState::Idle);
+				}
 			}), WaitTime, false);
 	}
 	break;
 	case EEnemyBossState::Die:
 		//충돌안되게 설정
-		me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		//me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		
+		//Die 몽타주 실행
+		me->particleComp1->SetVisibility(true);
+		me->PlayAnimMontage(damageMontage, 1.0f, FName(TEXT("Die")));
+		me->audioComp->Stop();
+		
 		
 		EnemyBossHPBar->RemoveFromParent();
-
 		EnemyBossDieUI = CreateWidget<UEnemyBossDieUI>(GetWorld(), EnemyBossDieUIFactory);
 		if (EnemyBossDieUI != nullptr)
 		{
@@ -344,11 +355,7 @@ void UEnemyBossFSM::ChangeState(EEnemyBossState state)
 		if (Material)
 		{
 			me->GetMesh()->SetMaterial(0, Material);
-		}
-		
-		
-		//Die 몽타주 실행
-		me->PlayAnimMontage(damageMontage, 1.0f, FName(TEXT("Die")));
+		}		
 		break;
 	}
 }
@@ -408,7 +415,7 @@ bool UEnemyBossFSM::IsWaitComplete(float delayTime)
 
 bool UEnemyBossFSM::IsTargetTrace()
 {
-	UE_LOG(LogTemp, Warning, TEXT("IsTargetTrace"));
+	//UE_LOG(LogTemp, Warning, TEXT("IsTargetTrace"));
 
 	//1. 나 ----> 플레이어를 향하는 벡터
 	FVector dir = target->GetActorLocation() - me->GetActorLocation();
@@ -485,12 +492,12 @@ void UEnemyBossFSM::DecideAttackPattern()
 	if (currHP / maxHP < 0.5f)
 	{
 		randPattern = FMath::RandRange(0, 8);
-		UE_LOG(LogTemp, Warning, TEXT("2pase"));
+		//UE_LOG(LogTemp, Warning, TEXT("2pase"));
 	}
 	else
 	{
 		randPattern = FMath::RandRange(0, 8);
-		UE_LOG(LogTemp, Warning, TEXT("1pase"));
+		//UE_LOG(LogTemp, Warning, TEXT("1pase"));
 
 	}
 	
@@ -601,7 +608,7 @@ void UEnemyBossFSM::SpawnGhost()
 		}), WaitTime, true);
 }
 
-void UEnemyBossFSM::Roar()
+void UEnemyBossFSM::Roar(float enemyAttackForce)
 {
 	UCharacterMovementComponent* PlayerMovementComponent = target->FindComponentByClass<UCharacterMovementComponent>();
 
@@ -609,4 +616,12 @@ void UEnemyBossFSM::Roar()
 	ForceDirection.Normalize();
 
 	PlayerMovementComponent->AddImpulse(ForceDirection * enemyAttackForce, true);
+}
+
+void UEnemyBossFSM::CameraShake()
+{
+	target->camShakeTime = 2.0f;
+	target->randC = 2.0f;
+	target->randD = 2.0f;
+	target->Shake();
 }

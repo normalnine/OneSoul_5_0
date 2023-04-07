@@ -7,6 +7,8 @@
 #include <Kismet/GameplayStatics.h>
 #include <Particles/ParticleSystemComponent.h>
 #include <Components/SphereComponent.h>
+#include "EnemyBoss.h"
+#include "EnemyBossFSM.h"
 
 // Sets default values
 AEnemyBossGhost::AEnemyBossGhost()
@@ -39,6 +41,7 @@ void AEnemyBossGhost::BeginPlay()
 	
 	target = Cast<AOnsSoulPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AOnsSoulPlayer::StaticClass()));
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), spawnSound, GetActorLocation());
+	enemy = Cast<AEnemyBoss>(UGameplayStatics::GetActorOfClass(GetWorld(), AEnemyBoss::StaticClass()));
 }
 
 // Called every frame
@@ -74,6 +77,7 @@ void AEnemyBossGhost::BeginOverlapGhost(UPrimitiveComponent* OverlappedComponent
 	{
 		target->ReceiveDamage(10);
 		target->DirectionalHitReact(GetActorLocation());
-
+		enemy->fsm->CameraShake();
+		enemy->fsm->Roar(1000.0f);
 	}
 }
