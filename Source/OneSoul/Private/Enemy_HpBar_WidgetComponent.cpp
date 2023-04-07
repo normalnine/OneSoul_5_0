@@ -21,7 +21,13 @@ void UEnemy_HpBar_WidgetComponent::UpdateCurrHP(float curr, float max)
 
 		//Progress bar UI °»½Å
 		HpWidget->UpdateCurrHP(curr,max);
+		
 	}
 
 	
+}
+
+void UEnemy_HpBar_WidgetComponent::UpdateDamage(float damage)
+{
+	HpWidget->UpdateDamage(damage);
 }

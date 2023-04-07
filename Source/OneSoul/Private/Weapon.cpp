@@ -113,7 +113,7 @@ void AWeapon::OnBoxOverlap(
 
 		  if (Enemy4 != nullptr)
 		  {
-			  Enemy4->fsm->OnDamageProcess();
+			  Enemy4->fsm->OnDamageProcess(2);
 		  }
 		  //매지션하고 충돌되었을때
 		  if (Enemy2 != nullptr)
@@ -157,15 +157,16 @@ void AWeapon::OnBoxOverlap(
 				  //UE_LOG(LogTemp, Warning, TEXT("asdadasddasd"));
 				  //플레이어를 캐스팅
 				  AOnsSoulPlayer* me = Cast<AOnsSoulPlayer>(GetOwner());
-				  //플레이어에 컴포넌트호출해서 거기에 있는 크리티컬어택 몽타주 실행
-				  me->compPlayerBase->CriAttack();
 				  //칼 콜리전 끄기 - 몬스터나 칼 콜리전 둘중 하나가 없어져야지 무한반복이 안실행됨
 				  WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-				  //몬스터랑 위치맞추기
+				   //몬스터랑 위치맞추기
 				  Enemy1->SetActorLocation(me->GetActorLocation() + me->GetActorForwardVector() * 100.0f);
-				 
+
+				  Enemy1->SetActorRotation(FRotator(0,-30,0));
+				  //플레이어에 컴포넌트호출해서 거기에 있는 크리티컬어택 몽타주 실행
+				  me->compPlayerBase->CriAttack();
 				  //몬스터 피격함수 호출
-				  Enemy1->fsm->OnDamageProcess();
+				  Enemy1->fsm->OnDamageProcess(1);
 				  //공격모션안되던 버그를 수정하기위해
 				  me->IsAttacking = false;
 
@@ -173,11 +174,7 @@ void AWeapon::OnBoxOverlap(
 			  }
 			  else
 			  {
-				 // if (!Enemy1->one)
-				 // {
-					 
-					 // Enemy1->fsm->OnDamageProcess();
-				 // }
+				 // Enemy1->fsm->OnDamageProcess();
 			  }
 
 		  }

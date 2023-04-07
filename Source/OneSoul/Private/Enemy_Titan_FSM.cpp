@@ -480,20 +480,30 @@ void UEnemy_Titan_FSM::UpdateReturnPos()
 {
 	MoveToPos(originPos);
 }
-void UEnemy_Titan_FSM::OnDamageProcess()
+void UEnemy_Titan_FSM::OnDamageProcess(float damage)
 {
+	////피격 이펙트
+	//GetWorld()->SpawnActor<AActor>(HitresultFactory, me->GetActorLocation(), FRotator::ZeroRotator);//, me->GetActorTransform(), param);
+	//데미지 UI
+	hp-=damage;
 	me->HpWidget->SetVisibility(true);
-	hp--;
 	me->HpWidget->UpdateCurrHP(hp, maxhp);
+	allDamage += damage;
+	me->HpWidget->UpdateDamage(allDamage);
+	onedam = true;
+	FTimerHandle dam;
+	GetWorld()->GetTimerManager().SetTimer(dam, this, &UEnemy_Titan_FSM::resetDamage, 3.0f, false);
 	//플레이어 카메라 흔들리게 하는 효과 셋팅값
-	target->camShakeTime = 0.4f;
-	target->randC = 0.7; target->randD = 0.7;
+	target->camShakeTime = 0.2f;
+	target->randC = 0.4; target->randD = 0.4;
 	target->Shake();
-
+	
 		//체력이 남아있다면
 		if (hp > 0)
 		{
-
+			FActorSpawnParameters param;
+			param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			 //GetWorld()->SpawnActor<AActor>(HitresultFactory, me->GetActorTransform());//, me->GetActorTransform(), param);
 			//체력이 절반이면 2페이즈 진입
 			if (hp<10 && shout == true)
 			{	
@@ -738,4 +748,19 @@ void UEnemy_Titan_FSM::MoveToPos(FVector pos)
 		//Idle 상태로 전환
 		ChangeState(EEnemyState4::Idle);
 	}
+}
+void UEnemy_Titan_FSM::resetDamage()
+{
+	if (onedam)
+	{
+		onedam = false;
+		FTimerHandle dam;
+		GetWorld()->GetTimerManager().SetTimer(dam, this, &UEnemy_Titan_FSM::resetDamage, 3.0f, false);
+	}
+	else
+	{
+		allDamage = 0;
+		me->HpWidget->UpdateDamage(0);
+	}
+
 }

@@ -97,6 +97,6 @@ public:
    UPROPERTY(EditAnywhere, Category = "Weapon")
    class TSubclassOf<AActor> bloodEffect;
 
-   UPROPERTY(VisibleAnywhere, Category = "Weapon")
+   UPROPERTY(VisibleAnywhere,BlueprintReadWrite, Category = "Weapon")
 	   UBoxComponent* WeaponBox;
 };

@@ -61,7 +61,5 @@ public:
 	UFUNCTION()
 		void OnOverlapME(class UPrimitiveComponent* selfComp, class AActor* otherActor, UPrimitiveComponent* otherComp,
 			int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	//칼이랑 충돌되면 나오는 피 이펙트
-	UPROPERTY(EditDefaultsOnly, Category = HitresultFactory)
-		TSubclassOf<class AActor> HitresultFactory;
+
 };

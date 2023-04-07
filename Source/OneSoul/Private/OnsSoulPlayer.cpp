@@ -1370,6 +1370,32 @@ ACameraActor* AOnsSoulPlayer::GetNPCCamera()
 
 	return nullptr;
 }
+
+void AOnsSoulPlayer::setUI()
+{
+	// Get all widgets in the viewport
+	TArray<UUserWidget*> Widgets;
+	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(UGameplayStatics::GetPlayerController(this, 0), Widgets, UUserWidget::StaticClass());
+
+	// Loop through the widgets and find the HUD widget
+	for (UUserWidget* Widget : Widgets)
+	{
+		if (Widget->IsA(UOneSoulOverlay::StaticClass())) // replace "UYourHUDWidgetClass" with the class name of your HUD widget
+		{
+			// Remove the HUD widget from the viewport
+			if (dontshow)
+			{
+				Widget->SetVisibility(ESlateVisibility::Hidden);
+			}
+			else
+			{
+				Widget->SetVisibility(ESlateVisibility::Visible);
+			}
+			break;
+		}
+	}
+}
+
 void AOnsSoulPlayer::Shake()
 {
 	camShake = true;

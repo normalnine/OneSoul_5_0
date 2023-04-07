@@ -18,8 +18,12 @@ public:
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	class UProgressBar* HpBar;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+		class UTextBlock* _howDamage;
 
 	UFUNCTION()
 		void UpdateCurrHP(float curr, float max);
+	UFUNCTION()
+		void UpdateDamage(float damage);
 
 };

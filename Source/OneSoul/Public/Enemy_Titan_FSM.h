@@ -77,7 +77,7 @@ public:
 
 	//피격 알림 이벤트 함수
 	UFUNCTION(BlueprintCallable)
-		void OnDamageProcess();
+		void OnDamageProcess(float damage);
 
 	//타겠을 쫒아갈수있나?
 	bool IsTargetTrace();
@@ -193,5 +193,14 @@ public:
 	//피격 효과음
 	UPROPERTY(EditDefaultsOnly, Category = Sound)
 		class USoundBase* HITSound;
+	//칼이랑 충돌되면 나오는 피 이펙트
+	UPROPERTY(EditAnywhere, Category = HitresultFactory)
+		TSubclassOf<class AActor> HitresultFactory;
 
+
+	void resetDamage();
+	//데미지 누적
+	float allDamage = 0;
+	//3초동안만 실행 누적실행 안되게
+	bool onedam = true;
 };
