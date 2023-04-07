@@ -190,6 +190,11 @@ void AOnsSoulPlayer::BeginPlay()
 	{
 		SetActorLocation(gameInst->lastLoc);
 	}
+
+	if (IsReSpawnCheck == true)
+	{
+		ReSpawnWiget = nullptr;
+	}
 }
 
 void AOnsSoulPlayer::Tick(float DeltaTime)
@@ -344,6 +349,11 @@ void AOnsSoulPlayer::Destroyed()
 	{
 	  CurrentGameModeBase-> ReSpawnPlayer(this); 
 	 
+	  ReSpawnWiget= nullptr;
+
+	  IsReSpawnCheck = true;
+
+	  EnableInput(UGameplayStatics::GetPlayerController(this, 0));
       UGameplayStatics:: GetPlayerController(this,0) -> SetShowMouseCursor(false);
       UGameplayStatics:: GetPlayerController(this, 0) -> SetInputMode(FInputModeGameOnly());
 	}
@@ -521,7 +531,7 @@ void AOnsSoulPlayer::SpawnDefaultWeapon()
 		  HandSocket -> AttachActor(DefaultWeapon,GetMesh());
 	  }
 	
-		  SwapWeapon(DefaultWeapon);
+	  SwapWeapon(DefaultWeapon);
 
     }
 }
@@ -1009,6 +1019,7 @@ void AOnsSoulPlayer::Die()
 
 	Tags.Add(FName("Dead"));
 
+	IsAttacking= true;
 	IsDead = true;
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -1025,12 +1036,15 @@ void AOnsSoulPlayer::Die()
 	YouDieWiget->AddToViewport();
 
 	GetWorld()->GetTimerManager().SetTimer(YouDieTimer, this, &AOnsSoulPlayer::YouDieRemoveWidget, 3.f);
-
+	
+	DisableInput(UGameplayStatics::GetPlayerController(this, 0));
 	UGameplayStatics::GetPlayerController(this, 0)->SetInputMode(FInputModeUIOnly());
 	if (EquippedWeapon != nullptr)
 	{
 	 EquippedWeapon -> Destroy();
 	}
+
+	IsAttacking = false;
 }
 
 bool AOnsSoulPlayer::CanDisarm()

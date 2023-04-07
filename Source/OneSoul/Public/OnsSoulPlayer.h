@@ -157,7 +157,9 @@ public:
 	bool IsDead = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "spawn")
 	bool IsReSpawn;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "spawn")
+	bool IsReSpawnCheck=false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
 	bool EKeyButton=false;
 	UPROPERTY(EditAnywhere,Category="Retargeting")
 	TSubclassOf<class AActor> RetargetPlueprints;
