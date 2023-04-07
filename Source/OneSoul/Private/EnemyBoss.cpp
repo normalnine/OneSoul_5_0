@@ -8,6 +8,8 @@
 #include <GameFramework/CharacterMovementComponent.h>
 #include <Components/SphereComponent.h>
 #include "OnsSoulPlayer.h"
+#include <Components/AudioComponent.h>
+#include <Particles/ParticleSystemComponent.h>
 
 // Sets default values
 AEnemyBoss::AEnemyBoss()
@@ -35,6 +37,11 @@ AEnemyBoss::AEnemyBoss()
 	sphereCompHand_R->SetSphereRadius(80.0f);
 	sphereCompHand_R->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	audioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Component"));
+	audioComp->SetupAttachment(RootComponent);
+
+	particleComp1 = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Particle System1"));
+	particleComp1->SetupAttachment(RootComponent);
 
 	ConstructorHelpers::FObjectFinder<USkeletalMesh>tempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/QuadrapedCreatures/MountainDragon/Meshes/SK_MOUNTAIN_DRAGON.SK_MOUNTAIN_DRAGON'"));
 	if (tempMesh.Succeeded())
@@ -73,7 +80,8 @@ void AEnemyBoss::BeginPlay()
 
 	sphereCompHand_R->OnComponentBeginOverlap.AddDynamic(this, &AEnemyBoss::BeginOverlapHead);
 	//sphereCompHand_R->OnComponentEndOverlap.AddDynamic(this, &AEnemyBoss::EndOverlapHead);
-	
+
+	audioComp->Play();
 }
 
 // Called every frame
@@ -143,6 +151,7 @@ void AEnemyBoss::BeginOverlapHead(UPrimitiveComponent* OverlappedComponent, AAct
 		{
 			target->ReceiveDamage(10);
 			target->DirectionalHitReact(GetActorLocation());
+			fsm->Roar(2000.0f);
 		}
 		bOverlap = false;
 	}
@@ -158,6 +167,7 @@ void AEnemyBoss::BeginOverlapLeftHand(UPrimitiveComponent* OverlappedComponent, 
 		{
 			target->ReceiveDamage(10);
 			target->DirectionalHitReact(GetActorLocation());
+			fsm->Roar(2000.0f);
 
 		}
 		bOverlap = false;
@@ -174,7 +184,7 @@ void AEnemyBoss::BeginOverlapRightHand(UPrimitiveComponent* OverlappedComponent,
 		{
 			target->ReceiveDamage(10);
 			target->DirectionalHitReact(GetActorLocation());
-
+			fsm->Roar(2000.0f);
 		}
 		bOverlap = false;
 	}

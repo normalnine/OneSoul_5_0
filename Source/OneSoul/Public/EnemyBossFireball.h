@@ -33,6 +33,9 @@ public:
 	class AOnsSoulPlayer* target;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class AEnemyBoss* enemy;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UParticleSystemComponent* particleComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

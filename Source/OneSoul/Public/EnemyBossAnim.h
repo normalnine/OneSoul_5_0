@@ -89,6 +89,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void AnimNotify_Ghost();
 
-		UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable)
 		void AnimNotify_Roar();
+
+	UFUNCTION(BlueprintCallable)
+		void AnimNotify_CameraShake();
 };

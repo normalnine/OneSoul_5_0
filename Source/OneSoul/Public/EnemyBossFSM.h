@@ -101,7 +101,7 @@ public:
 
 	//대기 상태 기다리는 시간
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float idleDelayTime = 2.0f;
+	float idleDelayTime = 5.0f;
 
 	//쫓아 갈 수 있는 범위
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -158,8 +158,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float soul = 150000.0f;
 	//넉백 수치
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float enemyAttackForce = 2000.0f;
+// 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+// 	float enemyAttackForce = 2000.0f;
 
 	//죽었을 때 내려가는 속력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -271,8 +271,10 @@ public:
 
 	//Roar 공격
 	UFUNCTION(BlueprintCallable)
-	void Roar();
+	void Roar(float enemyAttackForce);
 		
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CurrentOpacity = 1.0f;
+
+	void CameraShake();
 };

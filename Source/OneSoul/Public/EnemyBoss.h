@@ -48,6 +48,12 @@ public:
 		class USphereComponent* sphereCompHand_R;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UAudioComponent* audioComp;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UParticleSystemComponent* particleComp1;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool bOverlap = false;
 
 	// 활성 / 비활성 하는 기능
@@ -62,6 +68,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void BeginOverlapRightHand(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResul);
+
+
 
 // 	UFUNCTION()
 // 	void EndOverlapHead(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
