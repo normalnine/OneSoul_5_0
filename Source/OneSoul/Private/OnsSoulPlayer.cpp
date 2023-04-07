@@ -346,10 +346,7 @@ void AOnsSoulPlayer::Destroyed()
 	  CurrentGameModeBase-> ReSpawnPlayer(this); 
 
 
-	  if (SpawnTarget->GetReSpawnBox())
-	  {
-	   ReSpawnWiget = nullptr;
-	  }
+
 
 	  EnableInput(UGameplayStatics::GetPlayerController(this, 0));
       UGameplayStatics:: GetPlayerController(this,0) -> SetShowMouseCursor(false);
