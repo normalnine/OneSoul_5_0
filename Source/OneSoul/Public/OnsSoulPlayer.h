@@ -25,6 +25,7 @@ class UInventoryGrid;
 class USpotLightComponent;
 class AActor;
 class AShield;
+class ASoulsRetrieved;
 
 UENUM(BlueprintType)
 enum class EActionState : uint8
@@ -82,7 +83,23 @@ public:
 			const FHitResult& SweepResult);
 
 	UFUNCTION()
+	virtual void OnSoulsRetrievedOverlap(
+			     UPrimitiveComponent* OverlappedComponent,
+			     AActor* OthrActor,
+			     UPrimitiveComponent* OtherComp,
+			     int32 OtherBodyIndex,
+			     bool bFromSweep,
+			     const FHitResult& SweepResult);
+
+	UFUNCTION()
 	virtual void OnSphereEndOverlap(
+			     UPrimitiveComponent* OverlappedComponent,
+			     AActor* OthrActor,
+			     UPrimitiveComponent* OtherComp,
+			     int32 OtherBodyIndex);
+
+	UFUNCTION()
+    virtual void OnSoulsRetrievedEndOverlap(
 			     UPrimitiveComponent* OverlappedComponent,
 			     AActor* OthrActor,
 			     UPrimitiveComponent* OtherComp,
@@ -190,6 +207,8 @@ public:
 	FTimerHandle YouDieTimer;
 
 	FTimerHandle ReTargeting;
+
+	FTimerHandle SoulsRetrievedTimer;
 
 	bool bCanHitReact;
 
@@ -300,6 +319,10 @@ public:
 	void GetPickupItem(AItem* Item);
 	UFUNCTION(BlueprintCallable, Category = "Retargeting")
 	void RemoveLookOn();
+	UFUNCTION(BlueprintCallable, Category = "SoulsRetrieved")
+	void SoulsRetrievedRemove();
+	UFUNCTION(BlueprintCallable, Category = "SoulsRetrieved")
+	void SoulsRetrievedRemoveWidget();
 	UFUNCTION(BlueprintCallable)
 	bool SheidNull();
 
@@ -335,16 +358,37 @@ private:
 	USphereComponent* Sphere;
 
 	UPROPERTY(VisibleAnywhere)
+	USphereComponent* SphereSoulsRetrieved;
+
+	UPROPERTY(VisibleAnywhere)
 	USpotLightComponent* Light;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> MainInventorys;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget>SoulsRetrievedWidgets;
+
+	UPROPERTY(VisibleAnywhere)
+	UUserWidget* SoulsRetrievedWidget;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> LostSouls;
+
+	UPROPERTY(EditAnywhere)
+	UUserWidget* LostSoul;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> SoulsRetrievedBlueprint;
 
 	UPROPERTY(VisibleAnywhere)
 	class AActor* TargetActor;
 
 	UPROPERTY(VisibleInstanceOnly)
 	AItem* OverlappingItem;
+
+	UPROPERTY(VisibleAnywhere)
+	ASoulsRetrieved* SoulsRetrieved;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montages, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* LevelStartMontage;
@@ -457,7 +501,7 @@ public:
    ACameraActor* GetNPCCamera();
 
    UPROPERTY(BlueprintReadWrite)
-	   UOneSoulOverlay* OneSoulOverlay;
+	UOneSoulOverlay* OneSoulOverlay;
    UFUNCTION(BlueprintCallable)
    void setUI();
    UPROPERTY(EditAnywhere, BlueprintReadWrite)

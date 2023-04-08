@@ -9,6 +9,7 @@
 class UOneSoulOverlay;
 class AOnsSoulPlayer;
 class AWeapon;
+class UOneSoulGameInstance;
 
 UCLASS(minimalapi)
 class AOneSoulGameMode : public AGameModeBase
@@ -31,6 +32,8 @@ public:
 
 	void AddCoins(int32 point);
 
+	void MinusCoins(int32 point);
+
 	void ReSpawnPlayer(ACharacter* player);
 	
 	UPROPERTY(VisibleAnywhere)
@@ -41,6 +44,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LevelUp")
 	int32 Level = 1;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> SoulsRetrievedBlueprint;
+
+	UPROPERTY(EditAnywhere)
+	UOneSoulGameInstance* gameInst;
+
+	UPROPERTY(EditAnywhere)
+	int32 SoulSave;
 
 	private:
 

@@ -7,6 +7,7 @@
 #include "OnsSoulPlayer.h"
 #include "Weapon.h"
 #include "Kismet/GameplayStatics.h"
+#include "OneSoulGameInstance.h"
 
 AOneSoulGameMode::AOneSoulGameMode()
 {
@@ -22,7 +23,9 @@ void AOneSoulGameMode::BeginPlay()
 {
  Super:: BeginPlay();
 
+ gameInst = Cast<UOneSoulGameInstance>(GetWorld()->GetGameInstance());
 
+ SoulSave += gameInst->soul;
 }
 
 void AOneSoulGameMode::AddCoins(int32 point)
@@ -34,6 +37,11 @@ void AOneSoulGameMode::AddCoins(int32 point)
 	}
 }
 
+void AOneSoulGameMode::MinusCoins(int32 point)
+{
+  CurrentCoins -= point;
+}
+
 void AOneSoulGameMode::ReSpawnPlayer(ACharacter* player)
 {
  
@@ -42,7 +50,11 @@ void AOneSoulGameMode::ReSpawnPlayer(ACharacter* player)
   GetWorld() -> GetFirstPlayerController() -> Possess(
                                               GetWorld()->SpawnActor<AOnsSoulPlayer>(Class, SpawnTransform));
  
-  CurrentCoins;
+  if (SoulsRetrievedBlueprint)
+  {
+	  GetWorld()->SpawnActor<class AActor>(SoulsRetrievedBlueprint, player->GetActorTransform());
+  }
+ 
   PotionNum;
   Level;
   

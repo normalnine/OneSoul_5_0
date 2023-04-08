@@ -39,6 +39,7 @@
 #include "Interactions_DialogueUI.h"
 #include "EscUI.h"
 #include "OneSoulGameInstance.h"
+#include "SoulsRetrieved.h"
 
 #include <Camera/CameraActor.h>
 
@@ -87,10 +88,12 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollision"));
 	Sphere -> SetupAttachment(GetRootComponent());
 
+	SphereSoulsRetrieved = CreateDefaultSubobject<USphereComponent>(TEXT("SphereSoulsRetrieved"));
+	SphereSoulsRetrieved -> SetupAttachment(GetRootComponent());
+
 	SprintSpeed = 800.f;
 	WalkSpeed = 400.f;
 
-	
 	MinStamina = 0.f;
 
 	IsAttacking = false;
@@ -104,10 +107,6 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	TargetingDistance = 1000.f;
 	TargetingRadius = 200.f;
 	TargetRotationInterpSpeed = 9.f;
-
-	
-
-	
 
 	InventorySlots = 5;
 
@@ -130,6 +129,9 @@ void AOnsSoulPlayer::BeginPlay()
 	Sphere -> OnComponentBeginOverlap.AddDynamic(this,&AOnsSoulPlayer::OnSphereOverlap);
 	Sphere -> OnComponentEndOverlap.AddDynamic(this,&AOnsSoulPlayer::OnSphereEndOverlap);
 
+	SphereSoulsRetrieved -> OnComponentBeginOverlap.AddDynamic(this,&AOnsSoulPlayer::OnSoulsRetrievedOverlap);
+	SphereSoulsRetrieved -> OnComponentEndOverlap.AddDynamic(this,&AOnsSoulPlayer::OnSoulsRetrievedEndOverlap);
+
 	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
 	AItem* OverlappingWidget = Cast<AItem>(OverlappingItem);
 
@@ -140,15 +142,14 @@ void AOnsSoulPlayer::BeginPlay()
 	MainInventory -> SetVisibility(ESlateVisibility::Collapsed);
 	MainInventory -> AddToViewport();
 
-	GetWorld()->SpawnActor<class AActor>(PickupWeapon,GetActorTransform());
+	SoulsRetrievedWidget = CreateWidget<UUserWidget>(GetWorld(), SoulsRetrievedWidgets);
+
 	GetWorld()->SpawnActor<class AActor>(PickupPotion, GetActorTransform());
-	GetWorld()->SpawnActor<class AActor>(PickupSheid, GetActorTransform());
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && LevelStartMontage)
 	{
 		AnimInstance->Montage_Play(LevelStartMontage);
-
 	}
 
 	AGameModeBase* CurrentMode = GetWorld()->GetAuthGameMode();
@@ -190,6 +191,10 @@ void AOnsSoulPlayer::BeginPlay()
 	{
 		SetActorLocation(gameInst->lastLoc);
 	}
+
+	LostSoul = CreateWidget<UUserWidget>(GetWorld(), LostSouls);
+	LostSoul-> AddToViewport();
+	LostSoul->SetVisibility(ESlateVisibility::Hidden);
 
 }
 
@@ -344,10 +349,7 @@ void AOnsSoulPlayer::Destroyed()
 	if (AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(World->GetAuthGameMode()))
 	{
 	  CurrentGameModeBase-> ReSpawnPlayer(this); 
-
-
-
-
+	  
 	  EnableInput(UGameplayStatics::GetPlayerController(this, 0));
       UGameplayStatics:: GetPlayerController(this,0) -> SetShowMouseCursor(false);
       UGameplayStatics:: GetPlayerController(this, 0) -> SetInputMode(FInputModeGameOnly());
@@ -369,6 +371,25 @@ void AOnsSoulPlayer::OnSphereOverlap(
 
 }
 
+void AOnsSoulPlayer::OnSoulsRetrievedOverlap(
+                     UPrimitiveComponent* OverlappedComponent,
+					 AActor* OthrActor,
+					 UPrimitiveComponent* OtherComp,
+					 int32 OtherBodyIndex,
+					 bool bFromSweep,
+					 const FHitResult& SweepResult)
+{
+  SoulsRetrieved = Cast<ASoulsRetrieved>(OthrActor);
+  if (SoulsRetrieved)
+  {
+
+	  if (LostSoul != nullptr)
+	  {
+		LostSoul->SetVisibility(ESlateVisibility::Visible);
+	  }
+  }
+}
+
 void AOnsSoulPlayer::OnSphereEndOverlap(
                                         UPrimitiveComponent* OverlappedComponent,
 										AActor* OthrActor,
@@ -381,6 +402,23 @@ void AOnsSoulPlayer::OnSphereEndOverlap(
  {
 	 SpawnTarget = nullptr;
  }
+}
+
+void AOnsSoulPlayer::OnSoulsRetrievedEndOverlap(
+                     UPrimitiveComponent* OverlappedComponent,
+					 AActor* OthrActor,
+					 UPrimitiveComponent* OtherComp,
+					 int32 OtherBodyIndex)
+{
+	SoulsRetrieved = Cast<ASoulsRetrieved>(OthrActor);
+	if (SoulsRetrieved)
+	{
+
+		if (LostSoul != nullptr)
+		{
+			LostSoul->SetVisibility(ESlateVisibility::Collapsed);
+		}
+	}
 }
 
 void AOnsSoulPlayer::DirectionalHitReact(const FVector& ImpactPoint)
@@ -561,6 +599,22 @@ void AOnsSoulPlayer::RemoveLookOn()
   RetargetPlueprint->Destroy();
 }
 
+void AOnsSoulPlayer::SoulsRetrievedRemove()
+{
+	
+    SoulsRetrieved -> Destroy();
+
+	GetWorld()->GetTimerManager().SetTimer(SoulsRetrievedTimer, this, &AOnsSoulPlayer::SoulsRetrievedRemoveWidget, 2.f);
+}
+
+void AOnsSoulPlayer::SoulsRetrievedRemoveWidget()
+{
+	if (SoulsRetrievedWidget != nullptr)
+	{
+		SoulsRetrievedWidget->RemoveFromParent();
+	}
+}
+
 bool AOnsSoulPlayer::SheidNull()
 {
 
@@ -735,11 +789,29 @@ void AOnsSoulPlayer::EKeyPressed()
 
 		  ReSpawnWiget-> AddToViewport();
 
-	      GetWorld() -> GetTimerManager().SetTimer(SpawnWigetTimer,this,&AOnsSoulPlayer::ReSpawnRemoveWidget,2.f);
-
+	      GetWorld() -> GetTimerManager().SetTimer(SpawnWigetTimer,this,&AOnsSoulPlayer::ReSpawnRemoveWidget,1.5f);
 
  	   }
 		 
+ }
+
+ if (SoulsRetrieved && SoulsRetrieved->BoxCollision)
+ {
+	 AGameModeBase* CurrentMode = GetWorld()->GetAuthGameMode();
+
+	 AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(CurrentMode);
+
+	 if (CurrentGameModeBase != nullptr)
+	 {
+		 if (SoulsRetrievedWidget)
+		 {
+			 SoulsRetrievedWidget->AddToViewport();
+
+			 gameInst->soul *= 2; 
+		 }
+	 }
+
+	 GetWorld()->GetTimerManager().SetTimer(SoulsRetrievedTimer, this, &AOnsSoulPlayer::SoulsRetrievedRemove, 2.f);
  }
 
  }
@@ -1043,9 +1115,22 @@ void AOnsSoulPlayer::Die()
 	
 	DisableInput(UGameplayStatics::GetPlayerController(this, 0));
 	UGameplayStatics::GetPlayerController(this, 0)->SetInputMode(FInputModeUIOnly());
+
 	if (EquippedWeapon != nullptr)
 	{
 	 EquippedWeapon -> Destroy();
+	}
+
+	if (OverlappingShiled != nullptr)
+	{
+		OverlappingShiled->Destroy();
+	}
+
+	gameInst->soul /= 2;
+    
+	if (SoulsRetrieved != nullptr && IsDead==true)
+	{
+		SoulsRetrieved->Destroy();
 	}
 
 	IsAttacking = false;
