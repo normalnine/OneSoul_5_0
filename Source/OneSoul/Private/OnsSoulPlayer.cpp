@@ -604,14 +604,14 @@ void AOnsSoulPlayer::SoulsRetrievedRemove()
 	
     SoulsRetrieved -> Destroy();
 
-	GetWorld()->GetTimerManager().SetTimer(SoulsRetrievedTimer, this, &AOnsSoulPlayer::SoulsRetrievedRemoveWidget, 2.f);
+	GetWorld() -> GetTimerManager().SetTimer(SoulsRetrievedTimer,this,&AOnsSoulPlayer::SoulsRetrievedRemoveWidget,1.f);
 }
 
 void AOnsSoulPlayer::SoulsRetrievedRemoveWidget()
 {
 	if (SoulsRetrievedWidget != nullptr)
 	{
-		SoulsRetrievedWidget->RemoveFromParent();
+		SoulsRetrievedWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 
