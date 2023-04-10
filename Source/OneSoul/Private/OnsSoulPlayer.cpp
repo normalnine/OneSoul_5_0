@@ -1275,7 +1275,6 @@ void AOnsSoulPlayer::ToggleInventory()
 	{
 		IsPaused = true;
 
-		
 		GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
 		MainInventory -> SetVisibility(ESlateVisibility::Visible);
 		UGameplayStatics::GetPlayerController(this, 0)->SetInputMode(FInputModeGameAndUI());
