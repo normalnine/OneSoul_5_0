@@ -9,6 +9,8 @@
 #include <Components/SphereComponent.h>
 #include "EnemyBoss.h"
 #include "EnemyBossFSM.h"
+#include <GameFramework/DamageType.h>
+#include <AIModule/Classes/AIController.h>
 
 // Sets default values
 AEnemyBossGhost::AEnemyBossGhost()
@@ -75,8 +77,12 @@ void AEnemyBossGhost::BeginOverlapGhost(UPrimitiveComponent* OverlappedComponent
 	target = Cast<AOnsSoulPlayer>(OtherActor);
 	if (target != nullptr)
 	{
-		target->ReceiveDamage(10);
-		target->DirectionalHitReact(GetActorLocation());
+		UGameplayStatics::ApplyDamage(
+			target,
+			100.f,
+			enemy->fsm->ai,
+			this,
+			UDamageType::StaticClass());
 		enemy->fsm->CameraShake();
 		enemy->fsm->Roar(1000.0f);
 	}

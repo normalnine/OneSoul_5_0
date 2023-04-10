@@ -51,6 +51,7 @@ void UNPC_MenuUI::Talk()
 	text_dialogue->SetVisibility(ESlateVisibility::Visible);
 	vb_menuBox->SetVisibility(ESlateVisibility::Hidden);
 	image_back->SetVisibility(ESlateVisibility::Hidden);
+	image_dialogue->SetVisibility(ESlateVisibility::Visible);
 	hb_next->SetVisibility(ESlateVisibility::Visible);
 	return; 
 }

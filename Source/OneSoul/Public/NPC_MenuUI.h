@@ -38,8 +38,11 @@ public:
 	class UImage* image_back;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	class UImage* image_quest;
-	
+	class UImage* image_quest;	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UImage* image_dialogue;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UVerticalBox* vb_quest;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))

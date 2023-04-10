@@ -10,6 +10,9 @@
 #include <Particles/ParticleSystemComponent.h>
 #include "OnsSoulPlayer.h"
 #include "EnemyBossFSM.h"
+#include <GameFramework/DamageType.h>
+#include <AIModule/Classes/AIController.h>
+
 
 // Sets default values
 AEnemyBossLaser::AEnemyBossLaser()
@@ -60,8 +63,12 @@ void AEnemyBossLaser::BeginOverlapLaser(UPrimitiveComponent* OverlappedComponent
 	target = Cast<AOnsSoulPlayer>(OtherActor);
 	if (target != nullptr)
 	{
-		target->ReceiveDamage(10);
-		target->DirectionalHitReact(GetActorLocation());
+		UGameplayStatics::ApplyDamage(
+			target,
+			100,
+			enemy->fsm->ai,
+			this,
+			UDamageType::StaticClass());
 		enemy->fsm->CameraShake();
 		enemy->fsm->Roar(1000.0f);
 	}
