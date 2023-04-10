@@ -111,7 +111,7 @@ public:
 
 	//공격범위
 	UPROPERTY(EditAnywhere, Category = FSM)
-		float attackRange = 200.0f;
+		float attackRange = 150.0f;
 
 	//쫓아 갈 수 있는 범위
 	float traceRange = 2000;

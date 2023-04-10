@@ -86,7 +86,7 @@ public:
 	//방패에 플레이어 칼 맞았을때 효과음
 	UPROPERTY(EditDefaultsOnly, Category = Sound)
 		class USoundBase* blockSound;
-
-
+		//방패맞고 안나오게 하려고 설정한 변수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool one = false;
 };

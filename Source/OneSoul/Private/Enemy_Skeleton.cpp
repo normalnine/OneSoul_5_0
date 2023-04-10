@@ -6,6 +6,7 @@
 #include "OnsSoulPlayer.h"
 #include "Enemy_HpBar.h"
 #include "Weapon.h"
+#include "AIController.h"
 #include "Enemy_HpBar_WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "JW_ParryGuardComponent.h"
@@ -136,17 +137,20 @@ void AEnemy_Skeleton::OnOverlapBeginsword(class UPrimitiveComponent* selfComp, c
 
 				//효과음 발생
 				UGameplayStatics::PlaySound2D(GetWorld(), blockSound);
-			changeGroggy = true;
-			FActorSpawnParameters params;
-			params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-			GetWorld()->SpawnActor<AActor>(effectfactory1, SwordCollisionComp->GetRelativeTransform(), params);
+				changeGroggy = true;
+				FActorSpawnParameters params;
+				params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+				//이펙트 발생
+				GetWorld()->SpawnActor<AActor>(effectfactory1, target->GetMesh()->GetSocketTransform("ring_01_l"), params);
 			}
  			else
  			{
-				target->ReceiveDamage(1);
-				target->DirectionalHitReact(GetActorLocation());
-				target->HitReactSounds();
-
+				UGameplayStatics::ApplyDamage(target, 100, fsm->ai, this, UDamageType::StaticClass());
+				//플레이어를 넉백시킨다
+				FVector imp = -1 * target->GetActorForwardVector() * 500.0f;
+				target->GetCharacterMovement()->AddImpulse(imp, true);
+				//플레이어 카메라 흔들리기
+				//player->Shake();
 			}
  		
  
@@ -169,6 +173,7 @@ void AEnemy_Skeleton::OnOverlapBeginsword(class UPrimitiveComponent* selfComp, c
 			params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 			//튕겨지는 이펙트 생성
 			GetWorld()->SpawnActor<AActor>(effectfactory,shield->GetActorTransform(),params);
+
 
 			auto actor = UGameplayStatics::GetActorOfClass(GetWorld(), AOnsSoulPlayer::StaticClass());
 

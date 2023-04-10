@@ -93,7 +93,7 @@ public:
 
 	//대기시간
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
-		float idleDelayTime = 3;
+		float idleDelayTime = 2;
 	//경과시간
 	float currentTime = 0;
 
@@ -121,7 +121,7 @@ public:
 
 	//공격대기시간
 	UPROPERTY(EditAnywhere, Category = FSM)
-		float attackDelayTime = 2.0f;
+		float attackDelayTime = 1.2f;
 	//체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FSM)
 		int32 hp = 20;
@@ -196,11 +196,17 @@ public:
 	//칼이랑 충돌되면 나오는 피 이펙트
 	UPROPERTY(EditAnywhere, Category = HitresultFactory)
 		TSubclassOf<class AActor> HitresultFactory;
-
+	//피격 돌 떨어지는 효과음
+	UPROPERTY(EditDefaultsOnly, Category = Sound)
+		class USoundBase* StoneSound;
 
 	void resetDamage();
 	//데미지 누적
 	float allDamage = 0;
 	//3초동안만 실행 누적실행 안되게
 	bool onedam = true;
+
+	//바로 플레이어를 공격하러 이동
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool movetoattack = false;
 };

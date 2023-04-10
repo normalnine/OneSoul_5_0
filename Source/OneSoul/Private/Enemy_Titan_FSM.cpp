@@ -30,6 +30,11 @@ UEnemy_Titan_FSM::UEnemy_Titan_FSM()
 	{
 		HITSound = tempHITSound.Object;
 	}
+	ConstructorHelpers::FObjectFinder<USoundBase> tempstoneSound(TEXT("SoundCue'/Game/LJW/Enemys/sound/Stone.Stone'"));
+	if (tempstoneSound.Succeeded())
+	{
+		StoneSound = tempstoneSound.Object;
+	}
 }
 
 
@@ -391,9 +396,8 @@ void UEnemy_Titan_FSM::jumpattack()
 	if (stopmove)
 	{
 	ai->StopMovement();
-		if (currTime > 4)
+		if (movetoattack)
 		{
-			currTime = 0;
 			ChangeState(EEnemyState4::MovetoTarget);
 		}
 	}
@@ -497,7 +501,8 @@ void UEnemy_Titan_FSM::OnDamageProcess(float damage)
 	target->camShakeTime = 0.2f;
 	target->randC = 0.4; target->randD = 0.4;
 	target->Shake();
-	
+	//효과음재생
+	UGameplayStatics::PlaySound2D(GetWorld(), StoneSound);
 		//체력이 남아있다면
 		if (hp > 0)
 		{
@@ -551,6 +556,7 @@ void UEnemy_Titan_FSM::OnDamageProcess(float damage)
 			FString sectionName = FString::Printf(TEXT("Die"));
 			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 			GetWorld()->SpawnActor<AActor>(dropFactory, me->GetActorTransform());
+			target->killtitan = true;
 		}
 		//애니메이션 상태 동기화
 		anim->animState = mState;
@@ -673,7 +679,40 @@ void UEnemy_Titan_FSM::ChangeState(EEnemyState4 state)
 	switch (mState)
 	{
 	case EEnemyState4::Attack0:
-		//currTime = attackDelayTime;
+	{
+		//공격할때 처음만 플레이어를 바라보고 공격하도록
+	FVector des = target->GetActorLocation();
+	FVector dir = des - me->GetActorLocation();
+	FRotator dirx = dir.Rotation();
+	me->SetActorRotation(dirx);
+	}
+		break;
+	case EEnemyState4::Attack1:
+	{
+		//공격할때 처음만 플레이어를 바라보고 공격하도록
+		FVector des = target->GetActorLocation();
+		FVector dir = des - me->GetActorLocation();
+		FRotator dirx = dir.Rotation();
+		me->SetActorRotation(dirx);
+		}
+		break;
+	case EEnemyState4::Attack2:
+	{
+		//공격할때 처음만 플레이어를 바라보고 공격하도록
+		FVector des = target->GetActorLocation();
+		FVector dir = des - me->GetActorLocation();
+		FRotator dirx = dir.Rotation();
+		me->SetActorRotation(dirx);
+		}
+		break;
+	case EEnemyState4::Attack3:
+	{
+		//공격할때 처음만 플레이어를 바라보고 공격하도록
+		FVector des = target->GetActorLocation();
+		FVector dir = des - me->GetActorLocation();
+		FRotator dirx = dir.Rotation();
+		me->SetActorRotation(dirx);
+		}
 		break;
 	case EEnemyState4::Move:
 	{	

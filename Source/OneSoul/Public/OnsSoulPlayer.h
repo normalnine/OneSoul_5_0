@@ -473,6 +473,7 @@ public:
    void notMoveF();
    UFUNCTION(BlueprintCallable)
    void notMoveR();
+   UFUNCTION(BlueprintCallable)
    void Jumpp();
    UFUNCTION(BlueprintCallable, Category = "Equip")
 	void EquipShield(AShield* shield);
@@ -516,4 +517,6 @@ public:
    void setUI();
    UPROPERTY(EditAnywhere, BlueprintReadWrite)
    bool dontshow = false;
+   UPROPERTY(EditAnywhere, BlueprintReadWrite)
+   bool killtitan = false;
 };

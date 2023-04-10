@@ -174,7 +174,7 @@ void AWeapon::OnBoxOverlap(
 			  }
 			  else
 			  {
-				 // Enemy1->fsm->OnDamageProcess();
+				  WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			  }
 
 		  }
