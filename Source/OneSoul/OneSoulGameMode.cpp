@@ -6,6 +6,7 @@
 #include "OneSoulOverlay.h"
 #include "OnsSoulPlayer.h"
 #include "Weapon.h"
+#include "Shield.h"
 #include "Kismet/GameplayStatics.h"
 #include "OneSoulGameInstance.h"
 
@@ -26,6 +27,7 @@ void AOneSoulGameMode::BeginPlay()
  gameInst = Cast<UOneSoulGameInstance>(GetWorld()->GetGameInstance());
 
  SoulSave += gameInst->soul;
+
 }
 
 void AOneSoulGameMode::AddCoins(int32 point)
@@ -53,6 +55,11 @@ void AOneSoulGameMode::ReSpawnPlayer(ACharacter* player)
   if (SoulsRetrievedBlueprint)
   {
 	  GetWorld()->SpawnActor<class AActor>(SoulsRetrievedBlueprint, player->GetActorTransform());
+  }
+
+  if (ShieldBlueprint)
+  {
+	  //GetWorld()->SpawnActor<class AShield>(ShieldBlueprint, player->GetActorTransform());
   }
  
   PotionNum;

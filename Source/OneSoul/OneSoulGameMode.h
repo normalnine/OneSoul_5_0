@@ -9,6 +9,7 @@
 class UOneSoulOverlay;
 class AOnsSoulPlayer;
 class AWeapon;
+class AShield;
 class UOneSoulGameInstance;
 
 UCLASS(minimalapi)
@@ -47,6 +48,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> SoulsRetrievedBlueprint;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AShield>ShieldBlueprint;
 
 	UPROPERTY(EditAnywhere)
 	UOneSoulGameInstance* gameInst;

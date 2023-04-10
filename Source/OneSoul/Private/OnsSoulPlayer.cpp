@@ -91,8 +91,8 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	SphereSoulsRetrieved = CreateDefaultSubobject<USphereComponent>(TEXT("SphereSoulsRetrieved"));
 	SphereSoulsRetrieved -> SetupAttachment(GetRootComponent());
 
-	SprintSpeed = 800.f;
-	WalkSpeed = 400.f;
+	SprintSpeed = 600.f;
+	WalkSpeed = 280.f;
 
 	MinStamina = 0.f;
 
@@ -111,6 +111,7 @@ AOnsSoulPlayer::AOnsSoulPlayer()
 	InventorySlots = 5;
 
 	IsPaused = false;
+	IsEkey = false;
 
 	SetPlayerMaxSpeed(WalkSpeed);
 
@@ -143,8 +144,6 @@ void AOnsSoulPlayer::BeginPlay()
 	MainInventory -> AddToViewport();
 
 	SoulsRetrievedWidget = CreateWidget<UUserWidget>(GetWorld(), SoulsRetrievedWidgets);
-
-	GetWorld()->SpawnActor<class AActor>(PickupPotion, GetActorTransform());
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && LevelStartMontage)
@@ -348,8 +347,8 @@ void AOnsSoulPlayer::Destroyed()
   {
 	if (AOneSoulGameMode* CurrentGameModeBase = Cast<AOneSoulGameMode>(World->GetAuthGameMode()))
 	{
-	  CurrentGameModeBase-> ReSpawnPlayer(this); 
-	  
+	  CurrentGameModeBase-> ReSpawnPlayer(this);
+
 	  EnableInput(UGameplayStatics::GetPlayerController(this, 0));
       UGameplayStatics:: GetPlayerController(this,0) -> SetShowMouseCursor(false);
       UGameplayStatics:: GetPlayerController(this, 0) -> SetInputMode(FInputModeGameOnly());
@@ -604,14 +603,14 @@ void AOnsSoulPlayer::SoulsRetrievedRemove()
 	
     SoulsRetrieved -> Destroy();
 
-	GetWorld() -> GetTimerManager().SetTimer(SoulsRetrievedTimer,this,&AOnsSoulPlayer::SoulsRetrievedRemoveWidget,1.f);
+	GetWorld() -> GetTimerManager().SetTimer(SoulsRetrievedWidgetTimer,this,&AOnsSoulPlayer::SoulsRetrievedRemoveWidget,1.f);
 }
 
 void AOnsSoulPlayer::SoulsRetrievedRemoveWidget()
 {
 	if (SoulsRetrievedWidget != nullptr)
 	{
-		SoulsRetrievedWidget->SetVisibility(ESlateVisibility::Hidden);
+		SoulsRetrievedWidget->RemoveFromParent();
 	}
 }
 
@@ -621,6 +620,31 @@ bool AOnsSoulPlayer::SheidNull()
  OverlappingShiled = nullptr;
 
  return true;
+}
+
+void AOnsSoulPlayer::SwapShield(AShield* SheidToSwap)
+{
+	EquipShield(SheidToSwap);
+	OverlappingItem = nullptr;
+}
+
+void AOnsSoulPlayer::SpawnDefaultSheid()
+{
+	if (OverlappingSheids)
+	{
+		OverlappingShiled = GetWorld()->SpawnActor<AShield>(OverlappingSheids);
+
+
+		const USkeletalMeshSocket* HandSocket = GetMesh()->GetSocketByName(FName("hand_l"));
+
+		if (HandSocket)
+		{
+			HandSocket->AttachActor(OverlappingShiled, GetMesh());
+		}
+
+		SwapShield(OverlappingShiled);
+
+	}
 }
 
 void AOnsSoulPlayer::ToggleLockOn()
@@ -672,7 +696,7 @@ void AOnsSoulPlayer::Attack()
 
 void AOnsSoulPlayer::EKeyPressed()
 {
-    
+ 
 	TArray<UUserWidget*> FoundWidgets;
 	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), FoundWidgets, UEnemyBossDieUI::StaticClass(), true);
 
@@ -749,6 +773,8 @@ void AOnsSoulPlayer::EKeyPressed()
  {
 	 EquipShield(OverlappingShiled);
 	 OverlappingWidget->GetPickupWiget()->SetVisibility(false);
+
+	 IsEkey= true;
  }
  if (OverlappingItem)
  {
@@ -1250,6 +1276,7 @@ void AOnsSoulPlayer::WeaponChange()
 	{
 	  IsAttacking=true;
 	  Disarm();	
+	  SetPlayerMaxSpeed(400.f);
 	  GetWorldTimerManager().SetTimer(PotionDrinkingTimer, this, &AOnsSoulPlayer::PotionAttakTimer, 1.5f);
 	}
 	else

@@ -10,6 +10,8 @@
 #include "Enemy_Skeleton.h"
 #include "Enemy_Archer_Arrow.h"
 #include "Enemy_Magician_magic.h"
+#include "Components/SphereComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 AShield::AShield()
 {
@@ -22,7 +24,7 @@ void AShield::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (player->imguard)
+	if (player->imguard && this != nullptr)
 	{
 	shieldcomp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}

@@ -182,6 +182,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	AShield* OverlappingShiled;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<AShield>OverlappingSheids;
 
 	UPROPERTY(EditAnywhere,Category="Retargeting")
 	TSubclassOf<class AActor> RetargetPlueprints;
@@ -210,10 +212,15 @@ public:
 
 	FTimerHandle SoulsRetrievedTimer;
 
+	FTimerHandle SoulsRetrievedWidgetTimer;
+
 	bool bCanHitReact;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	bool IsPaused;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ekey")
+	bool IsEkey;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment")
 	int32 WeaponEquipmentSlots =  3;
@@ -325,6 +332,9 @@ public:
 	void SoulsRetrievedRemoveWidget();
 	UFUNCTION(BlueprintCallable)
 	bool SheidNull();
+
+	void SwapShield(AShield* SheidToSwap);
+	void SpawnDefaultSheid();
 
 protected:
 	virtual void BeginPlay() override;
