@@ -32,39 +32,39 @@ void UEnemyBossAnim::AnimNotify_DieEnd()
 void UEnemyBossAnim::AnimNotify_AttackStartHead()
 {
 	enemy->capsuleCompHead->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	enemy->capsuleCompHead->SetHiddenInGame(false);
+	//enemy->capsuleCompHead->SetHiddenInGame(false);
 }
 
 void UEnemyBossAnim::AnimNotify_AttackStartLeftHand()
 {
 	enemy->sphereCompHand_L->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	enemy->sphereCompHand_L->SetHiddenInGame(false);
+	//enemy->sphereCompHand_L->SetHiddenInGame(false);
 }
 
 void UEnemyBossAnim::AnimNotify_AttackStartRightHand()
 {
 	enemy->sphereCompHand_R->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	enemy->sphereCompHand_R->SetHiddenInGame(false);
+	//enemy->sphereCompHand_R->SetHiddenInGame(false);
 }
 
 void UEnemyBossAnim::AnimNotify_AttackEndHead()
 {
 	enemy->capsuleCompHead->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	enemy->capsuleCompHead->SetHiddenInGame(true);
+	//enemy->capsuleCompHead->SetHiddenInGame(true);
 	enemy->bOverlap = true;
 }
 
 void UEnemyBossAnim::AnimNotify_AttackEndLeftHand()
 {
 	enemy->sphereCompHand_L->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	enemy->sphereCompHand_L->SetHiddenInGame(true);
+	//enemy->sphereCompHand_L->SetHiddenInGame(true);
 	enemy->bOverlap = true;
 }
 
 void UEnemyBossAnim::AnimNotify_AttackEndRightHand()
 {
 	enemy->sphereCompHand_R->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	enemy->sphereCompHand_R->SetHiddenInGame(true);
+	//enemy->sphereCompHand_R->SetHiddenInGame(true);
 	enemy->bOverlap = true;
 }
 

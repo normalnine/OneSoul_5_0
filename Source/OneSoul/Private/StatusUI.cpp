@@ -4,12 +4,15 @@
 #include "StatusUI.h"
 #include "OneSoulGameInstance.h"
 #include <Components/TextBlock.h>
+#include <Kismet/GameplayStatics.h>
+#include "OnsSoulPlayer.h"
 
 void UStatusUI::NativeConstruct()
 {
 	Super::NativePreConstruct();
 
 	gameInst = Cast<UOneSoulGameInstance>(GetWorld()->GetGameInstance());
+	player = Cast<AOnsSoulPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AOnsSoulPlayer::StaticClass()));
 	StatusInit(gameInst->currLevel);
 }
 
@@ -23,4 +26,6 @@ void UStatusUI::StatusInit(int32 currLevel)
 	_currDefense->SetText(FText::AsNumber(gameInst->statusData[currLevel].defense));
 	_maxHP->SetText(FText::AsNumber(gameInst->statusData[currLevel].maxHP));
 	_maxStamina->SetText(FText::AsNumber(gameInst->statusData[currLevel].maxStamina));
+	_currHP->SetText(FText::AsNumber(player->Health));
+	_currStamina->SetText(FText::AsNumber(player->CurrentStamina));
 }

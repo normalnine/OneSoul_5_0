@@ -41,6 +41,9 @@ public:
 	class UTextBlock* _currStamina;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	class UTextBlock* _maxStamina;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class AOnsSoulPlayer* player;
 	
 	UFUNCTION(BlueprintCallable)
 	void StatusInit(int32 currLevel);

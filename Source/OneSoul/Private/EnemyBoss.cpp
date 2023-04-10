@@ -10,6 +10,10 @@
 #include "OnsSoulPlayer.h"
 #include <Components/AudioComponent.h>
 #include <Particles/ParticleSystemComponent.h>
+#include <GameFramework/DamageType.h>
+#include <Kismet/GameplayStatics.h>
+#include <AIModule/Classes/AIController.h>
+
 
 // Sets default values
 AEnemyBoss::AEnemyBoss()
@@ -149,8 +153,12 @@ void AEnemyBoss::BeginOverlapHead(UPrimitiveComponent* OverlappedComponent, AAct
 		target = Cast<AOnsSoulPlayer>(OtherActor);
 		if (target != nullptr)
 		{
-			target->ReceiveDamage(10);
-			target->DirectionalHitReact(GetActorLocation());
+			UGameplayStatics::ApplyDamage(
+				target,
+				100,
+				fsm->ai,
+				this,
+				UDamageType::StaticClass());
 			fsm->Roar(2000.0f);
 		}
 		bOverlap = false;
@@ -165,8 +173,12 @@ void AEnemyBoss::BeginOverlapLeftHand(UPrimitiveComponent* OverlappedComponent, 
 		target = Cast<AOnsSoulPlayer>(OtherActor);
 		if (target != nullptr)
 		{
-			target->ReceiveDamage(10);
-			target->DirectionalHitReact(GetActorLocation());
+			UGameplayStatics::ApplyDamage(
+				target,
+				100,
+				fsm->ai,
+				this,
+				UDamageType::StaticClass());
 			fsm->Roar(2000.0f);
 
 		}
@@ -182,8 +194,12 @@ void AEnemyBoss::BeginOverlapRightHand(UPrimitiveComponent* OverlappedComponent,
 		target = Cast<AOnsSoulPlayer>(OtherActor);
 		if (target != nullptr)
 		{
-			target->ReceiveDamage(10);
-			target->DirectionalHitReact(GetActorLocation());
+			UGameplayStatics::ApplyDamage(
+				target,
+				100,
+				fsm->ai,
+				this,
+				UDamageType::StaticClass());
 			fsm->Roar(2000.0f);
 		}
 		bOverlap = false;

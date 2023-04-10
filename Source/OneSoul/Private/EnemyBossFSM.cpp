@@ -449,7 +449,7 @@ bool UEnemyBossFSM::IsTargetTrace()
 		FHitResult hitInfo;
 		FCollisionQueryParams param;
 		param.AddIgnoredActor(me);
-		DrawDebugLine(GetWorld(), me->GetActorLocation(), target->GetActorLocation(), FColor::Cyan);
+		//DrawDebugLine(GetWorld(), me->GetActorLocation(), target->GetActorLocation(), FColor::Cyan);
 		bool bHit = GetWorld()->LineTraceSingleByChannel(
 			hitInfo,
 			me->GetActorLocation(),

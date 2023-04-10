@@ -142,6 +142,7 @@ void ANPC::Dialogue(TArray<FString> dialogueText)
 
 		npcMenuUI->text_dialogue->SetVisibility(ESlateVisibility::Hidden);
 		npcMenuUI->hb_next->SetVisibility(ESlateVisibility::Hidden);
+		npcMenuUI->image_dialogue->SetVisibility(ESlateVisibility::Hidden);
 		
 		npcMenuUI->text_dialogue->SetText(FText::FromString(dialogueText[dialogueIndex]));
 		if (gameInst->npcState == ENPCState::Quest)

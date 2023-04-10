@@ -10,6 +10,9 @@
 #include <Particles/ParticleSystemComponent.h>
 #include "EnemyBoss.h"
 #include "EnemyBossFSM.h"
+#include <GameFramework/DamageType.h>
+#include <AIModule/Classes/AIController.h>
+
 // Sets default values
 AEnemyBossFireball::AEnemyBossFireball()
 {
@@ -68,8 +71,14 @@ void AEnemyBossFireball::BeginOverlapFireball(UPrimitiveComponent* OverlappedCom
 		target = Cast<AOnsSoulPlayer>(OtherActor);
 		if (target != nullptr)
 		{
-			target->ReceiveDamage(10);
-			target->DirectionalHitReact(GetActorLocation());
+			UGameplayStatics::ApplyDamage(
+				target,
+				100,
+				enemy->fsm->ai,
+				this,
+				UDamageType::StaticClass());
+			//AActor* DamagedActor, float BaseDamage, AController* EventInstigator, AActor* DamageCauser, TSubclassOf<UDamageType> DamageTypeClass
+			//ApplyDamage(target,1000);
 			enemy->fsm->CameraShake();
 ;			bOverlap = false;
 		}		
