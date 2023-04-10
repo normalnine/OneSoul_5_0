@@ -73,6 +73,9 @@ void AEnemy_Titan::OnOverlapBegin(class UPrimitiveComponent* selfComp, class AAc
 			target->ReceiveDamage(1);
 			target->DirectionalHitReact(GetActorLocation());
 			target->HitReactSounds();
+			//플레이어를 넉백시킨다
+			FVector imp = -1 * target->GetActorForwardVector() * 2000.0f;
+			target->GetCharacterMovement()->AddImpulse(imp, true);
 		}
 
 

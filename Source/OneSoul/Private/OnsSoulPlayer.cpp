@@ -308,6 +308,7 @@ float AOnsSoulPlayer::TakeDamage(
 {
 	if (Health - Damage <= 0.f)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("DIE"));
 	  Health = 0.f;
 	  Die();
 	  PlayerDieTimer();
