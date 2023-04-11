@@ -330,7 +330,7 @@ void UEnemyBossFSM::ChangeState(EEnemyBossState state)
 	break;
 	case EEnemyBossState::Die:
 		//충돌안되게 설정
-		//me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		me->capsuleCompBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		
 		//Die 몽타주 실행
 		me->particleComp1->SetVisibility(true);

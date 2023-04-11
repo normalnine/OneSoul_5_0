@@ -48,6 +48,9 @@ public:
 		class USphereComponent* sphereCompHand_R;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UCapsuleComponent* capsuleCompBody;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UAudioComponent* audioComp;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

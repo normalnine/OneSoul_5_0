@@ -75,7 +75,7 @@ void AEnemyBossGhost::BeginOverlapGhost(UPrimitiveComponent* OverlappedComponent
 {
 	// 플레이어 캐스팅 & 데미지 함수 호출
 	target = Cast<AOnsSoulPlayer>(OtherActor);
-	if (target != nullptr)
+	if (target != nullptr && target->Health > 0)
 	{
 		UGameplayStatics::ApplyDamage(
 			target,

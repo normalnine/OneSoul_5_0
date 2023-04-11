@@ -21,6 +21,7 @@
 #include "Enemy_Titan_FSM.h"
 #include "EnemyBossFSM.h"
 #include "JW_PlayerBaseComponent.h"
+#include "OneSoulGameInstance.h"
 
 
 
@@ -89,6 +90,7 @@ void AWeapon::BeginPlay()
 
  WeaponBox -> OnComponentBeginOverlap.AddDynamic(this,&AWeapon::OnBoxOverlap);
  BossWeaponBox->OnComponentBeginOverlap.AddDynamic(this,&AWeapon::OnSphereOverlap);
+ gameInst = Cast<UOneSoulGameInstance>(GetWorld()->GetGameInstance());
 }
 
 void AWeapon::OnBoxOverlap(
@@ -98,11 +100,11 @@ void AWeapon::OnBoxOverlap(
               int32 OtherBodyIndex,
               bool bFromSweep,
               const FHitResult& SweepResult)
-{
+{		
 		//UE_LOG(LogTemp,Warning,TEXT("ovelapweapon"));
    
 		//if (ActorIsSameType(OthrActor)) return;
-
+	float randDamage = gameInst->statusData[gameInst->currLevel].offense + FMath::RandRange(-10,10);
 	      BoxTrace(BoxHit_);
 
 		  ANormalEnemy_YG* Enemy = Cast<ANormalEnemy_YG>(BoxHit_.GetActor());
@@ -113,25 +115,27 @@ void AWeapon::OnBoxOverlap(
 
 		  if (Enemy4 != nullptr)
 		  {
-			  Enemy4->fsm->OnDamageProcess(2);
+			  Enemy4->fsm->OnDamageProcess(randDamage);
 		  }
-		  //¸ÅÁö¼ÇÇÏ°í Ãæµ¹µÇ¾úÀ»¶§
+		  //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½æµ¹ï¿½Ç¾ï¿½ï¿½ï¿½ï¿½ï¿½
 		  if (Enemy2 != nullptr)
 		  {
 			  if (Enemy2->fsm->Hitback)
 			  {
-				  //ÇÃ·¹ÀÌ¾î¸¦ Ä³½ºÆÃ
+				  //ï¿½Ã·ï¿½ï¿½Ì¾î¸¦ Ä³ï¿½ï¿½ï¿½ï¿½
 				  AOnsSoulPlayer* me = Cast<AOnsSoulPlayer>(GetOwner());
-				  //ÇÃ·¹ÀÌ¾î¿¡ ÄÄÆ÷³ÍÆ®È£ÃâÇØ¼­ °Å±â¿¡ ÀÖ´Â Å©¸®Æ¼ÄÃ¾îÅÃ ¸ùÅ¸ÁÖ ½ÇÇà
+				  //ï¿½Ã·ï¿½ï¿½Ì¾î¿¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®È£ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½Å±â¿¡ ï¿½Ö´ï¿½ Å©ï¿½ï¿½Æ¼ï¿½Ã¾ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 				  me->compPlayerBase->CriAttack();
-				  //Ä® ÄÝ¸®Àü ²ô±â - ¸ó½ºÅÍ³ª Ä® ÄÝ¸®Àü µÑÁß ÇÏ³ª°¡ ¾ø¾îÁ®¾ßÁö ¹«ÇÑ¹Ýº¹ÀÌ ¾È½ÇÇàµÊ
+				  //Ä® ï¿½Ý¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ - ï¿½ï¿½ï¿½Í³ï¿½ Ä® ï¿½Ý¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ï³ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ñ¹Ýºï¿½ï¿½ï¿½ ï¿½È½ï¿½ï¿½ï¿½ï¿½
 				  WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-				  //¸ó½ºÅÍ¶û À§Ä¡¸ÂÃß±â
+				  //ï¿½ï¿½ï¿½Í¶ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ï¿½ß±ï¿½
 				  Enemy2->SetActorLocation(me->GetActorLocation() + me->GetActorForwardVector() * 100.0f);
 
-				  //¸ó½ºÅÍ ÇÇ°ÝÇÔ¼ö È£Ãâ
-				  Enemy2->fsm->OnDamageProcess(100);
-				  //°ø°Ý¸ð¼Ç¾ÈµÇ´ø ¹ö±×¸¦ ¼öÁ¤ÇÏ±âÀ§ÇØ
+				  //ï¿½ï¿½ï¿½ï¿½ ï¿½Ç°ï¿½ï¿½Ô¼ï¿½ È£ï¿½ï¿½
+
+				  Enemy2->fsm->OnDamageProcess(randDamage);
+
+				  //ï¿½ï¿½ï¿½Ý¸ï¿½Ç¾ÈµÇ´ï¿½ ï¿½ï¿½ï¿½×¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï±ï¿½ï¿½ï¿½ï¿½ï¿½
 				  me->IsAttacking = false;
 
 
@@ -141,33 +145,35 @@ void AWeapon::OnBoxOverlap(
 				  Enemy2->fsm->OnDamageProcess(100);
 			  }
 		  }
-		  //¾ÆÃ³¶û Ãæµ¹µÇ¾úÀ»¶§
+		  //ï¿½ï¿½Ã³ï¿½ï¿½ ï¿½æµ¹ï¿½Ç¾ï¿½ï¿½ï¿½ï¿½ï¿½
 
 		  if (Enemy3 != nullptr)
 		  {
 			  //UE_LOG(LogTemp, Warning, TEXT("AEnemy_Archer"));
-			  Enemy3->fsm->OnDamageProcess(100);
+
+			  Enemy3->fsm->OnDamageProcess(randDamage);
+
 		  }
 
-		  //½ºÄÌ·¹ÅæÀÌ¶û Ãæµ¹µÇ¾úÀ»¶§
+		  //ï¿½ï¿½ï¿½Ì·ï¿½ï¿½ï¿½ï¿½Ì¶ï¿½ ï¿½æµ¹ï¿½Ç¾ï¿½ï¿½ï¿½ï¿½ï¿½
 		  if (Enemy1 != nullptr)
 		  {
 			  if (Enemy1->fsm->cri || Enemy1->fsm->Hitback)
 			  {
 				  //UE_LOG(LogTemp, Warning, TEXT("asdadasddasd"));
-				  //ÇÃ·¹ÀÌ¾î¸¦ Ä³½ºÆÃ
+				  //ï¿½Ã·ï¿½ï¿½Ì¾î¸¦ Ä³ï¿½ï¿½ï¿½ï¿½
 				  AOnsSoulPlayer* me = Cast<AOnsSoulPlayer>(GetOwner());
-				  //Ä® ÄÝ¸®Àü ²ô±â - ¸ó½ºÅÍ³ª Ä® ÄÝ¸®Àü µÑÁß ÇÏ³ª°¡ ¾ø¾îÁ®¾ßÁö ¹«ÇÑ¹Ýº¹ÀÌ ¾È½ÇÇàµÊ
+				  //Ä® ï¿½Ý¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ - ï¿½ï¿½ï¿½Í³ï¿½ Ä® ï¿½Ý¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ï³ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ñ¹Ýºï¿½ï¿½ï¿½ ï¿½È½ï¿½ï¿½ï¿½ï¿½
 				  WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-				   //¸ó½ºÅÍ¶û À§Ä¡¸ÂÃß±â
+				   //ï¿½ï¿½ï¿½Í¶ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ï¿½ß±ï¿½
 				  Enemy1->SetActorLocation(me->GetActorLocation() + me->GetActorForwardVector() * 100.0f);
 
 				  Enemy1->SetActorRotation(FRotator(0,-30,0));
-				  //ÇÃ·¹ÀÌ¾î¿¡ ÄÄÆ÷³ÍÆ®È£ÃâÇØ¼­ °Å±â¿¡ ÀÖ´Â Å©¸®Æ¼ÄÃ¾îÅÃ ¸ùÅ¸ÁÖ ½ÇÇà
+				  //ï¿½Ã·ï¿½ï¿½Ì¾î¿¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®È£ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½Å±â¿¡ ï¿½Ö´ï¿½ Å©ï¿½ï¿½Æ¼ï¿½Ã¾ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 				  me->compPlayerBase->CriAttack();
-				  //¸ó½ºÅÍ ÇÇ°ÝÇÔ¼ö È£Ãâ
-				  Enemy1->fsm->OnDamageProcess(1);
-				  //°ø°Ý¸ð¼Ç¾ÈµÇ´ø ¹ö±×¸¦ ¼öÁ¤ÇÏ±âÀ§ÇØ
+				  //ï¿½ï¿½ï¿½ï¿½ ï¿½Ç°ï¿½ï¿½Ô¼ï¿½ È£ï¿½ï¿½
+				  Enemy1->fsm->OnDamageProcess(randDamage);
+				  //ï¿½ï¿½ï¿½Ý¸ï¿½Ç¾ÈµÇ´ï¿½ ï¿½ï¿½ï¿½×¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï±ï¿½ï¿½ï¿½ï¿½ï¿½
 				  me->IsAttacking = false;
 
 
@@ -215,7 +221,7 @@ void AWeapon::OnBoxOverlap(
 
 		if (Boss != nullptr)
 		{
-			Boss->fsm->ReceiveDamage(100);
+			Boss->fsm->ReceiveDamage(randDamage);
 			FActorSpawnParameters SpawnParameters;
 			GetWorld()->SpawnActor<AActor>(bloodEffect, BoxTraceStart->GetComponentTransform());
 		}
