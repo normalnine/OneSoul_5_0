@@ -144,7 +144,7 @@ public:
 	float currHP;
 	//최대 체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float maxHP = 1000.0f;
+	float maxHP = 5000.0f;
 	//누적 데미지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float accumulatedDamage;
@@ -153,12 +153,12 @@ public:
 	bool bDamageDealtRecently = false;
 	//그로기 데미지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float groggyDamage = 500.0f;
+	float groggyDamage = 1000.0f;
 	//소울
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float soul = 150000.0f;
 	//넉백 수치
-// 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+// 	UPROPERTY(EditAnywhere, BlueprintReadWrite)S
 // 	float enemyAttackForce = 2000.0f;
 
 	//죽었을 때 내려가는 속력

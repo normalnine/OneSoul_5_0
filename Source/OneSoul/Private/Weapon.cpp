@@ -21,6 +21,7 @@
 #include "Enemy_Titan_FSM.h"
 #include "EnemyBossFSM.h"
 #include "JW_PlayerBaseComponent.h"
+#include "OneSoulGameInstance.h"
 
 
 
@@ -89,6 +90,7 @@ void AWeapon::BeginPlay()
 
  WeaponBox -> OnComponentBeginOverlap.AddDynamic(this,&AWeapon::OnBoxOverlap);
  BossWeaponBox->OnComponentBeginOverlap.AddDynamic(this,&AWeapon::OnSphereOverlap);
+ gameInst = Cast<UOneSoulGameInstance>(GetWorld()->GetGameInstance());
 }
 
 void AWeapon::OnBoxOverlap(
@@ -98,11 +100,11 @@ void AWeapon::OnBoxOverlap(
               int32 OtherBodyIndex,
               bool bFromSweep,
               const FHitResult& SweepResult)
-{
+{		
 		//UE_LOG(LogTemp,Warning,TEXT("ovelapweapon"));
    
 		//if (ActorIsSameType(OthrActor)) return;
-
+	float randDamage = gameInst->statusData[gameInst->currLevel].offense + FMath::RandRange(-10,10);
 	      BoxTrace(BoxHit_);
 
 		  ANormalEnemy_YG* Enemy = Cast<ANormalEnemy_YG>(BoxHit_.GetActor());
@@ -113,7 +115,7 @@ void AWeapon::OnBoxOverlap(
 
 		  if (Enemy4 != nullptr)
 		  {
-			  Enemy4->fsm->OnDamageProcess(2);
+			  Enemy4->fsm->OnDamageProcess(randDamage);
 		  }
 		  //매지션하고 충돌되었을때
 		  if (Enemy2 != nullptr)
@@ -131,6 +133,7 @@ void AWeapon::OnBoxOverlap(
 
 				  //몬스터 피격함수 호출
 				  Enemy2->fsm->OnDamageProcess();
+				  //Enemy2->fsm->OnDamageProcess(randDamage);
 				  //공격모션안되던 버그를 수정하기위해
 				  me->IsAttacking = false;
 
@@ -147,6 +150,7 @@ void AWeapon::OnBoxOverlap(
 		  {
 			  //UE_LOG(LogTemp, Warning, TEXT("AEnemy_Archer"));
 			  Enemy3->fsm->OnDamageProcess();
+			  //Enemy3->fsm->OnDamageProcess(randDamage);
 		  }
 
 		  //스켈레톤이랑 충돌되었을때
@@ -166,7 +170,7 @@ void AWeapon::OnBoxOverlap(
 				  //플레이어에 컴포넌트호출해서 거기에 있는 크리티컬어택 몽타주 실행
 				  me->compPlayerBase->CriAttack();
 				  //몬스터 피격함수 호출
-				  Enemy1->fsm->OnDamageProcess(1);
+				  Enemy1->fsm->OnDamageProcess(randDamage);
 				  //공격모션안되던 버그를 수정하기위해
 				  me->IsAttacking = false;
 
@@ -215,7 +219,7 @@ void AWeapon::OnBoxOverlap(
 
 		if (Boss != nullptr)
 		{
-			Boss->fsm->ReceiveDamage(100);
+			Boss->fsm->ReceiveDamage(randDamage);
 			FActorSpawnParameters SpawnParameters;
 			GetWorld()->SpawnActor<AActor>(bloodEffect, BoxTraceStart->GetComponentTransform());
 		}

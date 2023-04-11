@@ -99,4 +99,7 @@ public:
 
    UPROPERTY(VisibleAnywhere,BlueprintReadWrite, Category = "Weapon")
 	   UBoxComponent* WeaponBox;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UOneSoulGameInstance* gameInst;
 };
