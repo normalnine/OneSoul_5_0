@@ -1145,7 +1145,7 @@ void AOnsSoulPlayer::Die()
 
 	if (EquippedWeapon != nullptr)
 	{
-	 EquippedWeapon -> Destroy();
+ EquippedWeapon -> Destroy();
 	}
 
 	if (OverlappingShiled != nullptr)
@@ -1155,11 +1155,6 @@ void AOnsSoulPlayer::Die()
 
 	gameInst->soul /= 2;
     
-	if (SoulsRetrieved != nullptr && IsDead==true)
-	{
-		SoulsRetrieved->Destroy();
-	}
-
 	IsAttacking = false;
 }
 
@@ -1252,7 +1247,7 @@ void AOnsSoulPlayer::PotionDrinking()
 	    {
 			IsAttacking = true;
 			CurrentGameModeBase-> PotionNum -= 1;
-			Potion = 20.f;
+			Potion = 200.f;
 			PotionHP(Potion);
 			PlayPotionHealMontage();
 			SetPlayerMaxSpeed(300.f);

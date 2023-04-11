@@ -2,7 +2,7 @@
 
 
 #include "NormalEnemy_YG.h"
-#include "OneSoulGameModeBase.h"
+#include "OneSoul/OneSoulGameMode.h"
 #include "OnsSoulPlayer.h"
 #include "Soul.h"
 #include "AIController.h"
@@ -34,7 +34,7 @@ ANormalEnemy_YG::ANormalEnemy_YG()
 
 	AttackMin = 0.5f;
 	AttackMax = 1.f;
-	BaseDamage = 20.f;
+	BaseDamage = 200.f;
 
 	DeathLifeSpan = 1.f;
 
@@ -136,7 +136,7 @@ bool ANormalEnemy_YG::InTargetRange(AActor* Target, double Radius)
 
 void ANormalEnemy_YG::MoveToTarget(AActor* Target)
 {
-    if(EnemyController == nullptr || Target == nullptr) return;
+    if(EnemyController == nullptr) return;
 	FAIMoveRequest MoveRequest;
 	MoveRequest.SetGoalActor(Target);
 	MoveRequest.SetAcceptanceRadius(60.f);
@@ -238,6 +238,11 @@ void ANormalEnemy_YG::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	if(IsDead()) return;
+
+	if (CombatTarget && CombatTarget->ActorHasTag(FName("Dead")))
+	{
+		InitializeEnemy();
+	}
 
 	UpdateHitNumbers();
 

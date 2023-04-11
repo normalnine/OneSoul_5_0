@@ -7,6 +7,7 @@
 #include "OnsSoulPlayer.h"
 #include "Weapon.h"
 #include "Shield.h"
+#include "NormalEnemy_YG.h"
 #include "Kismet/GameplayStatics.h"
 #include "OneSoulGameInstance.h"
 
