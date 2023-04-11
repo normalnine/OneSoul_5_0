@@ -134,7 +134,7 @@ void AEnemy_Skeleton::OnOverlapBeginsword(class UPrimitiveComponent* selfComp, c
 				//	++It;
 				//	player->EnableInput(Pcon);
 				//}
-
+				SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 				//효과음 발생
 				UGameplayStatics::PlaySound2D(GetWorld(), blockSound);
 				changeGroggy = true;
@@ -144,13 +144,17 @@ void AEnemy_Skeleton::OnOverlapBeginsword(class UPrimitiveComponent* selfComp, c
 				GetWorld()->SpawnActor<AActor>(effectfactory1, target->GetMesh()->GetSocketTransform("ring_01_l"), params);
 			}
  			else
- 			{
-				UGameplayStatics::ApplyDamage(target, 100, fsm->ai, this, UDamageType::StaticClass());
+ 			{	if(target->Health>1)
+			{
+				SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//플레이어 데미지 호출하는함수
+				UGameplayStatics::ApplyDamage(target, 40, fsm->ai, this, UDamageType::StaticClass());
 				//플레이어를 넉백시킨다
 				FVector imp = -1 * target->GetActorForwardVector() * 500.0f;
 				target->GetCharacterMovement()->AddImpulse(imp, true);
 				//플레이어 카메라 흔들리기
 				//player->Shake();
+				}
 			}
  		
  

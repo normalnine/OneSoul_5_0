@@ -112,29 +112,30 @@ void UEnemy_Skeleton_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FA
 		groggy();
 		break;
 	}
-
-	FVector Ddir = target->GetActorLocation() - me->GetActorLocation();
-	FVector DdirSize = Ddir;
-	Ddir.Normalize();
-	//멀어지면 체력바안보이도록 수정
-	if (DdirSize.Size() > 2000)
-	{
-		me->HpWidget->SetVisibility(false);
+	if (!(target == nullptr))
+	{ 
+		FVector Ddir = target->GetActorLocation() - me->GetActorLocation();
+		FVector DdirSize = Ddir;
+		Ddir.Normalize();
+		//멀어지면 체력바안보이도록 수정
+		if (DdirSize.Size() > 2000)
+		{
+			me->HpWidget->SetVisibility(false);
+		}
+		float Ddotvalue = FVector::DotProduct(me->GetActorForwardVector(), Ddir);
+		float Dangle = UKismetMathLibrary::DegAcos(Ddotvalue);
+		//몬스터의 뒷각에 있으면서 몬스터와의 거리가 200미만일때
+		if (Dangle > 170 && DdirSize.Size() < 300)
+		{
+			Hitback = true;
+			/*UE_LOG(LogTemp, Warning, TEXT("Hitback = true;"));*/
+		}
+		else
+		{
+			Hitback = false;
+			/*UE_LOG(LogTemp, Warning, TEXT("Hitback = false;"));*/
+		}
 	}
-	float Ddotvalue = FVector::DotProduct(me->GetActorForwardVector(), Ddir);
-	float Dangle = UKismetMathLibrary::DegAcos(Ddotvalue);
-	//몬스터의 뒷각에 있으면서 몬스터와의 거리가 200미만일때
-	if (Dangle > 170 && DdirSize.Size() < 300)
-	{
-		Hitback = true;
-		/*UE_LOG(LogTemp, Warning, TEXT("Hitback = true;"));*/
-	}
-	else
-	{
-		Hitback = false;
-		/*UE_LOG(LogTemp, Warning, TEXT("Hitback = false;"));*/
-	}
-
 }
 
 void UEnemy_Skeleton_FSM::IdleState()
@@ -162,47 +163,37 @@ void UEnemy_Skeleton_FSM::MoveState()
 	/*UE_LOG(LogTemp, Warning, TEXT("MoveState"));*/
 	// 시야에 들어왔는지 여부
 	bool bTrace = IsTargetTrace();
-
+	if (!(target == nullptr))
+	{
 	//타겟을 향하는 방향을 구하고
 	FVector dir = target->GetActorLocation() - me->GetActorLocation();
 
 	//처음 위치, 나의 현재 위치의 거리
 	float dist = FVector::Distance(originPos, me->GetActorLocation());
+	
 
-
-	//시야에 들어왔다면
-	if (bTrace)
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("trace"));
-		//만약에 target - me 거리가 공격범위보다 작으면
-		if (dir.Length() < attackRange)
+		//시야에 들어왔다면
+		if (bTrace)
 		{
-		//	if (fight)
-			//{
-				index = FMath::RandRange(0, 2);
-			//}
-			
-			if (index == 0)
+			//UE_LOG(LogTemp, Warning, TEXT("trace"));
+			//만약에 target - me 거리가 공격범위보다 작으면
+			if (dir.Length() < attackRange)
 			{
 				ChangeState(EEnemyState1::Attack);
 			}
-			else if (index ==1)
-			{
-				ChangeState(EEnemyState1::Attackcombo1);
-			}
+			//그렇지 않으면
 			else
 			{
-				ChangeState(EEnemyState1::Shield);
+				//UE_LOG(LogTemp, Warning, TEXT("movetotarget"));
+				ai->MoveToLocation(target->GetActorLocation());
 			}
-			
-				
-			
 		}
-		//그렇지 않으면
 		else
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("movetotarget"));
-			ai->MoveToLocation(target->GetActorLocation());
+			//UE_LOG(LogTemp, Warning, TEXT("movetorandpos"));
+			// 랜덤한 위치까지 도착한 후 Idle 상태로 전환
+			MoveToPos(randPos);
+
 		}
 	}
 	//시야에 들어오지 않았다면
@@ -217,18 +208,25 @@ void UEnemy_Skeleton_FSM::MoveState()
 
 void UEnemy_Skeleton_FSM::movetoPlayer()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("movetoPlayer"));
-	ai->MoveToLocation(target->GetActorLocation());
+	if (!(target == nullptr))
+	{ 
+		//UE_LOG(LogTemp, Warning, TEXT("movetoPlayer"));
+		ai->MoveToLocation(target->GetActorLocation());
 
-	FVector dir = target->GetActorLocation() - me->GetActorLocation();
-	//만약에 target - me 거리가 공격범위보다 작으면
-	if (dir.Length() < attackRange)
-	{
-		ChangeState(EEnemyState1::Attack);
+		FVector dir = target->GetActorLocation() - me->GetActorLocation();
+		//만약에 target - me 거리가 공격범위보다 작으면
+		if (dir.Length() < attackRange)
+		{
+			ChangeState(EEnemyState1::Attack);
+		}
+		if (dir.Length()>traceRange)
+		{
+			ChangeState(EEnemyState1::Move);
+		}
 	}
-	if (dir.Length()>traceRange)
+	else
 	{
-		ChangeState(EEnemyState1::Move);
+		MoveToPos(randPos);
 	}
 }
 
@@ -335,33 +333,36 @@ void UEnemy_Skeleton_FSM::UpdaetAttackDelay()
 {
 	/*UE_LOG(LogTemp, Warning, TEXT("UpdaetAttackDelay"));*/
 	superArm = false;
-	if (IsWaitComplete(attackDelayTime))
+	if (target->Health < 1)
 	{
-
-		FVector dir = target->GetActorLocation() - me->GetActorLocation();
-		float dist = dir.Length();
-
-		if (dist < attackRange)
+		ChangeState(EEnemyState1::Idle);
+	}
+	if (!(target == nullptr))
+	{ 
+		if (IsWaitComplete(attackDelayTime))
 		{
 
-			index = FMath::RandRange(0, 2);
-			if (index == 0)
+			FVector dir = target->GetActorLocation() - me->GetActorLocation();
+			float dist = dir.Length();
+		
+			if (dist < attackRange)
 			{
-				ChangeState(EEnemyState1::Attack);
-			}
-			else if (index == 1)
-			{
-				ChangeState(EEnemyState1::Attackcombo1);
+
+				index = FMath::RandRange(0, 1);
+				if (index == 0)
+				{
+					ChangeState(EEnemyState1::Attack);
+				}
+				else
+				{
+					ChangeState(EEnemyState1::Shield);
+				}
 			}
 			else
 			{
-				ChangeState(EEnemyState1::Shield);
+	
+				ChangeState(EEnemyState1::MovetoTarget);
 			}
-		}
-		else
-		{
-
-			ChangeState(EEnemyState1::MovetoTarget);
 		}
 	}
 }
@@ -577,7 +578,7 @@ void UEnemy_Skeleton_FSM::resetDamage()
 bool UEnemy_Skeleton_FSM::IsTargetTrace()
 {
 
-
+	if (target == nullptr) return false;
 	FVector dir = target->GetActorLocation() - me->GetActorLocation();
 	FVector dirSize = dir;
 	dir.Normalize();

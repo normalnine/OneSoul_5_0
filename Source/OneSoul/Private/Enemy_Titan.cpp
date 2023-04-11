@@ -63,21 +63,18 @@ void AEnemy_Titan::OnOverlapBegin(class UPrimitiveComponent* selfComp, class AAc
 
 	if (target != nullptr)
 	{
-		if (target->parrying)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("parryGood"));
-			changeGroggy = true;
-		}
-		else
-		{
-			target->ReceiveDamage(1);
-			target->DirectionalHitReact(GetActorLocation());
-			target->HitReactSounds();
-			//플레이어를 넉백시킨다
-			FVector imp = -1 * target->GetActorForwardVector() * 2000.0f;
-			target->GetCharacterMovement()->AddImpulse(imp, true);
-		}
+		
+			if (target->Health > 1)
+			{
+				//플레이어 데미지 호출하는함수
+				UGameplayStatics::ApplyDamage(target, 70, fsm->ai, this, UDamageType::StaticClass());
+				//플레이어를 넉백시킨다
+				RcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+				LcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				FVector imp = -1 * target->GetActorForwardVector() * 2000.0f;
+				target->GetCharacterMovement()->AddImpulse(imp, true);
+			}
 
 	}
 

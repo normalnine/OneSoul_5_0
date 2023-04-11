@@ -312,13 +312,16 @@ float AOnsSoulPlayer::TakeDamage(
 {
 	if (Health - Damage <= 0.f)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("DIE"));
 	  Health = 0.f;
+	  compPlayerRoll->re = true;
+	  compPlayerRoll->ba = true;
 	  Die();
 	  PlayerDieTimer();
 	}
 	else
 	{
+		compPlayerRoll->re = true;
+		compPlayerRoll->ba = true;
 	  DirectionalHitReact(GetActorLocation());
 	  HitReactSounds();
 	  ReceiveDamage(Damage);
@@ -1124,7 +1127,9 @@ void AOnsSoulPlayer::Die()
 
 	IsAttacking= true;
 	IsDead = true;
-
+	//구르기 빽스탭 밀어주는 힘 끄는거
+	compPlayerRoll->re=true;
+	compPlayerRoll->ba=true;
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && DeathMontage)
 	{
@@ -1389,7 +1394,7 @@ void AOnsSoulPlayer::ExchangeInventoryItems(int32 CurrentItemIndex, int32 NewIte
 void AOnsSoulPlayer::EquipShield(AShield* shield)
 {
 
-	shield->Equip(GetMesh(), FName("hand_l"), this, this);
+	shield->Equip(GetMesh(), FName("shieldLoc"), this, this);
 	//FVector NewScale = FVector(15.0f, 15.0f, 15.0f); // ũ�⸦ �� ��� �����մϴ�.
 	//shield->SetActorRelativeScale3D(NewScale);
 	canshield = true;
