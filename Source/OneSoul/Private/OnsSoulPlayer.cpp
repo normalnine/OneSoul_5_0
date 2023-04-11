@@ -1226,13 +1226,13 @@ void AOnsSoulPlayer::HitReactSounds()
 
 void AOnsSoulPlayer::PotionHP(float PotionHP)
 {
-	if (Health > 0 && Health < 100.f)
+	if (Health > 0 && Health < MaxHealth)
 	{
 		Health += PotionHP;
 		PotionHP = FMath::Clamp(Health, 0.f, MaxHealth);
     }
 
-}
+} 
 
 void AOnsSoulPlayer::PotionDrinking()
 {
