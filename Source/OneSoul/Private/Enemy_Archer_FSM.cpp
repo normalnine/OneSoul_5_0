@@ -91,26 +91,29 @@ void UEnemy_Archer_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 		UpdateReturnPos();
 		break;
 	}
-	FVector Ddir = target->GetActorLocation() - me->GetActorLocation();
-	FVector DdirSize = Ddir;
-	Ddir.Normalize();
-	float Ddotvalue = FVector::DotProduct(me->GetActorLocation(), Ddir);
-	float Dangle = UKismetMathLibrary::DegAcos(Ddotvalue);
-	//멀어지면 체력바안보이도록 수정
-	if (DdirSize.Size() > 2000)
-	{
-		me->HpWidget->SetVisibility(false);
-	}
 
-	if (Dangle > 155 && DdirSize.Size() < 500)
-	{
-		Hitback = true;
+	if (!(target == nullptr))
+	{ 
+		FVector Ddir = target->GetActorLocation() - me->GetActorLocation();
+		FVector DdirSize = Ddir;
+		Ddir.Normalize();
+		float Ddotvalue = FVector::DotProduct(me->GetActorForwardVector(), Ddir);
+		float Dangle = UKismetMathLibrary::DegAcos(Ddotvalue);
+		//멀어지면 체력바안보이도록 수정
+		if (DdirSize.Size() > 2000)
+		{
+			me->HpWidget->SetVisibility(false);
+		}
+	
+		if (Dangle > 175 && DdirSize.Size() < 300)
+		{
+			Hitback = true;
+		}
+		else
+		{
+			Hitback = false;
+		}
 	}
-	else
-	{
-		Hitback = false;
-	}
-
 }
 
 void UEnemy_Archer_FSM::IdleState()
@@ -135,45 +138,53 @@ void UEnemy_Archer_FSM::IdleState()
 }
 void UEnemy_Archer_FSM::MoveState()
 {
+	
+		//UE_LOG(LogTemp, Warning, TEXT("moVE"));
+		// 시야에 들어왔는지 여부
+		bool bTrace = IsTargetTrace();
+	if (!(target == nullptr))
+	{ 
+		//타겟을 향하는 방향을 구하고
+		FVector dir = target->GetActorLocation() - me->GetActorLocation();
 
-	//UE_LOG(LogTemp, Warning, TEXT("moVE"));
-	// 시야에 들어왔는지 여부
-	bool bTrace = IsTargetTrace();
-
-	//타겟을 향하는 방향을 구하고
-	FVector dir = target->GetActorLocation() - me->GetActorLocation();
-
-	//처음 위치, 나의 현재 위치의 거리
-	float dist = FVector::Distance(originPos, me->GetActorLocation());
+		//처음 위치, 나의 현재 위치의 거리
+		float dist = FVector::Distance(originPos, me->GetActorLocation());
 
 
-	//시야에 들어왔다면
-	if (bTrace)
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("trace"));
-		//만약에 target - me 거리가 공격범위보다 작으면
-		if (dir.Length() < attackRange)
+		//시야에 들어왔다면
+		if (bTrace)
 		{
-
-			/*if (dir.Length() < 500)
+			//UE_LOG(LogTemp, Warning, TEXT("trace"));
+			//만약에 target - me 거리가 공격범위보다 작으면
+			if (dir.Length() < attackRange)
 			{
-				ChangeState(EEnemyState5::Run);
+
+				/*if (dir.Length() < 500)
+				{
+					ChangeState(EEnemyState5::Run);
+				}
+				else
+				{
+					
+				}*/
+				ChangeState(EEnemyState5::Attack);
+
 			}
+			//그렇지 않으면
 			else
 			{
-				
-			}*/
-			ChangeState(EEnemyState5::Attack);
-
+				//UE_LOG(LogTemp, Warning, TEXT("movetotarget"));
+				ai->MoveToLocation(target->GetActorLocation());
+			}
 		}
-		//그렇지 않으면
+			//시야에 들어오지 않았다면
 		else
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("movetotarget"));
-			ai->MoveToLocation(target->GetActorLocation());
+			//UE_LOG(LogTemp, Warning, TEXT("movetorandpos"));
+			// 랜덤한 위치까지 도착한 후 Idle 상태로 전환
+			MoveToPos(randPos);
 		}
 	}
-	//시야에 들어오지 않았다면
 	else
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("movetorandpos"));
@@ -183,7 +194,9 @@ void UEnemy_Archer_FSM::MoveState()
 }
 
 void UEnemy_Archer_FSM::AttackState()
-{
+{	
+	if (!(target == nullptr))
+	{ 
 	FVector des = target->GetActorLocation();
 
 	FVector dir = des - me->GetActorLocation();
@@ -192,7 +205,7 @@ void UEnemy_Archer_FSM::AttackState()
 
 	me->SetActorRotation(dirx);
 	ChangeState(EEnemyState5::AttackDelay);
-
+	}
 }
 
 void UEnemy_Archer_FSM::BackRun()
@@ -217,32 +230,36 @@ void UEnemy_Archer_FSM::BackRun()
 
 void UEnemy_Archer_FSM::UpdaetAttackDelay()
 {
-	//계속플레이어 방향을 바라보도록
 
-	FVector dira = target->GetActorLocation() - me->GetActorLocation();
-	FRotator dirx = dira.Rotation();
-	me->SetActorRotation(dirx);
-
-
-	if (IsWaitComplete(attackDelayTime))
+	if (!(target == nullptr))
 	{
+		//계속플레이어 방향을 바라보도록
+		FVector dira = target->GetActorLocation() - me->GetActorLocation();
+		FRotator dirx = dira.Rotation();
+		me->SetActorRotation(dirx);
 
-		FVector dir = target->GetActorLocation() - me->GetActorLocation();
-		float dist = dir.Length();
 
-		/*if (dist < 500)
+		if (IsWaitComplete(attackDelayTime))
 		{
+
+			FVector dir = target->GetActorLocation() - me->GetActorLocation();
+			float dist = dir.Length();
+
+			/*if (dist < 500)
+			{
 			EEnemyState5::Run;
 			anim->animState = mState;
-		}
-		else */if (dist < attackRange)
-		{
+			}
+			else */
+			if (dist < attackRange)
+			{
 
-			ChangeState(EEnemyState5::Attack);
-		}
-		else
-		{
-			ChangeState(EEnemyState5::Idle);
+				ChangeState(EEnemyState5::Attack);
+			}
+			else
+			{
+				ChangeState(EEnemyState5::Idle);
+			}
 		}
 	}
 }
@@ -280,15 +297,15 @@ void UEnemy_Archer_FSM::UpdateReturnPos()
 {
 	MoveToPos(originPos);
 }
-void UEnemy_Archer_FSM::OnDamageProcess()
+void UEnemy_Archer_FSM::OnDamageProcess(float damage)
 {
 	//체력 유아이 보이도록
 	me->HpWidget->SetVisibility(true);
 	//피격효과음재생
 	UGameplayStatics::PlaySound2D(GetWorld(), HITSound);
 	//체력감소
-	//hp -= damage;
-	hp--;
+	hp -= damage;
+	//hp--;
 	//피격되었을때 hp표시줄을 보여주는거 한번만 실행되면됨
 	me->HpWidget->UpdateCurrHP(hp, maxhp);
 	if (hp > 0)
@@ -351,6 +368,8 @@ bool UEnemy_Archer_FSM::GetRandomPositionInNavMesh(FVector centerLocation, float
 
 void UEnemy_Archer_FSM::mazic()
 {
+	if (!(target == nullptr))
+	{ 
 	FVector des = target->GetActorLocation();
 
 	FVector dir = des - me->GetActorLocation();
@@ -363,6 +382,7 @@ void UEnemy_Archer_FSM::mazic()
 	//소켓 에서 스폰한다
 	GetWorld()->SpawnActor<AActor>(ArrowFactory, me->GetMesh()->GetSocketLocation(TEXT("Socket2")), dirx, params);
 	ChangeState(EEnemyState5::AttackDelay);
+	}
 }
 
 void UEnemy_Archer_FSM::groggy()
@@ -382,7 +402,7 @@ void UEnemy_Archer_FSM::moveBack()
 
 bool UEnemy_Archer_FSM::IsTargetTrace()
 {
-
+	if (target == nullptr) return false;
 
 	FVector dir = target->GetActorLocation() - me->GetActorLocation();
 	FVector dirSize = dir;

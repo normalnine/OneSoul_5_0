@@ -98,24 +98,28 @@ void UEnemy_Magician_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FA
 		UpdateReturnPos();
 		break;
 	}
-	FVector Ddir = target->GetActorLocation() - me->GetActorLocation();
-	FVector DdirSize = Ddir;
-	Ddir.Normalize();
-	float Ddotvalue = FVector::DotProduct(me->GetActorLocation(), Ddir);
-	float Dangle = UKismetMathLibrary::DegAcos(Ddotvalue);
-	//멀어지면 체력바안보이도록 수정
-	if (DdirSize.Size() > 2000)
-	{
-		me->HpWidget->SetVisibility(false);
-	}
 
-	if (Dangle > 155 && DdirSize.Size() < 500)
+	if (!(target == nullptr))
 	{
-		Hitback = true;
-	}
-	else
-	{
-		Hitback = false;
+		FVector Ddir = target->GetActorLocation() - me->GetActorLocation();
+		FVector DdirSize = Ddir;
+		Ddir.Normalize();
+		float Ddotvalue = FVector::DotProduct(me->GetActorForwardVector(), Ddir);
+		float Dangle = UKismetMathLibrary::DegAcos(Ddotvalue);
+		//멀어지면 체력바안보이도록 수정
+		if (DdirSize.Size() > 2000)
+		{
+			me->HpWidget->SetVisibility(false);
+		}
+
+		if (Dangle > 175 && DdirSize.Size() < 300)
+		{
+			Hitback = true;
+		}
+		else
+		{
+			Hitback = false;
+		}
 	}
 }
 
@@ -142,41 +146,50 @@ void UEnemy_Magician_FSM::MoveState()
 {
 	// 시야에 들어왔는지 여부
 	bool bTrace = IsTargetTrace();
-
-	//타겟을 향하는 방향을 구하고
-	FVector dir = target->GetActorLocation() - me->GetActorLocation();
-
-	//처음 위치, 나의 현재 위치의 거리
-	float dist = FVector::Distance(originPos, me->GetActorLocation());
-
-
-	//시야에 들어왔다면
-	if (bTrace)
+	if (!(target == nullptr))
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("trace"));
-		//만약에 target - me 거리가 공격범위보다 작으면
-		if (dir.Length() < attackRange)
+		//타겟을 향하는 방향을 구하고
+		FVector dir = target->GetActorLocation() - me->GetActorLocation();
+
+		//처음 위치, 나의 현재 위치의 거리
+		float dist = FVector::Distance(originPos, me->GetActorLocation());
+
+
+		//시야에 들어왔다면
+		if (bTrace)
 		{
+			//UE_LOG(LogTemp, Warning, TEXT("trace"));
+			//만약에 target - me 거리가 공격범위보다 작으면
+			if (dir.Length() < attackRange)
+			{
 			
-			/*	if (dir.Length() < 500)
-				{
-					ChangeState(EEnemyState3::Run);
-				}
-				else
+				/*	if (dir.Length() < 500)
+					{
+						ChangeState(EEnemyState3::Run);
+					}
+					else
 				{*/
-				ChangeState(EEnemyState3::Attack);
-			//}
+					ChangeState(EEnemyState3::Attack);
+				//}
 			
 			
+			}
+			//그렇지 않으면
+			else
+			{
+				//UE_LOG(LogTemp, Warning, TEXT("movetotarget"));
+				ai->MoveToLocation(target->GetActorLocation());
+			}
 		}
-		//그렇지 않으면
+		//시야에 들어오지 않았다면
 		else
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("movetotarget"));
-			ai->MoveToLocation(target->GetActorLocation());
+			//UE_LOG(LogTemp, Warning, TEXT("movetorandpos"));
+			// 랜덤한 위치까지 도착한 후 Idle 상태로 전환
+			MoveToPos(randPos);
 		}
+	
 	}
-	//시야에 들어오지 않았다면
 	else
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("movetorandpos"));
@@ -300,15 +313,15 @@ void UEnemy_Magician_FSM::UpdateReturnPos()
 {
 	MoveToPos(originPos);
 }
-void UEnemy_Magician_FSM::OnDamageProcess()
+void UEnemy_Magician_FSM::OnDamageProcess(float damage)
 {
 	//피격효과음
 	UGameplayStatics::PlaySound2D(GetWorld(), HITSound);
 	//체력 위젯 보이도록
 	me->HpWidget->SetVisibility(true);
 	//체력감소
-	//hp -= damage;
-	hp--;
+	hp -= damage;
+	//hp--;
 	//피격되었을때 hp표시줄을 보여주는거 한번만 실행되면됨
 	me->HpWidget->UpdateCurrHP(hp, maxhp);
 
@@ -369,6 +382,8 @@ bool UEnemy_Magician_FSM::GetRandomPositionInNavMesh(FVector centerLocation, flo
 
 void UEnemy_Magician_FSM::mazic()
 {
+	if (!(target == nullptr))
+	{
 	FVector des = target->GetActorLocation();
 
 	FVector dir = des - me->GetActorLocation();
@@ -393,6 +408,11 @@ void UEnemy_Magician_FSM::mazic()
 	
 
 	ChangeState(EEnemyState3::AttackDelay);
+	}
+	else
+	{
+		MoveToPos(originPos);
+	}
 }
 
 void UEnemy_Magician_FSM::groggy()
@@ -409,7 +429,7 @@ void UEnemy_Magician_FSM::moveBack()
 
 bool UEnemy_Magician_FSM::IsTargetTrace()
 {
-
+	if (target == nullptr) return false;
 
 	FVector dir = target->GetActorLocation() - me->GetActorLocation();
 	FVector dirSize = dir;

@@ -61,7 +61,7 @@ public:
 
 	//피격 알림 이벤트 함수
 	UFUNCTION(BlueprintCallable)
-		void OnDamageProcess();
+		void OnDamageProcess(float damage);
 
 	//타겠을 쫒아갈수있나?
 	bool IsTargetTrace();
@@ -107,11 +107,11 @@ public:
 		float attackDelayTime = 2.0f;
 	//체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FSM)
-		int32 hp = 20;
+		int32 hp = 400;
 
 	//체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FSM)
-		int32 maxhp = 20;
+		int32 maxhp = 400;
 	//피격 대기 시간
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
 		float damageDelayTime = 3.0f;

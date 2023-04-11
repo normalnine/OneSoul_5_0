@@ -20,6 +20,7 @@ public:
 
 
 	void Roll();
+	UFUNCTION(BlueprintCallable)
 	void onColl();
 	
 

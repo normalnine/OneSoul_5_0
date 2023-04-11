@@ -130,7 +130,7 @@ void AWeapon::OnBoxOverlap(
 				  Enemy2->SetActorLocation(me->GetActorLocation() + me->GetActorForwardVector() * 100.0f);
 
 				  //몬스터 피격함수 호출
-				  Enemy2->fsm->OnDamageProcess();
+				  Enemy2->fsm->OnDamageProcess(100);
 				  //공격모션안되던 버그를 수정하기위해
 				  me->IsAttacking = false;
 
@@ -138,7 +138,7 @@ void AWeapon::OnBoxOverlap(
 			  }
 			  else
 			  {
-				  Enemy2->fsm->OnDamageProcess();
+				  Enemy2->fsm->OnDamageProcess(100);
 			  }
 		  }
 		  //아처랑 충돌되었을때
@@ -146,7 +146,7 @@ void AWeapon::OnBoxOverlap(
 		  if (Enemy3 != nullptr)
 		  {
 			  //UE_LOG(LogTemp, Warning, TEXT("AEnemy_Archer"));
-			  Enemy3->fsm->OnDamageProcess();
+			  Enemy3->fsm->OnDamageProcess(100);
 		  }
 
 		  //스켈레톤이랑 충돌되었을때

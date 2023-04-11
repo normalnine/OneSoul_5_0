@@ -108,6 +108,8 @@ void UEnemy_Titan_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 		break;
 	}
 
+	if (!(target == nullptr))
+	{
 	FVector Ddir = target->GetActorLocation() - me->GetActorLocation();
 	FVector DdirSize = Ddir;
 	Ddir.Normalize();
@@ -148,10 +150,12 @@ void UEnemy_Titan_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 			target->Camera->SetRelativeLocation(FVector::ZeroVector);
 		}
 	}
+	}
 }
 void UEnemy_Titan_FSM::IdleState()
 {
-	
+	/*if (!(target == nullptr))
+	{*/
 	superArmor=false;
 	FVector Ddir = target->GetActorLocation() - me->GetActorLocation();
 	FVector DdirSize = Ddir;
@@ -168,22 +172,15 @@ void UEnemy_Titan_FSM::IdleState()
 		}
 		//ChangeState(EEnemyState4::Move);
 	}
+	}
 
-	//else
-	//{
-	//	//idleDelayTime 이 지나면	
-	//	if (IsWaitComplete(idleDelayTime))
-	//	{
-	//		//현재상태를 Move 로 한다.
-	//		ChangeState(EEnemyState4::Move);
-	//	}
-	//}
-}
+//}
 void UEnemy_Titan_FSM::MoveState()
 {
 	// 시야에 들어왔는지 여부
 	bool bTrace = IsTargetTrace();
-
+	/*if (!(target == nullptr))
+	{*/
 	//타겟을 향하는 방향을 구하고
 	FVector dir = target->GetActorLocation() - me->GetActorLocation();
 
@@ -237,13 +234,32 @@ void UEnemy_Titan_FSM::MoveState()
 		// 랜덤한 위치까지 도착한 후 Idle 상태로 전환
 		MoveToPos(randPos);
 	}
+	//}
+	//else
+	//{
+	//	//UE_LOG(LogTemp, Warning, TEXT("movetorandpos"));
+	//	// 랜덤한 위치까지 도착한 후 Idle 상태로 전환
+	//	MoveToPos(randPos);
+	//}
 }
 
 void UEnemy_Titan_FSM::movetoPlayer()
 {
-	ai->MoveToLocation(target->GetActorLocation());
+	if (!(target == nullptr))
+	{
+	
 
 	FVector dir = target->GetActorLocation() - me->GetActorLocation();
+	
+		if (dir.Length() > 2000)
+		{
+			MoveToPos(randPos);
+		}
+		else
+		{
+			ai->MoveToLocation(target->GetActorLocation());
+		}
+	
 	//만약에 target - me 거리가 공격범위보다 작으면
 	if (dir.Length() < attackRange)
 	{
@@ -270,16 +286,18 @@ void UEnemy_Titan_FSM::movetoPlayer()
 			ChangeState(EEnemyState4::Attack3);
 		}
 	}
+	
+	}
+	else
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("movetorandpos"));
+		// 랜덤한 위치까지 도착한 후 Idle 상태로 전환
+		MoveToPos(randPos);
+	}
 }
 
 void UEnemy_Titan_FSM::AttackState()
 {
-	//몬스터가 플레이어 방향으로 공격하도록 하는 거 안함
-	FVector des = target->GetActorLocation();
-	FVector dir = des - me->GetActorLocation();
-	FRotator dirx = dir.Rotation();
-	//me->SetActorRotation(dirx);
-
 	//애니메이션에서 끄고 키는걸로 수정
 	/*me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);*/
@@ -303,15 +321,6 @@ void UEnemy_Titan_FSM::AttackState()
 void UEnemy_Titan_FSM::AttackState1()
 {
 	superArmor = true;
-	//몬스터가 플레이어 방향으로 공격하도록 하는 거
-	//FVector des = target->GetActorLocation();
-	//FVector dir = des - me->GetActorLocation();
-	//FRotator dirx = dir.Rotation();
-	//me->SetActorRotation(dirx);
-
-	//애니메이션에서 끄고 키는걸로 수정
-	/*me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);*/
 
 	currTime += GetWorld()->DeltaTimeSeconds;
 
@@ -410,35 +419,45 @@ void UEnemy_Titan_FSM::UpdaetAttackDelay()
 	//팔의 충돌 콜리전 끄는거
 	me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	if (IsWaitComplete(attackDelayTime))
+	if (target->Health < 1)
 	{
+		ChangeState(EEnemyState4::Move);
+	}
+	if (!(target == nullptr))
+	{
+		if (IsWaitComplete(attackDelayTime))
+		{
 		
-		FVector dir = target->GetActorLocation() - me->GetActorLocation();
-		float dist = dir.Length();
+			FVector dir = target->GetActorLocation() - me->GetActorLocation();
+			float dist = dir.Length();
 
-		if (dist < attackRange)
-		{
-			//기본 공격 패턴 2개
-			int32 index = FMath::RandRange(0, 1);
-			//hp가 적어지면 공격패턴 추가
-			if (hp<11)
-			{index =FMath::RandRange(0,2);}
+			if (dist < attackRange)
+			{
+				//기본 공격 패턴 2개
+				int32 index = FMath::RandRange(0, 1);
+				//hp가 적어지면 공격패턴 추가
+				if (hp<1250)
+				{index =FMath::RandRange(0,2);}
 
-			//공격패턴 실행
-			if (index == 0)
-			{ChangeState(EEnemyState4::Attack1);}
-			else if(index ==1)
-			{ChangeState(EEnemyState4::Attack2);}
-			else if(index ==2)
-			{ChangeState(EEnemyState4::Attack3);}
+				//공격패턴 실행
+				if (index == 0)
+				{ChangeState(EEnemyState4::Attack1);}
+				else if(index ==1)
+				{ChangeState(EEnemyState4::Attack2);}
+				else if(index ==2)
+				{ChangeState(EEnemyState4::Attack3);}
 			
-		}
-		else
-		{
+			}
+			else
+			{
 
 			ChangeState(EEnemyState4::MovetoTarget);
+			}
 		}
+	}
+	else
+	{
+		MoveToPos(randPos);
 	}
 }
 void UEnemy_Titan_FSM::DamageState()
@@ -498,9 +517,12 @@ void UEnemy_Titan_FSM::OnDamageProcess(float damage)
 	FTimerHandle dam;
 	GetWorld()->GetTimerManager().SetTimer(dam, this, &UEnemy_Titan_FSM::resetDamage, 3.0f, false);
 	//플레이어 카메라 흔들리게 하는 효과 셋팅값
+	if (!(target == nullptr))
+	{
 	target->camShakeTime = 0.2f;
 	target->randC = 0.4; target->randD = 0.4;
 	target->Shake();
+	}
 	//효과음재생
 	UGameplayStatics::PlaySound2D(GetWorld(), StoneSound);
 		//체력이 남아있다면
@@ -510,7 +532,7 @@ void UEnemy_Titan_FSM::OnDamageProcess(float damage)
 			param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 			 //GetWorld()->SpawnActor<AActor>(HitresultFactory, me->GetActorTransform());//, me->GetActorTransform(), param);
 			//체력이 절반이면 2페이즈 진입
-			if (hp<10 && shout == true)
+			if (hp<1250 && shout == true)
 			{	
 				UE_LOG(LogTemp, Warning, TEXT("2page"));
 				//몽타주실행
@@ -596,7 +618,7 @@ void UEnemy_Titan_FSM::Shake()
 
 bool UEnemy_Titan_FSM::IsTargetTrace()
 {
-
+	if (target == nullptr) return false;
 
 	FVector dir = target->GetActorLocation() - me->GetActorLocation();
 	FVector dirSize = dir;

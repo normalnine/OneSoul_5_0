@@ -24,14 +24,18 @@ void AShield::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (player->imguard && this != nullptr)
+	if (!(player == nullptr))
 	{
-	shieldcomp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		if (player->imguard && this != nullptr)
+		{
+			shieldcomp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		}
+		else
+		{
+			shieldcomp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
 	}
-	else
-	{
-	shieldcomp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
+
 
 	//if (reS)
 	//{
