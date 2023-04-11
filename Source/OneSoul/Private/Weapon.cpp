@@ -104,7 +104,7 @@ void AWeapon::OnBoxOverlap(
 		//UE_LOG(LogTemp,Warning,TEXT("ovelapweapon"));
    
 		//if (ActorIsSameType(OthrActor)) return;
-	float randDamage = gameInst->statusData[gameInst->currLevel].offense + FMath::RandRange(-10,10);
+	randDamage = gameInst->statusData[gameInst->currLevel].offense + FMath::RandRange(-10,10);
 	      BoxTrace(BoxHit_);
 
 		  ANormalEnemy_YG* Enemy = Cast<ANormalEnemy_YG>(BoxHit_.GetActor());

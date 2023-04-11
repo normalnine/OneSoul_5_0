@@ -18,6 +18,9 @@
 #include <Kismet/GameplayStatics.h>
 #include "Engine/EngineTypes.h"
 #include <Kismet/KismetSystemLibrary.h>
+#include <GameFramework/Actor.h>
+#include <Components/BoxComponent.h>
+#include "Shield.h"
 
 
 
@@ -177,8 +180,8 @@ void AEnemy_Skeleton::OnOverlapBeginsword(class UPrimitiveComponent* selfComp, c
 			params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 			//Æ¨°ÜÁö´Â ÀÌÆåÆ® »ý¼º
 			GetWorld()->SpawnActor<AActor>(effectfactory,shield->GetActorTransform(),params);
-
-
+			
+			
 			auto actor = UGameplayStatics::GetActorOfClass(GetWorld(), AOnsSoulPlayer::StaticClass());
 
 			player = Cast<AOnsSoulPlayer>(actor);
@@ -269,9 +272,9 @@ void AEnemy_Skeleton::OnOverlapME(class UPrimitiveComponent* selfComp, class AAc
 		//FVector HitLocation = SweepResult.Location;
 		/*FName HitLocation = SweepResult.BoneName;
 		GetWorld()->SpawnActor<AActor>(HitresultFactory, GetMesh()->GetSocketLocation(TEXT("*HitLocation")),weapon->GetActorRotation()-GetActorRotation(),params);*/
-
-		fsm->OnDamageProcess(1);
-		/*	FString LocationString = HitLocation.ToString();
+		
+		fsm->OnDamageProcess(weapon->randDamage);
+		/*	FString LocationString = HitLocation.ToString();`
 
 			UKismetSystemLibrary::PrintString(this, LocationString, true, true, FLinearColor::Green); */
 	

@@ -102,4 +102,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UOneSoulGameInstance* gameInst;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float randDamage;
 };
