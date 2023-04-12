@@ -19,22 +19,22 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
-	// Ä® ½ºÅÂÆ½¸Å½¬
+	// Ä® ï¿½ï¿½ï¿½ï¿½Æ½ï¿½Å½ï¿½
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		class UStaticMeshComponent* SwordMeshComp;
 
-	// ¹æÆÐ ½ºÅÂÆ½¸Å½¬
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ½ï¿½Å½ï¿½
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		class UStaticMeshComponent* ShieldMeshComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = FSMComponent)
 		class UEnemy_Skeleton_FSM* fsm;
 
-	//Ãæµ¹ ÄÄÆ÷³ÍÆ®
+	//ï¿½æµ¹ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Collision)
 		class UCapsuleComponent* collisionComp;
 
-	//Ãæµ¹ ÄÄÆ÷³ÍÆ®
+	//ï¿½æµ¹ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Collision)
 		class UCapsuleComponent* SwordCollisionComp;
 
@@ -48,11 +48,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool changeGroggy = false;
 
-	//Å¸±ê
+	//Å¸ï¿½ï¿½
 	UPROPERTY(VisibleAnywhere, Category = FSM)
 		class AOnsSoulPlayer* player;
 
-	//hp ¹Ù
+	//hp ï¿½ï¿½
 	UPROPERTY(EditAnywhere)
 		class UEnemy_HpBar* EnemyHpBar;
 
@@ -62,10 +62,10 @@ public:
 	UPROPERTY(EditAnywhere)
 		class UEnemy_HpBar_WidgetComponent* HpWidget;
 
-	//ÇÃ·¹ÀÌ¾î ¹æÆÐ ¶û Ãæµ¹ µÇ¾úÀ»¶§ ³ª¿À´Â ÀÌÆåÆ®
+	//ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½æµ¹ ï¿½Ç¾ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®
 	UPROPERTY(EditDefaultsOnly, Category = BulletFactory)
 		TSubclassOf<class AActor> effectfactory;
-	//ÇÃ·¹ÀÌ¾î°¡ ÆÐ¸µ µÇ¾úÀ»¶§ ³ª¿À´Â ÀÌÆåÆ®
+	//ï¿½Ã·ï¿½ï¿½Ì¾î°¡ ï¿½Ð¸ï¿½ ï¿½Ç¾ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®
 	UPROPERTY(EditDefaultsOnly, Category = BulletFactory)
 		TSubclassOf<class AActor> effectfactory1;
 
@@ -76,17 +76,17 @@ public:
 	void OnOverlapME(class UPrimitiveComponent* selfComp, class AActor* otherActor, UPrimitiveComponent* otherComp,
 	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	//Ä®ÀÌ¶û Ãæµ¹µÇ¸é ³ª¿À´Â ÇÇ ÀÌÆåÆ®
+	//Ä®ï¿½Ì¶ï¿½ ï¿½æµ¹ï¿½Ç¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®
 	UPROPERTY(EditDefaultsOnly, Category = HitresultFactory)
 	TSubclassOf<class AActor> HitresultFactory;
 
-	//¸öÀÇ ÄÝ¸®ÀüÀ» ´Ù½Ã Å°´ÂÇÔ¼ö
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½Ý¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ù½ï¿½ Å°ï¿½ï¿½ï¿½Ô¼ï¿½
 	void oncoll();
 
-	//¹æÆÐ¿¡ ÇÃ·¹ÀÌ¾î Ä® ¸Â¾ÒÀ»¶§ È¿°úÀ½
+	//ï¿½ï¿½ï¿½Ð¿ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ Ä® ï¿½Â¾ï¿½ï¿½ï¿½ï¿½ï¿½ È¿ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(EditDefaultsOnly, Category = Sound)
 		class USoundBase* blockSound;
-		//¹æÆÐ¸Â°í ¾È³ª¿À°Ô ÇÏ·Á°í ¼³Á¤ÇÑ º¯¼ö
+		//ï¿½ï¿½ï¿½Ð¸Â°ï¿½ ï¿½È³ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ï·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool one = false;
 };

@@ -59,7 +59,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool bOverlap = false;
 
-	// È°¼º / ºñÈ°¼º ÇÏ´Â ±â´É
+	// È°ï¿½ï¿½ / ï¿½ï¿½È°ï¿½ï¿½ ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½
 	UFUNCTION(BlueprintCallable)
 	void SetActive(bool bActive);
 
@@ -82,6 +82,6 @@ public:
 // 
 // 	UFUNCTION()
 // 		void EndOverlapRightHand(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-	//Á×¾úÀ» ¶§ È£ÃâµÇ´Â ÇÔ¼ö¸¦ ´ã´Â º¯¼ö
+	//ï¿½×¾ï¿½ï¿½ï¿½ ï¿½ï¿½ È£ï¿½ï¿½Ç´ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	//FEnemyBossDieDelegate dieDelegate;
 };

@@ -16,6 +16,8 @@ void UStatusUI::NativeConstruct()
 	StatusInit(gameInst->currLevel);
 }
 
+
+
 void UStatusUI::StatusInit(int32 currLevel)
 {	
 	_nickname->SetText(FText::FromString(gameInst->nickname));
@@ -26,6 +28,8 @@ void UStatusUI::StatusInit(int32 currLevel)
 	_currDefense->SetText(FText::AsNumber(gameInst->statusData[currLevel].defense));
 	_maxHP->SetText(FText::AsNumber(gameInst->statusData[currLevel].maxHP));
 	_maxStamina->SetText(FText::AsNumber(gameInst->statusData[currLevel].maxStamina));
-	_currHP->SetText(FText::AsNumber(player->Health));
-	_currStamina->SetText(FText::AsNumber(player->CurrentStamina));
+	_currHP->SetText(FText::AsNumber(gameInst->statusData[currLevel].maxHP));
+	_currStamina->SetText(FText::AsNumber(gameInst->statusData[currLevel].maxStamina));
+	UE_LOG(LogTemp,Error,TEXT("currhp %d"), player->Health);
+	
 }

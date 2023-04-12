@@ -18,6 +18,8 @@ protected:
 	virtual void NativeConstruct() override;
 
 public:
+
+
 	UPROPERTY(EditAnywhere)
 	class UOneSoulGameInstance* gameInst;
 	

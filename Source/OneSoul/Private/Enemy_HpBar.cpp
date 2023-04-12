@@ -3,20 +3,21 @@
 
 #include "Enemy_HpBar.h"
 #include <Components/ProgressBar.h>
+#include <Components/TextBlock.h>
 
 
 void UEnemy_HpBar::NativeConstruct()
 {
-	//progress bar hp °¡Á®¿ÀÀÚ
+	//progress bar hp ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	HpBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("_HpBar")));
 }
 void UEnemy_HpBar::UpdateCurrHP(float curr, float max)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("4"));
-	//hp ¸¦ 0 ~ 1 »çÀÌ·Î Ç¥Çö
+	//hp ï¿½ï¿½ 0 ~ 1 ï¿½ï¿½ï¿½Ì·ï¿½ Ç¥ï¿½ï¿½
 	float hp = curr / max;
 
-	//Progress bar UI °»½Å
+	//Progress bar UI ï¿½ï¿½ï¿½ï¿½
 	HpBar->SetPercent(hp);
 }
 
