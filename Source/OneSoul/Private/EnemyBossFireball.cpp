@@ -67,7 +67,7 @@ void AEnemyBossFireball::BeginOverlapFireball(UPrimitiveComponent* OverlappedCom
 {
 	if (bOverlap)
 	{
-		// ÇÃ·¹ÀÌ¾î Ä³½ºÆÃ & µ¥¹ÌÁö ÇÔ¼ö È£Ãâ
+		// ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ Ä³ï¿½ï¿½ï¿½ï¿½ & ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½ È£ï¿½ï¿½
 		target = Cast<AOnsSoulPlayer>(OtherActor);
 		if (target != nullptr && target->Health > 0)
 		{

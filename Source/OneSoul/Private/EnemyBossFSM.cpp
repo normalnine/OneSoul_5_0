@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "EnemyBossFSM.h"
@@ -40,25 +40,25 @@ void UEnemyBossFSM::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//Å¸°Ù Ã£ÀÚ
-	target = Cast<AOnsSoulPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AOnsSoulPlayer::StaticClass()));	//³ª¸¦ Ã£ÀÚ
+	//íƒ€ê²Ÿ ì°¾ì
+	target = Cast<AOnsSoulPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AOnsSoulPlayer::StaticClass()));	//ë‚˜ë¥¼ ì°¾ì
 	
 	me = Cast<AEnemyBoss>(GetOwner());
 
-	//anim instance Ã£ÀÚ
+	//anim instance ì°¾ì
 	/*USkeletalMeshComponent* mesh = me->GetMesh();
 	UAnimInstance animInstance = mesh->GetAnimInstance();
 	anim = Cast<UEnemyAnim>(animInstance);*/
 	anim = Cast<UEnemyBossAnim>(me->GetMesh()->GetAnimInstance());
 
-	//ai controller Ã£ÀÚ
+	//ai controller ì°¾ì
 	ai = Cast<AAIController>(me->GetController());
 	//ai = UAIBlueprintHelperLibrary::GetAIController(me);
 
-	//³ªÀÇ ÃÊ±â Ã¼·ÂÀ» ¼ÂÆÃÇÏÀÚ
+	//ë‚˜ì˜ ì´ˆê¸° ì²´ë ¥ì„ ì…‹íŒ…í•˜ì
 	currHP = maxHP;
 
-	//³ªÀÇ ÃÊ±â À§Ä¡¸¦ ÀúÀåÇÏÀÚ
+	//ë‚˜ì˜ ì´ˆê¸° ìœ„ì¹˜ë¥¼ ì €ì¥í•˜ì
 	originPos = me->GetActorLocation();
 }
 
@@ -96,18 +96,18 @@ void UEnemyBossFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 void UEnemyBossFSM::UpdateIdle()
 {
-	//¸¸¾à¿¡ ÇÃ·¹ÀÌ¾î¸¦ ÂÑ¾Æ °¥ ¼ö ÀÖ´Ï?
+	//ë§Œì•½ì— í”Œë ˆì´ì–´ë¥¼ ì«“ì•„ ê°ˆ ìˆ˜ ìˆë‹ˆ?
 	if (IsTargetTrace())
 	{
-		//»óÅÂ¸¦ Move ·Î ÀüÈ¯
+		//ìƒíƒœë¥¼ Move ë¡œ ì „í™˜
 		ChangeState(EEnemyBossState::Move);
 	}
 	else
 	{
-		//idleDelayTime ÀÌ Áö³ª¸é	
+		//idleDelayTime ì´ ì§€ë‚˜ë©´	
 		if (IsWaitComplete(idleDelayTime))
 		{
-			//ÇöÀç»óÅÂ¸¦ Move ·Î ÇÑ´Ù.
+			//í˜„ì¬ìƒíƒœë¥¼ Move ë¡œ í•œë‹¤.
 			ChangeState(EEnemyBossState::Move);
 		}
 	}
@@ -115,23 +115,23 @@ void UEnemyBossFSM::UpdateIdle()
 
 void UEnemyBossFSM::UpdateMove()
 {
-	// ½Ã¾ß¿¡ µé¾î¿Ô´ÂÁö ¿©ºÎ
+	// ì‹œì•¼ì— ë“¤ì–´ì™”ëŠ”ì§€ ì—¬ë¶€
 	bool bTrace = IsTargetTrace();
 
-	//1. Å¸°ÙÀ» ÇâÇÏ´Â ¹æÇâÀ» ±¸ÇÏ°í(target - me)
+	//1. íƒ€ê²Ÿì„ í–¥í•˜ëŠ” ë°©í–¥ì„ êµ¬í•˜ê³ (target - me)
 	FVector dir = target->GetActorLocation() - me->GetActorLocation();
 
-// 	//Ã³À½ À§Ä¡, ³ªÀÇ ÇöÀç À§Ä¡ÀÇ °Å¸®
+// 	//ì²˜ìŒ ìœ„ì¹˜, ë‚˜ì˜ í˜„ì¬ ìœ„ì¹˜ì˜ ê±°ë¦¬
 // 	float dist = FVector::Distance(originPos, me->GetActorLocation());
 // 
-// 	//¸¸¾à¿¡ dist °¡ moveRange º¸´Ù Ä¿Áö¸é (¿òÁ÷ÀÏ ¼ö ÀÖ´Â ¹İ°æÀ» ³Ñ¾î°¬´Ù¸é)
+// 	//ë§Œì•½ì— dist ê°€ moveRange ë³´ë‹¤ ì»¤ì§€ë©´ (ì›€ì§ì¼ ìˆ˜ ìˆëŠ” ë°˜ê²½ì„ ë„˜ì–´ê°”ë‹¤ë©´)
 // // 	if (dist > moveRange)
 // // 	{
-// // 		//»óÅÂ¸¦ ReturnPos ·Î º¯°æ
+// // 		//ìƒíƒœë¥¼ ReturnPos ë¡œ ë³€ê²½
 // // 		UE_LOG(LogTemp, Warning, TEXT("ReturnPos"));
 // // 		ChangeState(EEnemyBossState::ReturnPos);
 // // 	}
-// 	//¸¸¾à¿¡ ½Ã¾ß¿¡ µé¾î¿Ô´Ù¸é
+// 	//ë§Œì•½ì— ì‹œì•¼ì— ë“¤ì–´ì™”ë‹¤ë©´
 // 	else if (bTrace)
 	if (bTrace)
 	{
@@ -141,29 +141,29 @@ void UEnemyBossFSM::UpdateMove()
 // 			MoveToPos(randPos);
 // 			UE_LOG(LogTemp, Warning, TEXT("randPos"));
 // 		}
-		//¸¸¾à¿¡ target - me °Å¸®°¡ °ø°İ¹üÀ§º¸´Ù ÀÛÀ¸¸é
+		//ë§Œì•½ì— target - me ê±°ë¦¬ê°€ ê³µê²©ë²”ìœ„ë³´ë‹¤ ì‘ìœ¼ë©´
 		if (dir.Length() < attackRange)
 		{
-			//»óÅÂ¸¦ Attack À¸·Î º¯°æ
+			//ìƒíƒœë¥¼ Attack ìœ¼ë¡œ ë³€ê²½
 			ChangeState(EEnemyBossState::AttackDelay);
 		}
-		//±×·¸Áö ¾ÊÀ¸¸é
+		//ê·¸ë ‡ì§€ ì•Šìœ¼ë©´
 		else
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("AddMovementInput"));
 
-			//2. ±× ¹æÇâÀ¸·Î ÀÌµ¿ÇÏ°í ½Í´Ù.
+			//2. ê·¸ ë°©í–¥ìœ¼ë¡œ ì´ë™í•˜ê³  ì‹¶ë‹¤.
 			//me->AddMovementInput(dir.GetSafeNormal());
 			//me->SetActorRotation()
-			//ai ¸¦ ÀÌ¿ëÇØ¼­ ¸ñÀûÁö±îÁö ÀÌµ¿ÇÏ°í ½Í´Ù.	
+			//ai ë¥¼ ì´ìš©í•´ì„œ ëª©ì ì§€ê¹Œì§€ ì´ë™í•˜ê³  ì‹¶ë‹¤.	
 			ai->MoveToLocation(target->GetActorLocation());
 		}
 	}
-	//½Ã¾ß¿¡ µé¾î¿ÀÁö ¾Ê¾Ò´Ù¸é
+	//ì‹œì•¼ì— ë“¤ì–´ì˜¤ì§€ ì•Šì•˜ë‹¤ë©´
 	else
 	{
 		
-		// ·£´ıÇÑ À§Ä¡±îÁö µµÂøÇÑ ÈÄ Idle »óÅÂ·Î ÀüÈ¯
+		// ëœë¤í•œ ìœ„ì¹˜ê¹Œì§€ ë„ì°©í•œ í›„ Idle ìƒíƒœë¡œ ì „í™˜
 		//UE_LOG(LogTemp, Warning, TEXT("randPos"));
 		MoveToPos(randPos);
 	}
@@ -172,29 +172,29 @@ void UEnemyBossFSM::UpdateMove()
 
 void UEnemyBossFSM::UpdateAttack()
 {
-	//2. »óÅÂ¸¦ AttackDelay ·Î ÀüÈ¯	
+	//2. ìƒíƒœë¥¼ AttackDelay ë¡œ ì „í™˜	
 	ChangeState(EEnemyBossState::AttackDelay);
 }
 
 void UEnemyBossFSM::UpdaetAttackDelay()
 {
-	//2. ¸¸¾à¿¡ ÇöÀç½Ã°£ÀÌ attackDelayTime º¸´Ù Ä¿Áö¸é
+	//2. ë§Œì•½ì— í˜„ì¬ì‹œê°„ì´ attackDelayTime ë³´ë‹¤ ì»¤ì§€ë©´
 	if (IsWaitComplete(attackDelayTime))
 	{
-		//3. target °ú me °Å¸®¸¦ ±¸ÇÏÀÚ.
+		//3. target ê³¼ me ê±°ë¦¬ë¥¼ êµ¬í•˜ì.
 		FVector dir = target->GetActorLocation() - me->GetActorLocation();
 		float dist = dir.Length();
 
-		//4. ¸¸¾à¿¡ ±×°Å¸®°¡ attackRangeº¸´Ù ÀÛÀ¸¸é
+		//4. ë§Œì•½ì— ê·¸ê±°ë¦¬ê°€ attackRangeë³´ë‹¤ ì‘ìœ¼ë©´
 		if (dist < attackRange)
 		{
-			//5. Attack »óÅÂ·Î ÀüÈ¯
+			//5. Attack ìƒíƒœë¡œ ì „í™˜
 			DecideAttackPattern();
 			ChangeState(EEnemyBossState::Attack);
 		}
 		else
 		{
-			//6. ±×·¸Áö ¾ÊÀ¸¸é Idle »óÅÂ·Î °¡ÀÚ
+			//6. ê·¸ë ‡ì§€ ì•Šìœ¼ë©´ Idle ìƒíƒœë¡œ ê°€ì
 			ChangeState(EEnemyBossState::Idle);
 		}
 	}
@@ -207,10 +207,10 @@ void UEnemyBossFSM::UpdaetAttackDelay()
 
 void UEnemyBossFSM::UpdateDamaged()
 {
-	//damageDelayTime ÀÌ Áö³ª¸é
+	//damageDelayTime ì´ ì§€ë‚˜ë©´
 	if (IsWaitComplete(damageDelayTime))
 	{
-		//Move »óÅÂ
+		//Move ìƒíƒœ
 		me->PlayAnimMontage(damageMontage, 1.0f, FName(TEXT("Damage0")));
 		//anim->Montage_Stop(5.0f, damageMontage);
 
@@ -220,7 +220,7 @@ void UEnemyBossFSM::UpdateDamaged()
 
 void UEnemyBossFSM::UpdateDie()
 {
-	//¸¸¾à¿¡ bDieMove °¡ false ¶ó¸é ÇÔ¼ö¸¦ ³ª°¡¶ó
+	//ë§Œì•½ì— bDieMove ê°€ false ë¼ë©´ í•¨ìˆ˜ë¥¼ ë‚˜ê°€ë¼
 	//if (bDieMove == false) return;
 
 	UMaterialInstanceDynamic* CharacterMaterial = me->GetMesh()->CreateDynamicMaterialInstance(0);
@@ -242,30 +242,30 @@ void UEnemyBossFSM::UpdateDie()
 
 void UEnemyBossFSM::UpdateReturnPos()
 {
-	// Ã³À½ À§Ä¡·Î °¡¼­ µµÂøÇÏ¸é Idle »óÅÂ·Î ÀüÈ¯ÇÑ´Ù.
+	// ì²˜ìŒ ìœ„ì¹˜ë¡œ ê°€ì„œ ë„ì°©í•˜ë©´ Idle ìƒíƒœë¡œ ì „í™˜í•œë‹¤.
 	MoveToPos(originPos);
 
 
-	////1. ³ª ----> Ã³À½À§Ä¡¸¦ ÇâÇÏ´Â ¹æÇâÀ» ±¸ÇÑ´Ù.
+	////1. ë‚˜ ----> ì²˜ìŒìœ„ì¹˜ë¥¼ í–¥í•˜ëŠ” ë°©í–¥ì„ êµ¬í•œë‹¤.
 	//FVector dir = originPos - me->GetActorLocation();
 
-	////2. ¸¸¾à¿¡ ³ª --- Ã³À½À§Ä¡ÀÇ °Å¸®°¡ 10º¸´Ù ÀÛÀ¸¸é
+	////2. ë§Œì•½ì— ë‚˜ --- ì²˜ìŒìœ„ì¹˜ì˜ ê±°ë¦¬ê°€ 10ë³´ë‹¤ ì‘ìœ¼ë©´
 	//if (dir.Length() < 10)
 	//{
-	//	//3. Idle »óÅÂ·Î ÀüÈ¯
+	//	//3. Idle ìƒíƒœë¡œ ì „í™˜
 	//	ChangeState(EEnemyState::Idle);
 	//}
-	////4. ±×·¸Áö ¾ÊÀ¸¸é 
+	////4. ê·¸ë ‡ì§€ ì•Šìœ¼ë©´ 
 	//else
 	//{
-	//	//5. °è¼Ó 1¹ø¿¡¼­ ±¸ÇÑ ¹æÇâÀ¸·Î ÀÌµ¿ÇÑ´Ù
+	//	//5. ê³„ì† 1ë²ˆì—ì„œ êµ¬í•œ ë°©í–¥ìœ¼ë¡œ ì´ë™í•œë‹¤
 	//	me->AddMovementInput(dir.GetSafeNormal());
 	//}
 }
 
 void UEnemyBossFSM::ChangeState(EEnemyBossState state)
 {
-	//»óÅÂ º¯°æ ·Î±×¸¦ Ãâ·ÂÇÏÀÚ
+	//ìƒíƒœ ë³€ê²½ ë¡œê·¸ë¥¼ ì¶œë ¥í•˜ì
 // 	UEnum* enumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EEnemyState"), true);
 // 	if (enumPtr != nullptr)
 // 	{
@@ -274,19 +274,19 @@ void UEnemyBossFSM::ChangeState(EEnemyBossState state)
 // 			*enumPtr->GetNameStringByIndex((int32)state));
 // 	}
 
-	//ÇöÀç »óÅÂ¸¦ °»½Å
+	//í˜„ì¬ ìƒíƒœë¥¼ ê°±ì‹ 
 	currState = state;
 
-	//anim ÀÇ »óÅÂ °»½Å
+	//anim ì˜ ìƒíƒœ ê°±ì‹ 
 	anim->state = state;
 
-	//ÇöÀç ½Ã°£ ÃÊ±âÈ­
+	//í˜„ì¬ ì‹œê°„ ì´ˆê¸°í™”
 	currTime = 0;
 
-	//ai ÀÇ ¿òÁ÷ÀÓ ¸ØÃßÀÚ
+	//ai ì˜ ì›€ì§ì„ ë©ˆì¶”ì
 	ai->StopMovement();
 
-	//»óÅÂ¿¡ µû¸¥ ÃÊ±â¼³Á¤
+	//ìƒíƒœì— ë”°ë¥¸ ì´ˆê¸°ì„¤ì •
 	switch (currState)
 	{
 	case EEnemyBossState::Attack:
@@ -296,9 +296,9 @@ void UEnemyBossFSM::ChangeState(EEnemyBossState state)
 	break;
 	case EEnemyBossState::Move:
 	{
-		//³×ºñ°ÔÀÌ¼Ç ½Ã½ºÅÛ °¡Á®¿ÀÀÚ
+		//ë„¤ë¹„ê²Œì´ì…˜ ì‹œìŠ¤í…œ ê°€ì ¸ì˜¤ì
 		UNavigationSystemV1* ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
-		//·£´ıÇÑ À§Ä¡¸¦ ¾ò¿ÀÀÚ
+		//ëœë¤í•œ ìœ„ì¹˜ë¥¼ ì–»ì˜¤ì
 		FNavLocation loc;
 		ns->GetRandomReachablePointInRadius(originPos, 1000.0f, loc);
 		randPos = loc.Location;
@@ -306,17 +306,17 @@ void UEnemyBossFSM::ChangeState(EEnemyBossState state)
 	break;
 	case EEnemyBossState::Damaged:
 	{
-		//1. ·£´ıÇÑ °ªÀ» »Ì´Â´Ù (0, 1 Áß)
+		//1. ëœë¤í•œ ê°’ì„ ë½‘ëŠ”ë‹¤ (0, 1 ì¤‘)
 		//int32 rand = FMath::RandRange(0, 1);
-		//2. Damage0, Damage1 ÀÌ¶õ ¹®ÀÚ¿­À» ¸¸µç´Ù.
+		//2. Damage0, Damage1 ì´ë€ ë¬¸ìì—´ì„ ë§Œë“ ë‹¤.
 		//FString sectionName = FString::Printf(TEXT("Damage%d"), rand);
-		//3. ¸ùÅ¸ÁÖ¸¦ ÇÃ·¹ÀÌÇÑ´Ù.
+		//3. ëª½íƒ€ì£¼ë¥¼ í”Œë ˆì´í•œë‹¤.
 		//me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 		me->PlayAnimMontage(damageMontage, 1.0f, FName(TEXT("Damage0")));
 		accumulatedDamage = 0;
 		bGroggy = true;
 		FTimerHandle WaitHandle;
-		float WaitTime = 2.0f; //½Ã°£À» ¼³Á¤ÇÏ°í
+		float WaitTime = 2.0f; //ì‹œê°„ì„ ì„¤ì •í•˜ê³ 
 		GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
 			{
 				if (currHP > 0)
@@ -329,10 +329,10 @@ void UEnemyBossFSM::ChangeState(EEnemyBossState state)
 	}
 	break;
 	case EEnemyBossState::Die:
-		//Ãæµ¹¾ÈµÇ°Ô ¼³Á¤
+		//ì¶©ëŒì•ˆë˜ê²Œ ì„¤ì •
 		me->capsuleCompBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		
-		//Die ¸ùÅ¸ÁÖ ½ÇÇà
+		//Die ëª½íƒ€ì£¼ ì‹¤í–‰
 		me->particleComp1->SetVisibility(true);
 		me->PlayAnimMontage(damageMontage, 1.0f, FName(TEXT("Die")));
 		me->audioComp->Stop();
@@ -362,19 +362,19 @@ void UEnemyBossFSM::ChangeState(EEnemyBossState state)
 
 void UEnemyBossFSM::ReceiveDamage(float damage)
 {
-	//ÇÇ¸¦ ÁÙÀÌÀÚ
+	//í”¼ë¥¼ ì¤„ì´ì
 	currHP -= damage;
 	EnemyBossHPBar->UpdateCurrHP(currHP, maxHP);
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), slashedSound, me->GetActorLocation());
 	FTimerHandle WaitHandle;
-	float WaitTime = 1.0f; //½Ã°£À» ¼³Á¤ÇÏ°í
+	float WaitTime = 1.0f; //ì‹œê°„ì„ ì„¤ì •í•˜ê³ 
 	GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
 		{
 			EnemyBossHPBar->UpdateBackCurrHP(currHP, maxHP);
 
 		}), WaitTime, false);
 
-	//µ¥¹ÌÁö¸¦ ´©ÀûÇÏÀÚ
+	//ë°ë¯¸ì§€ë¥¼ ëˆ„ì í•˜ì
 	if(!bGroggy) accumulatedDamage += damage;
 	EnemyBossHPBar->UpdateAccumulatedDamage(accumulatedDamage);
 
@@ -396,19 +396,19 @@ void UEnemyBossFSM::ReceiveDamage(float damage)
 
 bool UEnemyBossFSM::IsWaitComplete(float delayTime)
 {
-	//1. ½Ã°£À» Èå¸£°Ô ÇÑ´Ù.
+	//1. ì‹œê°„ì„ íë¥´ê²Œ í•œë‹¤.
 	currTime += GetWorld()->DeltaTimeSeconds;
 
-	//2. ¸¸¾à¿¡ ÇöÀç½Ã°£ÀÌ delayTimeº¸´Ù Ä¿Áö¸é 
+	//2. ë§Œì•½ì— í˜„ì¬ì‹œê°„ì´ delayTimeë³´ë‹¤ ì»¤ì§€ë©´ 
 	if (currTime > delayTime)
 	{
-		//3. ÇöÀç½Ã°£À» 0À¸·Î ÃÊ±âÈ­
+		//3. í˜„ì¬ì‹œê°„ì„ 0ìœ¼ë¡œ ì´ˆê¸°í™”
 		currTime = 0;
-		//4. true ¹İÈ¯
+		//4. true ë°˜í™˜
 		return true;
 	}
 
-	//5. ±×·¸Áö ¾ÊÀ¸¸é false ¸¦ ¹İÈ¯
+	//5. ê·¸ë ‡ì§€ ì•Šìœ¼ë©´ false ë¥¼ ë°˜í™˜
 	return false;
 }
 
@@ -417,17 +417,17 @@ bool UEnemyBossFSM::IsTargetTrace()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("IsTargetTrace"));
 
-	//1. ³ª ----> ÇÃ·¹ÀÌ¾î¸¦ ÇâÇÏ´Â º¤ÅÍ
+	//1. ë‚˜ ----> í”Œë ˆì´ì–´ë¥¼ í–¥í•˜ëŠ” ë²¡í„°
 	FVector dir = target->GetActorLocation() - me->GetActorLocation();
 
-	//2. ³ªÀÇ ¾Õ¹æÇâ°ú 1¹ø¿¡ ±¸ÇÑ º¤ÅÍÀÇ ³»Àû
+	//2. ë‚˜ì˜ ì•ë°©í–¥ê³¼ 1ë²ˆì— êµ¬í•œ ë²¡í„°ì˜ ë‚´ì 
 	float dotValue = FVector::DotProduct(me->GetActorForwardVector(), dir.GetSafeNormal());
 
-	//3. 2¹ø¿¡ ±¸ÇÑ °ªÀ» Acos --> µÎ º¤ÅÍÀÇ »çÀÌ°¢
+	//3. 2ë²ˆì— êµ¬í•œ ê°’ì„ Acos --> ë‘ ë²¡í„°ì˜ ì‚¬ì´ê°
 	float angle = UKismetMathLibrary::DegAcos(dotValue);
 
-	//4. ¸¸¾à¿¡ 3¹ø¿¡¼­ ±¸ÇÑ °ªÀÌ 30º¸´Ù ÀÛ°í(½Ã¾ß°¢ 60)
-	//   ³ª - Å¸°Ù °úÀÇ °Å¸®°¡ traceRange º¸´Ù ÀÛÀ¸¸é
+	//4. ë§Œì•½ì— 3ë²ˆì—ì„œ êµ¬í•œ ê°’ì´ 30ë³´ë‹¤ ì‘ê³ (ì‹œì•¼ê° 60)
+	//   ë‚˜ - íƒ€ê²Ÿ ê³¼ì˜ ê±°ë¦¬ê°€ traceRange ë³´ë‹¤ ì‘ìœ¼ë©´
 	//if (angle < 60 && dir.Length() < traceRange)
 	if (dir.Length() < traceRange)
 	{
@@ -445,7 +445,7 @@ bool UEnemyBossFSM::IsTargetTrace()
 
 		}
 
-		//Enemy -----> target LineTrace ½îÀÚ!!
+		//Enemy -----> target LineTrace ì˜ì!!
 		FHitResult hitInfo;
 		FCollisionQueryParams param;
 		param.AddIgnoredActor(me);
@@ -457,30 +457,30 @@ bool UEnemyBossFSM::IsTargetTrace()
 			ECollisionChannel::ECC_Visibility,
 			param);
 
-		//¸¸¾à¿¡ ºÎµúÈù °÷ÀÌ ÀÖ´Ù¸é
+		//ë§Œì•½ì— ë¶€ë”ªíŒ ê³³ì´ ìˆë‹¤ë©´
 		if (bHit)
 		{
-			//¸¸¾à¿¡ ºÎµúÈù ³ğÀÇ ÀÌ¸§ÀÌ Player ¸¦ Æ÷ÇÔÇÏ°í ÀÖ´Ù¸é
+			//ë§Œì•½ì— ë¶€ë”ªíŒ ë†ˆì˜ ì´ë¦„ì´ Player ë¥¼ í¬í•¨í•˜ê³  ìˆë‹¤ë©´
 			if (hitInfo.GetActor()->GetName().Contains(TEXT("Player")))
 			{
-				//5. true ¹İÈ¯
+				//5. true ë°˜í™˜
 				return true;
 			}
 		}
 	}
-	//6. ±×·¸Áö ¾ÊÀ¸¸é false ¹İÈ¯
+	//6. ê·¸ë ‡ì§€ ì•Šìœ¼ë©´ false ë°˜í™˜
 	return false;
 }
 
 void UEnemyBossFSM::MoveToPos(FVector pos)
 {
-	//ÇØ´ç À§Ä¡(pos) ·Î °£´Ù
+	//í•´ë‹¹ ìœ„ì¹˜(pos) ë¡œ ê°„ë‹¤
 	EPathFollowingRequestResult::Type result = ai->MoveToLocation(pos);
 
-	//¸¸¾à¿¡ ¸ñÀûÁö¿¡ µµÂøÇß´Ù¸é
+	//ë§Œì•½ì— ëª©ì ì§€ì— ë„ì°©í–ˆë‹¤ë©´
 	if (result == EPathFollowingRequestResult::AlreadyAtGoal)
 	{
-		//Idle »óÅÂ·Î ÀüÈ¯
+		//Idle ìƒíƒœë¡œ ì „í™˜
 		ChangeState(EEnemyBossState::Idle);
 	}
 }
@@ -589,7 +589,7 @@ void UEnemyBossFSM::SpawnGhost()
 	FTransform trans = me->GetActorTransform();
 
 	
-	float WaitTime = 0.05f; //½Ã°£À» ¼³Á¤ÇÏ°í
+	float WaitTime = 0.05f; //ì‹œê°„ì„ ì„¤ì •í•˜ê³ 
 	GetWorld()->GetTimerManager().SetTimer(GhostHandle, FTimerDelegate::CreateLambda([&]()
 		{			
 			FVector OffsetVector = FVector::CrossProduct(me->GetActorRotation().Vector(), FVector::UpVector).GetSafeNormal() * ghostDistance;

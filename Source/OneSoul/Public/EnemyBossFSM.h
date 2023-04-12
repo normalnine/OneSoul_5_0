@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -37,14 +37,14 @@ public:
 
 public:
 
-	//ÇöÀç»óÅÂ
+	//í˜„ì¬ìƒíƒœ
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		EEnemyBossState currState = EEnemyBossState::Idle;
 
-	//Å¸°Ù
+	//íƒ€ê²Ÿ
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class AOnsSoulPlayer* target;
-	//³ª
+	//ë‚˜
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class AEnemyBoss* me;
 
@@ -91,102 +91,102 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class UEnemyBossDieUI* EnemyBossDieUI;
 
-	//º¸½º ÀÌ¸§
+	//ë³´ìŠ¤ ì´ë¦„
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString bossName = "Souleater Dimir";
+	FString bossName = FString::Printf(TEXT("ì˜í˜¼ì„ ë¨¹ëŠ” ë””ë¯¸ë¥´"));
 
-	//ÇöÀç½Ã°£
+	//í˜„ì¬ì‹œê°„
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float currTime = 0;
 
-	//´ë±â »óÅÂ ±â´Ù¸®´Â ½Ã°£
+	//ëŒ€ê¸° ìƒíƒœ ê¸°ë‹¤ë¦¬ëŠ” ì‹œê°„
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float idleDelayTime = 5.0f;
 
-	//ÂÑ¾Æ °¥ ¼ö ÀÖ´Â ¹üÀ§
+	//ì«“ì•„ ê°ˆ ìˆ˜ ìˆëŠ” ë²”ìœ„
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float traceRange = 5000.0f;
 
-	//°ø°İ¹üÀ§
+	//ê³µê²©ë²”ìœ„
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float attackRange = 2500.0f;
 
-	//È¸ÇÇ¹üÀ§
+	//íšŒí”¼ë²”ìœ„
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float avoidRange  = 150.0f;
 
-	//°ø°İ ´ë±â ½Ã°£
+	//ê³µê²© ëŒ€ê¸° ì‹œê°„
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float attackDelayTime = 1.5f;
 
-	//ÇÇ°İ ´ë±â ½Ã°£
+	//í”¼ê²© ëŒ€ê¸° ì‹œê°„
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float damageDelayTime = 5.0f;
 
-	//È¸Àü ´ë±â ½Ã°£
+	//íšŒì „ ëŒ€ê¸° ì‹œê°„
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float rotateDelayTime = 2.0f;
 
-	//È¸Àü ´ë±â ½Ã°£
+	//íšŒì „ ëŒ€ê¸° ì‹œê°„
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float currrotateDelayTime = 2.0f;
 
-	//°í½ºÆ® ½ºÆù °£°İ
+	//ê³ ìŠ¤íŠ¸ ìŠ¤í° ê°„ê²©
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	double ghostDistance = 450.0f;
 
-	//°í½ºÆ® ½ºÆù Å¸ÀÌ¸Ó ¹İº¹/Á¤Áö
+	//ê³ ìŠ¤íŠ¸ ìŠ¤í° íƒ€ì´ë¨¸ ë°˜ë³µ/ì •ì§€
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bSpawnGhost = true;
 
-	//ÇöÀç Ã¼·Â
+	//í˜„ì¬ ì²´ë ¥
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float currHP;
-	//ÃÖ´ë Ã¼·Â
+	//ìµœëŒ€ ì²´ë ¥
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float maxHP = 5000.0f;
-	//´©Àû µ¥¹ÌÁö
+	//ëˆ„ì  ë°ë¯¸ì§€
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float accumulatedDamage;
-	//´©Àû »óÅÂ
+	//ëˆ„ì  ìƒíƒœ
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bDamageDealtRecently = false;
-	//±×·Î±â µ¥¹ÌÁö
+	//ê·¸ë¡œê¸° ë°ë¯¸ì§€
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float groggyDamage = 1000.0f;
-	//¼Ò¿ï
+	//ì†Œìš¸
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float soul = 150000.0f;
-	//³Ë¹é ¼öÄ¡
+	//ë„‰ë°± ìˆ˜ì¹˜
 // 	UPROPERTY(EditAnywhere, BlueprintReadWrite)S
 // 	float enemyAttackForce = 2000.0f;
 
-	//Á×¾úÀ» ¶§ ³»·Á°¡´Â ¼Ó·Â
+	//ì£½ì—ˆì„ ë•Œ ë‚´ë ¤ê°€ëŠ” ì†ë ¥
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float dieSpeed = 100.0f;
-	//Á×¾úÀ» ¶§ ³»·Á°¡°Ô ÇÏ´Â º¯¼ö
+	//ì£½ì—ˆì„ ë•Œ ë‚´ë ¤ê°€ê²Œ í•˜ëŠ” ë³€ìˆ˜
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bDieMove = false;
-	//±×·Î±â »óÅÂ
+	//ê·¸ë¡œê¸° ìƒíƒœ
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bGroggy = false;
 
-	//ÀÌµ¿ÇÒ ¼ö ÀÖ´Â ¹İ°æ
+	//ì´ë™í•  ìˆ˜ ìˆëŠ” ë°˜ê²½
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float moveRange = 2000.0f;
-	//Ã³À½ À§Ä¡¸¦ ´ã¾Æ³õÀ» º¯¼ö
+	//ì²˜ìŒ ìœ„ì¹˜ë¥¼ ë‹´ì•„ë†“ì„ ë³€ìˆ˜
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector originPos;
 
-	//·£´ıÇÑ À§Ä¡
+	//ëœë¤í•œ ìœ„ì¹˜
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector randPos;
 
-	//´©Àû µ¥¹ÌÁö Å¸ÀÌ¸Ó
+	//ëˆ„ì  ë°ë¯¸ì§€ íƒ€ì´ë¨¸
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTimerHandle DamageResetTimerHandle;
 
-	//°í½ºÆ® ½ºÆù Å¸ÀÌ¸Ó
+	//ê³ ìŠ¤íŠ¸ ìŠ¤í° íƒ€ì´ë¨¸
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTimerHandle GhostHandle;
 
@@ -199,77 +199,77 @@ public:
 	
 
 public:
-	//´ë±â
+	//ëŒ€ê¸°
 	UFUNCTION(BlueprintCallable)
 	void UpdateIdle();
-	//ÀÌµ¿	
+	//ì´ë™	
 	UFUNCTION(BlueprintCallable)
 	void UpdateMove();
-	//°ø°İ
+	//ê³µê²©
 	UFUNCTION(BlueprintCallable)
 	void UpdateAttack();
-	//°ø°İ ´ë±â
+	//ê³µê²© ëŒ€ê¸°
 	UFUNCTION(BlueprintCallable)
 	void UpdaetAttackDelay();
-	//ÇÇ°İ
+	//í”¼ê²©
 	UFUNCTION(BlueprintCallable)
 	void UpdateDamaged();
-	//Á×À½
+	//ì£½ìŒ
 	UFUNCTION(BlueprintCallable)
 	void UpdateDie();
-	//¸®ÅÏ
+	//ë¦¬í„´
 	UFUNCTION(BlueprintCallable)
 	void UpdateReturnPos();
 
-	//»óÅÂ º¯°æ½Ã ÇÑ¹ø¸¸!!! È£Ãâ µÇ´Â ÇÔ¼ö
+	//ìƒíƒœ ë³€ê²½ì‹œ í•œë²ˆë§Œ!!! í˜¸ì¶œ ë˜ëŠ” í•¨ìˆ˜
 	UFUNCTION(BlueprintCallable)
 	void ChangeState(EEnemyBossState state);
 
-	//°ø°İ ¹Ş¾ÒÀ» ¶§ Ã³¸®ÇÏ´Â ÇÔ¼ö
+	//ê³µê²© ë°›ì•˜ì„ ë•Œ ì²˜ë¦¬í•˜ëŠ” í•¨ìˆ˜
 	UFUNCTION(BlueprintCallable)
 	void ReceiveDamage(float damage);
 
-	//Delay ÇÔ¼ö
+	//Delay í•¨ìˆ˜
 	UFUNCTION(BlueprintCallable)
 	bool IsWaitComplete(float delayTime);
 
-	//Å¸°ÙÀ» ÂÑ¾Æ °¥ ¼ö ÀÖ´Ï?
+	//íƒ€ê²Ÿì„ ì«“ì•„ ê°ˆ ìˆ˜ ìˆë‹ˆ?
 	UFUNCTION(BlueprintCallable)
 	bool IsTargetTrace();
 
-	//ÇØ´ç À§Ä¡±îÁö µµÂøÇÏ¸é »óÅÂ¸¦ Idle ·Î ÀüÈ¯ÇÏ´Â ÇÔ¼ö
+	//í•´ë‹¹ ìœ„ì¹˜ê¹Œì§€ ë„ì°©í•˜ë©´ ìƒíƒœë¥¼ Idle ë¡œ ì „í™˜í•˜ëŠ” í•¨ìˆ˜
 	UFUNCTION(BlueprintCallable)
 	void MoveToPos(FVector pos);
 
-	//°ø°İ ÆĞÅÏ Á¤ÇÏ±â
+	//ê³µê²© íŒ¨í„´ ì •í•˜ê¸°
 	UFUNCTION(BlueprintCallable)
 	void DecideAttackPattern();
 
-	//°ø°İ ÆĞÅÏ ÃÊ±âÈ­
+	//ê³µê²© íŒ¨í„´ ì´ˆê¸°í™”
 	UFUNCTION(BlueprintCallable)
 	void InitAttackPattern();
 
-	//Fireball ¼ÒÈ¯
+	//Fireball ì†Œí™˜
 	UFUNCTION(BlueprintCallable)
 	void SpawnFireball();
 
-	//FireSpread ¼ÒÈ¯
+	//FireSpread ì†Œí™˜
 	UFUNCTION(BlueprintCallable)
 	void SpawnFireSpread();
 
-	//Laser ¼ÒÈ¯
+	//Laser ì†Œí™˜
 	UFUNCTION(BlueprintCallable)
 	void SpawnLaser();
 
-	//´©Àû µ¥¹ÌÁö ÃÊ±âÈ­
+	//ëˆ„ì  ë°ë¯¸ì§€ ì´ˆê¸°í™”
 	UFUNCTION(BlueprintCallable)
 	void ResetDamageIfNoRecentDamage();
 
-	//Ghost ¼ÒÈ¯
+	//Ghost ì†Œí™˜
 	UFUNCTION(BlueprintCallable)
 	void SpawnGhost();
 
-	//Roar °ø°İ
+	//Roar ê³µê²©
 	UFUNCTION(BlueprintCallable)
 	void Roar(float enemyAttackForce);
 		

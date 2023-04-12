@@ -60,15 +60,15 @@ AEnemyBoss::AEnemyBoss()
 
 	fsm = CreateDefaultSubobject<UEnemyBossFSM>(TEXT("FSM"));
 
-	// ¾Ö´Ï¸ÞÀÌ¼Ç ºí·çÇÁ¸°Æ® ÇÒ´çÇÏ±â
+	// ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½Ò´ï¿½ï¿½Ï±ï¿½
 	ConstructorHelpers::FClassFinder<UEnemyBossAnim> tempClass(TEXT("AnimBlueprint'/Game/KDH/Animation/ABP_MountainDragon.ABP_MountainDragon_C'"));
 	if (tempClass.Succeeded())
 	{
 		GetMesh()->SetAnimInstanceClass(tempClass.Class);
 	}
 
-	// ¿ùµå¿¡ ¹èÄ¡µÇ°Å³ª ½ºÆùµÉ ¶§ ÀÚµ¿À¸·Î
-	// AIController ºÎÅÍ Process µÉ ¼ö ÀÖµµ·Ï ¼³Á¤
+	// ï¿½ï¿½ï¿½å¿¡ ï¿½ï¿½Ä¡ï¿½Ç°Å³ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½
+	// AIController ï¿½ï¿½ï¿½ï¿½ Process ï¿½ï¿½ ï¿½ï¿½ ï¿½Öµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 
@@ -121,30 +121,30 @@ void AEnemyBoss::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 void AEnemyBoss::SetActive(bool bActive)
 {
-	// È°¼ºÈ­
+	// È°ï¿½ï¿½È­
 	if (bActive)
 	{
-		//Ãæµ¹ È°¼º
+		//ï¿½æµ¹ È°ï¿½ï¿½
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		//»ý¼º À§Ä¡ Àç¼³Á¤
+		//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ ï¿½ç¼³ï¿½ï¿½
 		fsm->originPos = GetActorLocation();
 	}
-	// ºñÈ°¼ºÈ­
+	// ï¿½ï¿½È°ï¿½ï¿½È­
 	else
 	{
-		//Ãæµ¹ ºñÈ°¼º
+		//ï¿½æµ¹ ï¿½ï¿½È°ï¿½ï¿½
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		//ÅºÃ¢¿¡ ³¯ ´Ù½Ã ³Ö¾îÁà
+		//ÅºÃ¢ï¿½ï¿½ ï¿½ï¿½ ï¿½Ù½ï¿½ ï¿½Ö¾ï¿½ï¿½ï¿½
 		//dieDelegate.ExecuteIfBound(this);
 	}
 
-	//¸Þ½¬¸¦ È°¼º / ºñÈ°¼º
+	//ï¿½Þ½ï¿½ï¿½ï¿½ È°ï¿½ï¿½ / ï¿½ï¿½È°ï¿½ï¿½
 	GetMesh()->SetActive(bActive);
-	//¸Þ½¬¸¦ º¸ÀÌ°í / ¾Èº¸ÀÌ°í
+	//ï¿½Þ½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì°ï¿½ / ï¿½Èºï¿½ï¿½Ì°ï¿½
 	GetMesh()->SetVisibility(bActive);
-	//Ä³¸¯ÅÍ ¹«ºê¸ÕÆ® È°¼º / ºñÈ°¼º
+	//Ä³ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Æ® È°ï¿½ï¿½ / ï¿½ï¿½È°ï¿½ï¿½
 	GetCharacterMovement()->SetActive(bActive);
-	//fsm È°¼º / ºñÈ°¼º
+	//fsm È°ï¿½ï¿½ / ï¿½ï¿½È°ï¿½ï¿½
 	fsm->SetActive(bActive);
 }
 
@@ -152,7 +152,7 @@ void AEnemyBoss::BeginOverlapHead(UPrimitiveComponent* OverlappedComponent, AAct
 {
 	if (bOverlap)
 	{
-		// ÇÃ·¹ÀÌ¾î Ä³½ºÆÃ & µ¥¹ÌÁö ÇÔ¼ö È£Ãâ
+		// ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ Ä³ï¿½ï¿½ï¿½ï¿½ & ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½ È£ï¿½ï¿½
 		target = Cast<AOnsSoulPlayer>(OtherActor);
 		if (target != nullptr && target->Health > 0)
 		{
@@ -172,7 +172,7 @@ void AEnemyBoss::BeginOverlapLeftHand(UPrimitiveComponent* OverlappedComponent, 
 {
 	if (bOverlap)
 	{
-		// ÇÃ·¹ÀÌ¾î Ä³½ºÆÃ & µ¥¹ÌÁö ÇÔ¼ö È£Ãâ
+		// ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ Ä³ï¿½ï¿½ï¿½ï¿½ & ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½ È£ï¿½ï¿½
 		target = Cast<AOnsSoulPlayer>(OtherActor);
 		if (target != nullptr && target->Health > 0)
 		{
@@ -193,7 +193,7 @@ void AEnemyBoss::BeginOverlapRightHand(UPrimitiveComponent* OverlappedComponent,
 {
 	if (bOverlap)
 	{
-		// ÇÃ·¹ÀÌ¾î Ä³½ºÆÃ & µ¥¹ÌÁö ÇÔ¼ö È£Ãâ
+		// ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ Ä³ï¿½ï¿½ï¿½ï¿½ & ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½ È£ï¿½ï¿½
 		target = Cast<AOnsSoulPlayer>(OtherActor);
 		if (target != nullptr && target->Health > 0)
 		{

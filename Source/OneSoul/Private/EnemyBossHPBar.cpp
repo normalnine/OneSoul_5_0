@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+Ôªø// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "EnemyBossHPBar.h"
@@ -14,7 +14,7 @@ void UEnemyBossHPBar::NativeConstruct()
 	
 	me = Cast<AEnemyBoss>(UGameplayStatics::GetActorOfClass(GetWorld(), AEnemyBoss::StaticClass()));
 
-	//progress bar hp ∞°¡Æø¿¿⁄
+	//progress bar hp Í∞ÄÏ†∏Ïò§Ïûê
 	currHPBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("_bossHPBar")));
 	currHPBar2 = Cast<UProgressBar>(GetWidgetFromName(TEXT("_bossHPBar_1")));
 	_bossName->SetText(FText::FromString(me->fsm->bossName));
@@ -22,20 +22,20 @@ void UEnemyBossHPBar::NativeConstruct()
 
 void UEnemyBossHPBar::UpdateCurrHP(float curr, float max)
 {
-	//hp ∏¶ 0 ~ 1 ªÁ¿Ã∑Œ «•«ˆ
+	//hp Î•º 0 ~ 1 ÏÇ¨Ïù¥Î°ú ÌëúÌòÑ
 	float hp = curr / max;
 
-	//Progress bar UI ∞ªΩ≈
+	//Progress bar UI Í∞±Ïã†
 	currHPBar->SetPercent(hp);
 
 }
 
 void UEnemyBossHPBar::UpdateBackCurrHP(float curr, float max)
 {
-	//hp ∏¶ 0 ~ 1 ªÁ¿Ã∑Œ «•«ˆ
+	//hp Î•º 0 ~ 1 ÏÇ¨Ïù¥Î°ú ÌëúÌòÑ
 	float hp = curr / max;
 
-	//Progress bar UI ∞ªΩ≈
+	//Progress bar UI Í∞±Ïã†
 	currHPBar2->SetPercent(hp);
 }
 
