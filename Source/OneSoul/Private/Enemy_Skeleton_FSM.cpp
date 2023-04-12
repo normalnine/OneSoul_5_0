@@ -117,14 +117,14 @@ void UEnemy_Skeleton_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FA
 		FVector Ddir = target->GetActorLocation() - me->GetActorLocation();
 		FVector DdirSize = Ddir;
 		Ddir.Normalize();
-		//¸Ö¾îÁö¸é Ã¼·Â¹Ù¾Èº¸ÀÌµµ·Ï ¼öÁ¤
+		//ï¿½Ö¾ï¿½ï¿½ï¿½ï¿½ï¿½ Ã¼ï¿½Â¹Ù¾Èºï¿½ï¿½Ìµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		if (DdirSize.Size() > 2000)
 		{
 			me->HpWidget->SetVisibility(false);
 		}
 		float Ddotvalue = FVector::DotProduct(me->GetActorForwardVector(), Ddir);
 		float Dangle = UKismetMathLibrary::DegAcos(Ddotvalue);
-		//¸ó½ºÅÍÀÇ µÞ°¢¿¡ ÀÖÀ¸¸é¼­ ¸ó½ºÅÍ¿ÍÀÇ °Å¸®°¡ 200¹Ì¸¸ÀÏ¶§
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Þ°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½é¼­ ï¿½ï¿½ï¿½Í¿ï¿½ï¿½ï¿½ ï¿½Å¸ï¿½ï¿½ï¿½ 200ï¿½Ì¸ï¿½ï¿½Ï¶ï¿½
 		if (Dangle > 170 && DdirSize.Size() < 300)
 		{
 			Hitback = true;
@@ -142,7 +142,7 @@ void UEnemy_Skeleton_FSM::IdleState()
 {
 	/*UE_LOG(LogTemp, Warning, TEXT("IdleState"));*/
 	isShield = false;
-	//½Ã¾ß¿¡ µé¾î¿À¸é ¿òÁ÷ÀÌ±â ½ÃÀÛ
+	//ï¿½Ã¾ß¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì±ï¿½ ï¿½ï¿½ï¿½ï¿½
 	if (IsTargetTrace())
 	{
 		ChangeState(EEnemyState1::Move);
@@ -150,10 +150,10 @@ void UEnemy_Skeleton_FSM::IdleState()
 
 	else
 	{
-		//idleDelayTime ÀÌ Áö³ª¸é	
+		//idleDelayTime ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½	
 		if (IsWaitComplete(idleDelayTime))
 		{
-			//ÇöÀç»óÅÂ¸¦ Move ·Î ÇÑ´Ù.
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¸ï¿½ Move ï¿½ï¿½ ï¿½Ñ´ï¿½.
 			ChangeState(EEnemyState1::Move);
 		}
 	}
@@ -161,27 +161,27 @@ void UEnemy_Skeleton_FSM::IdleState()
 void UEnemy_Skeleton_FSM::MoveState()
 {
 	/*UE_LOG(LogTemp, Warning, TEXT("MoveState"));*/
-	// ½Ã¾ß¿¡ µé¾î¿Ô´ÂÁö ¿©ºÎ
+	// ï¿½Ã¾ß¿ï¿½ ï¿½ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	bool bTrace = IsTargetTrace();
 	if (!(target == nullptr))
 	{
-	//Å¸°ÙÀ» ÇâÇÏ´Â ¹æÇâÀ» ±¸ÇÏ°í
+	//Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï°ï¿½
 	FVector dir = target->GetActorLocation() - me->GetActorLocation();
 
-	//Ã³À½ À§Ä¡, ³ªÀÇ ÇöÀç À§Ä¡ÀÇ °Å¸®
+	//Ã³ï¿½ï¿½ ï¿½ï¿½Ä¡, ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½Å¸ï¿½
 	float dist = FVector::Distance(originPos, me->GetActorLocation());
 	
 
-		//½Ã¾ß¿¡ µé¾î¿Ô´Ù¸é
+		//ï¿½Ã¾ß¿ï¿½ ï¿½ï¿½ï¿½Ô´Ù¸ï¿½
 		if (bTrace)
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("trace"));
-			//¸¸¾à¿¡ target - me °Å¸®°¡ °ø°Ý¹üÀ§º¸´Ù ÀÛÀ¸¸é
+			//ï¿½ï¿½ï¿½à¿¡ target - me ï¿½Å¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ý¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			if (dir.Length() < attackRange)
 			{
 				ChangeState(EEnemyState1::Attack);
 			}
-			//±×·¸Áö ¾ÊÀ¸¸é
+			//ï¿½×·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			else
 			{
 				//UE_LOG(LogTemp, Warning, TEXT("movetotarget"));
@@ -191,16 +191,16 @@ void UEnemy_Skeleton_FSM::MoveState()
 		else
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("movetorandpos"));
-			// ·£´ýÇÑ À§Ä¡±îÁö µµÂøÇÑ ÈÄ Idle »óÅÂ·Î ÀüÈ¯
+			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ Idle ï¿½ï¿½ï¿½Â·ï¿½ ï¿½ï¿½È¯
 			MoveToPos(randPos);
 
 		}
 	}
-	//½Ã¾ß¿¡ µé¾î¿ÀÁö ¾Ê¾Ò´Ù¸é
+	//ï¿½Ã¾ß¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¾Ò´Ù¸ï¿½
 	else
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("movetorandpos"));
-		// ·£´ýÇÑ À§Ä¡±îÁö µµÂøÇÑ ÈÄ Idle »óÅÂ·Î ÀüÈ¯
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ Idle ï¿½ï¿½ï¿½Â·ï¿½ ï¿½ï¿½È¯
 		MoveToPos(randPos);
 		
 	}
@@ -214,7 +214,7 @@ void UEnemy_Skeleton_FSM::movetoPlayer()
 		ai->MoveToLocation(target->GetActorLocation());
 
 		FVector dir = target->GetActorLocation() - me->GetActorLocation();
-		//¸¸¾à¿¡ target - me °Å¸®°¡ °ø°Ý¹üÀ§º¸´Ù ÀÛÀ¸¸é
+		//ï¿½ï¿½ï¿½à¿¡ target - me ï¿½Å¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ý¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		if (dir.Length() < attackRange)
 		{
 			ChangeState(EEnemyState1::Attack);
@@ -381,7 +381,7 @@ void UEnemy_Skeleton_FSM::DamageState()
 		me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		Hitback = false;
 	}
-	//damageDelayTime ÀÌ Áö³ª¸é
+	//damageDelayTime ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	if (IsWaitComplete(damageDelayTime))
 	{
 		me->SetActorEnableCollision(ECollisionEnabled::QueryOnly);
@@ -405,17 +405,17 @@ void UEnemy_Skeleton_FSM::UpdateReturnPos()
 
 void UEnemy_Skeleton_FSM::OnDamageProcess(float damage)
 {
-	//Ä®,¹æÆÐ Ãæµ¹Ã¼ ²ô±â
+	//Ä®,ï¿½ï¿½ï¿½ï¿½ ï¿½æµ¹Ã¼ ï¿½ï¿½ï¿½
 	me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	me->HpWidget->SetVisibility(true);
 	UGameplayStatics::PlaySound2D(GetWorld(), HITSound);
-	//¹æÆÐÄÝ¸®Àü²ô±â ¸ó½ºÅÍ Æ½¿¡¼­ ¿Â¿ÀÇÁ
+	//ï¿½ï¿½ï¿½ï¿½ï¿½Ý¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Æ½ï¿½ï¿½ï¿½ï¿½ ï¿½Â¿ï¿½ï¿½ï¿½
 	isShield=false;
 
-		//Ã¼·Â°¨¼Ò
+		//Ã¼ï¿½Â°ï¿½ï¿½ï¿½
 		hp -= damage;
 		
-		//ÇÇ°ÝµÇ¾úÀ»¶§ hpÇ¥½ÃÁÙÀ» º¸¿©ÁÖ´Â°Å ÇÑ¹ø¸¸ ½ÇÇàµÇ¸éµÊ
+		//ï¿½Ç°ÝµÇ¾ï¿½ï¿½ï¿½ï¿½ï¿½ hpÇ¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ö´Â°ï¿½ ï¿½Ñ¹ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ç¸ï¿½ï¿½
 		me->HpWidget->UpdateCurrHP(hp,maxhp);
 		allDamage+=damage;
 		me->HpWidget->UpdateDamage(allDamage);
@@ -432,7 +432,7 @@ void UEnemy_Skeleton_FSM::OnDamageProcess(float damage)
 				if (cri)
 				{	
 				/*	FB = true;*/
-					//ÇÃ·¹ÀÌ¾î¸¦ º¸¸é¼­ µÚ·Î ¹Ð·Á°¡±â
+					//ï¿½Ã·ï¿½ï¿½Ì¾î¸¦ ï¿½ï¿½ï¿½é¼­ ï¿½Ú·ï¿½ ï¿½Ð·ï¿½ï¿½ï¿½ï¿½ï¿½
 					FVector lookVot = target->GetActorLocation() - me->GetActorLocation();
 					FRotator lookRot = lookVot.Rotation();
 					me->SetActorRotation(lookRot);
@@ -444,7 +444,7 @@ void UEnemy_Skeleton_FSM::OnDamageProcess(float damage)
 				}
 				else if (Hitback)
 				{
-					//¹æÇâ¼³Á¤
+					//ï¿½ï¿½ï¿½â¼³ï¿½ï¿½
 					FVector lookVot =me->GetActorLocation()-target->GetActorLocation();
 					FRotator lookRot = lookVot.Rotation();
 					FRotator PY = FRotator(0,-90,0);
@@ -458,11 +458,11 @@ void UEnemy_Skeleton_FSM::OnDamageProcess(float damage)
 				}
 				else
 				{
-					//ÀÏ¹ÝÇÇ°Ý
+					//ï¿½Ï¹ï¿½ï¿½Ç°ï¿½
 					FVector imp = target->GetActorForwardVector() * 500.0f;
 					me->GetCharacterMovement()->AddImpulse(imp, true);
 					currentTime = 0;
-					//ÇÇ°Ý ¾Ö´Ï¸ÞÀÌ¼Ç Àç»ý
+					//ï¿½Ç°ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½
 					FString sectionName = FString::Printf(TEXT("Damage0"));
 					me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 				
@@ -487,19 +487,19 @@ void UEnemy_Skeleton_FSM::OnDamageProcess(float damage)
 				FString sectionName = FString::Printf(TEXT("Die"));
 				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 			}
-			//»óÅÂ¸¦ Á×À½À¸·Î ÀüÈ¯
+			//ï¿½ï¿½ï¿½Â¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯
 			mState = EEnemyState1::Die;
-			//Ä¸½¶ Ãæµ¹Ã¼ ºñÈ°¼ºÈ­
+			//Ä¸ï¿½ï¿½ ï¿½æµ¹Ã¼ ï¿½ï¿½È°ï¿½ï¿½È­
 			me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			//Á×À½ ¾Ö´Ï¸ÞÀÌ¼Ç Àç»ý
+			//ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½
 			
 			GetWorld()->SpawnActor<AActor>(dropFactory, me->GetActorTransform());
-			//»ç¸ÁÈ¿°úÀ½
+			//ï¿½ï¿½ï¿½È¿ï¿½ï¿½ï¿½ï¿½
 			UGameplayStatics::PlaySound2D(GetWorld(), SeeplayerSound);
 			me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			
 		}
-		//¾Ö´Ï¸ÞÀÌ¼Ç »óÅÂ µ¿±âÈ­
+		//ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½È­
 		anim->animState = mState;
 		ai->StopMovement();
 	}
@@ -542,7 +542,7 @@ void UEnemy_Skeleton_FSM::groggy()
 void UEnemy_Skeleton_FSM::moveBack()
 {
 
-		//µÚ·Î»ìÂ¦¹Ð·Á°¡°Ô
+		//ï¿½Ú·Î»ï¿½Â¦ï¿½Ð·ï¿½ï¿½ï¿½ï¿½ï¿½
 		/*int32 a;
 		if (FB){a=-1;}else{a=1;}*/
 		FVector imp = /*a * */(target->GetActorForwardVector()) * 2000.0f;
@@ -605,7 +605,7 @@ bool UEnemy_Skeleton_FSM::IsTargetTrace()
 	//acos
 	float angle = UKismetMathLibrary::DegAcos(dotvalue);
 
-	//±¸ÇÑ °ªÀÌ ½Ã¾ß°¢ º¸´Ù ÀÛ°í Àû°ú ÇÃ·¹ÀÌ¾î¿ÍÀÇ °Å¸®°¡ ÁöÁ¤ÇÑ °Å¸®º¸´Ù ÀÛÀ¸¸é
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã¾ß°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Û°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ï¿½ï¿½ï¿½ ï¿½Å¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Å¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	if (angle < 120 && dirSize.Size() < traceRange)
 	{
 
@@ -653,19 +653,19 @@ bool UEnemy_Skeleton_FSM::IsWaitComplete(float delayTime)
 void UEnemy_Skeleton_FSM::ChangeState(EEnemyState1 state)
 {
 
-	//ÇöÀç »óÅÂ¸¦ °»½Å
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â¸ï¿½ ï¿½ï¿½ï¿½ï¿½
 	mState = state;
 
-	//anim ÀÇ »óÅÂ °»½Å
+	//anim ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	anim->animState = state;
 
-	//ÇöÀç ½Ã°£ ÃÊ±âÈ­
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ ï¿½Ê±ï¿½È­
 	currTime = 0;
 
-	//ai ÀÇ ¿òÁ÷ÀÓ ¸ØÃßÀÚ
+	//ai ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	ai->StopMovement();
 
-	//»óÅÂ¿¡ µû¸¥ ÃÊ±â¼³Á¤
+	//ï¿½ï¿½ï¿½Â¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±â¼³ï¿½ï¿½
 	switch (mState)
 	{
 	case EEnemyState1::Attack:
@@ -674,9 +674,9 @@ void UEnemy_Skeleton_FSM::ChangeState(EEnemyState1 state)
 		break;
 	case EEnemyState1::Move:
 	{
-		//³×ºñ°ÔÀÌ¼Ç ½Ã½ºÅÛ °¡Á®¿ÀÀÚ
+		//ï¿½×ºï¿½ï¿½ï¿½Ì¼ï¿½ ï¿½Ã½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		UNavigationSystemV1* ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
-		//·£´ýÇÑ À§Ä¡¸¦ ¾ò¿ÀÀÚ
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½
 		FNavLocation loc;
 		ns->GetRandomReachablePointInRadius(originPos, 1000, loc);
 		randPos = loc.Location;
@@ -684,11 +684,11 @@ void UEnemy_Skeleton_FSM::ChangeState(EEnemyState1 state)
 	break;
 	case EEnemyState1::Damage:
 	{
-		//1. ·£´ýÇÑ °ªÀ» »Ì´Â´Ù (0, 1 Áß)
+		//1. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ì´Â´ï¿½ (0, 1 ï¿½ï¿½)
 		int32 rand = FMath::RandRange(0, 1);
-		//2. Damage0, Damage1 ÀÌ¶õ ¹®ÀÚ¿­À» ¸¸µç´Ù.
+		//2. Damage0, Damage1 ï¿½Ì¶ï¿½ ï¿½ï¿½ï¿½Ú¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.
 		FString sectionName = FString::Printf(TEXT("Damage%d"), rand);
-		//3. ¸ùÅ¸ÁÖ¸¦ ÇÃ·¹ÀÌÇÑ´Ù.
+		//3. ï¿½ï¿½Å¸ï¿½Ö¸ï¿½ ï¿½Ã·ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
 		//me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 	}
 	break;
@@ -700,13 +700,13 @@ void UEnemy_Skeleton_FSM::ChangeState(EEnemyState1 state)
 	break;
 	case EEnemyState1::Die:
 
-		//Ãæµ¹¾ÈµÇ°Ô ¼³Á¤
+		//ï¿½æµ¹ï¿½ÈµÇ°ï¿½ ï¿½ï¿½ï¿½ï¿½
 		me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
 
 
 
-		//Die ¸ùÅ¸ÁÖ ½ÇÇà
+		//Die ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		//me->PlayAnimMontage(damageMontage, 1.0f, FName(TEXT("Die")));
 
 		break;
@@ -714,14 +714,14 @@ void UEnemy_Skeleton_FSM::ChangeState(EEnemyState1 state)
 }
 void UEnemy_Skeleton_FSM::ReceiveDamage()
 {
-	//ÇÇ¸¦ ÁÙÀÌÀÚ
+	//ï¿½Ç¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	hp--;
-	//hp °¡ 0º¸´Ù Å©¸é Damage »óÅÂ·Î ÀüÈ¯
+	//hp ï¿½ï¿½ 0ï¿½ï¿½ï¿½ï¿½ Å©ï¿½ï¿½ Damage ï¿½ï¿½ï¿½Â·ï¿½ ï¿½ï¿½È¯
 	if (hp > 0)
 	{
 		ChangeState(EEnemyState1::Damage);
 	}
-	//±×·¸Áö ¾ÊÀ¸¸é Die »óÅÂ·Î ÀüÈ¯
+	//ï¿½×·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Die ï¿½ï¿½ï¿½Â·ï¿½ ï¿½ï¿½È¯
 	else
 	{
 
@@ -731,14 +731,14 @@ void UEnemy_Skeleton_FSM::ReceiveDamage()
 
 void UEnemy_Skeleton_FSM::MoveToPos(FVector pos)
 {
-	//ÇØ´ç À§Ä¡(pos) ·Î °£´Ù
+	//ï¿½Ø´ï¿½ ï¿½ï¿½Ä¡(pos) ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	EPathFollowingRequestResult::Type result = ai->MoveToLocation(pos);
 
-	//¸¸¾à¿¡ ¸ñÀûÁö¿¡ µµÂøÇß´Ù¸é
+	//ï¿½ï¿½ï¿½à¿¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ß´Ù¸ï¿½
 	if (result == EPathFollowingRequestResult::AlreadyAtGoal)
 	{
 		
-		//Idle »óÅÂ·Î ÀüÈ¯
+		//Idle ï¿½ï¿½ï¿½Â·ï¿½ ï¿½ï¿½È¯
 		ChangeState(EEnemyState1::Idle);
 	}
 }

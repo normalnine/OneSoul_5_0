@@ -177,7 +177,7 @@ void AOnsSoulPlayer::BeginPlay()
 		break;
 	}
 
-	escUI = CreateWidget<UEscUI>(GetWorld(), escUIFactory);
+	
 	gameInst = Cast<UOneSoulGameInstance>(GetWorld()->GetGameInstance());
 	MaxStamina = gameInst->statusData[gameInst->currLevel].maxStamina;
 	CurrentStamina = MaxStamina;
@@ -861,10 +861,16 @@ void AOnsSoulPlayer::EKeyPressed()
    
  void AOnsSoulPlayer::EsckeyPressed()
  {
+	if (escUI == nullptr)
+	{
+		 escUI = CreateWidget<UEscUI>(GetWorld(), escUIFactory);
+	}
+	 
 	if (escUI != nullptr)
 	{
 		if (!escUI->IsInViewport())
 		{
+			
 			escUI->AddToViewport();
 			GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
 

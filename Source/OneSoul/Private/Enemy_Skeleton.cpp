@@ -26,40 +26,40 @@
 
 AEnemy_Skeleton::AEnemy_Skeleton()
 {
-	//½ºÄÌ·¹Å»¸Þ½Ã µ¥ÀÌÅÍ ·Îµå
+	//ï¿½ï¿½ï¿½Ì·ï¿½Å»ï¿½Þ½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½
 	ConstructorHelpers::FObjectFinder<USkeletalMesh>tempMesh(TEXT("SkeletalMesh'/Game/LJW/Enemys/SimpleSkeleton/mesh/SKELETON.SKELETON'"));
-	//µ¥ÀÌÅÍ ·Îµå ¼º°øÇÏ¸é
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½
 	if (tempMesh.Succeeded())
 	{
-		//µ¥ÀÌÅÍÇÒ´ç
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò´ï¿½
 		GetMesh()->SetSkeletalMesh(tempMesh.Object);
-		//¸Þ½Ã À§Ä¡ ¹× È¸Àü ¼³Á¤
+		//ï¿½Þ½ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½ È¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
 	}
-	//Ä®¸Þ½Ã ¼³Á¤
+	//Ä®ï¿½Þ½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	SwordMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SwoedMeshComp"));
 
-	//½ºÄÌ·¹Åæ ÆÈ¿¡ ºÙ¿©ÁÖ±â
+	//ï¿½ï¿½ï¿½Ì·ï¿½ï¿½ï¿½ ï¿½È¿ï¿½ ï¿½Ù¿ï¿½ï¿½Ö±ï¿½
 	SwordMeshComp->SetupAttachment(GetMesh(), "Bip01-R-Hand");
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempSworodMesh(TEXT("StaticMesh'/Game/LJW/Enemys/SimpleSkeleton/mesh/SWORD_W_sword_01.SWORD_W_sword_01'"));
 	if (TempSworodMesh.Succeeded())
 	{
-		//4-4.½ºÄÌ·¹Å»¸Þ½Ã µ¥ÀÌÅÍÇÒ´ç
+		//4-4.ï¿½ï¿½ï¿½Ì·ï¿½Å»ï¿½Þ½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò´ï¿½
 		SwordMeshComp->SetStaticMesh(TempSworodMesh.Object);
 
 	}
 
-	//¹æÆÐ ¸Þ½Ã ¼³Á¤
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½Þ½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	ShieldMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShieldMeshComp"));
 
-	//½ºÄÌ·¹Åæ ÆÈ¿¡ ºÙ¿©ÁÖ±â
+	//ï¿½ï¿½ï¿½Ì·ï¿½ï¿½ï¿½ ï¿½È¿ï¿½ ï¿½Ù¿ï¿½ï¿½Ö±ï¿½
 	ShieldMeshComp->SetupAttachment(GetMesh(), "Bip01-L-Hand");
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempShieldMesh(TEXT("StaticMesh'/Game/LJW/Enemys/SimpleSkeleton/mesh/SHIELD.SHIELD'"));
 	if (TempShieldMesh.Succeeded())
 	{
-		//4-4.½ºÄÌ·¹Å»¸Þ½Ã µ¥ÀÌÅÍÇÒ´ç
+		//4-4.ï¿½ï¿½ï¿½Ì·ï¿½Å»ï¿½Þ½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò´ï¿½
 		ShieldMeshComp->SetStaticMesh(TempShieldMesh.Object);
 
 	}
@@ -84,7 +84,7 @@ AEnemy_Skeleton::AEnemy_Skeleton()
 	HpWidget = CreateDefaultSubobject<UEnemy_HpBar_WidgetComponent>(TEXT("HpBar"));
 	HpWidget->SetupAttachment(GetRootComponent());
 
-	//¸ó½ºÅÍ Ä¸½¶¿¡ Ä®ÀÌ ¸ÂÀ¸¸é
+	//ï¿½ï¿½ï¿½ï¿½ Ä¸ï¿½ï¿½ï¿½ï¿½ Ä®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	UCapsuleComponent* mycapsule = GetCapsuleComponent();
 	mycapsule->OnComponentBeginOverlap.AddDynamic(this, &AEnemy_Skeleton::OnOverlapME);
 
@@ -133,17 +133,17 @@ void AEnemy_Skeleton::OnOverlapBeginsword(class UPrimitiveComponent* selfComp, c
 				//while (It)
 				//{
 				//	APlayerController* Pcon = It->Get();
-				//	// °¡Á®¿Â ÇÃ·¹ÀÌ¾î ÄÁÆ®·Ñ·¯ °´Ã¼·Î Ã³¸®
+				//	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½Æ®ï¿½Ñ·ï¿½ ï¿½ï¿½Ã¼ï¿½ï¿½ Ã³ï¿½ï¿½
 				//	++It;
 				//	player->EnableInput(Pcon);
 				//}
 				/*SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);*/
-				//È¿°úÀ½ ¹ß»ý
+				//È¿ï¿½ï¿½ï¿½ï¿½ ï¿½ß»ï¿½
 				UGameplayStatics::PlaySound2D(GetWorld(), blockSound);
 				changeGroggy = true;
 				FActorSpawnParameters params;
 				params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-				//ÀÌÆåÆ® ¹ß»ý
+				//ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ß»ï¿½
 				GetWorld()->SpawnActor<AActor>(effectfactory1, target->GetMesh()->GetSocketTransform("ring_01_l"), params);
 			}
  			else
@@ -151,12 +151,12 @@ void AEnemy_Skeleton::OnOverlapBeginsword(class UPrimitiveComponent* selfComp, c
 				if(target->Health>1)
 				{
 				SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-				//ÇÃ·¹ÀÌ¾î µ¥¹ÌÁö È£ÃâÇÏ´ÂÇÔ¼ö
+				//ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½ï¿½Ï´ï¿½ï¿½Ô¼ï¿½
 				UGameplayStatics::ApplyDamage(target, 40, fsm->ai, this, UDamageType::StaticClass());
-				//ÇÃ·¹ÀÌ¾î¸¦ ³Ë¹é½ÃÅ²´Ù
+				//ï¿½Ã·ï¿½ï¿½Ì¾î¸¦ ï¿½Ë¹ï¿½ï¿½Å²ï¿½ï¿½
 				FVector imp = -1 * target->GetActorForwardVector() * 500.0f;
 				target->GetCharacterMovement()->AddImpulse(imp, true);
-				//ÇÃ·¹ÀÌ¾î Ä«¸Þ¶ó Èçµé¸®±â
+				//ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ Ä«ï¿½Þ¶ï¿½ ï¿½ï¿½é¸®ï¿½ï¿½
 				//player->Shake();
 				}
 			}
@@ -171,15 +171,15 @@ void AEnemy_Skeleton::OnOverlapBeginsword(class UPrimitiveComponent* selfComp, c
 			
 			FString sectionName = FString::Printf(TEXT("thing"));
 			PlayAnimMontage(fsm->damageMontage, 1.0f, FName(*sectionName));
-			//Ä® ¹æÆÐ Ãæµ¹Ã¼ ²ô±â
+			//Ä® ï¿½ï¿½ï¿½ï¿½ ï¿½æµ¹Ã¼ ï¿½ï¿½ï¿½
 			SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			collisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			//È¿°úÀ½ ¹ß»ý
+			//È¿ï¿½ï¿½ï¿½ï¿½ ï¿½ß»ï¿½
 			UGameplayStatics::PlaySound2D(GetWorld(), blockSound);
 
 			FActorSpawnParameters params;
 			params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-			//Æ¨°ÜÁö´Â ÀÌÆåÆ® »ý¼º
+			//Æ¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
 			GetWorld()->SpawnActor<AActor>(effectfactory,shield->GetActorTransform(),params);
 			
 			
@@ -190,17 +190,17 @@ void AEnemy_Skeleton::OnOverlapBeginsword(class UPrimitiveComponent* selfComp, c
 				if (player !=nullptr)
 				{
 				
-					//ÇÃ·¹ÀÌ¾î¸¦ ³Ë¹é½ÃÅ²´Ù
+					//ï¿½Ã·ï¿½ï¿½Ì¾î¸¦ ï¿½Ë¹ï¿½ï¿½Å²ï¿½ï¿½
 					FVector imp = -1 * player->GetActorForwardVector() * 3000.0f;
 					player->GetCharacterMovement()->AddImpulse(imp, true);
 
-					//ÇÃ·¹ÀÌ¾î Ä«¸Þ¶ó Èçµé¸®±â
+					//ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ Ä«ï¿½Þ¶ï¿½ ï¿½ï¿½é¸®ï¿½ï¿½
 					player->Shake();
 
-					//ÇÃ·¹ÀÌ¾îÀÇ ±â·Â °¨¼Ò
+					//ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 					player->CurrentStamina = FMath::Clamp(player->CurrentStamina - 10.f, player->MinStamina, player->MaxStamina);
 
-					//ÇÃ·¹ÀÌ¾îÀÇ ±â·Â È¸º¹ ¸îÃÊµÚ¿¡ È£ÃâÇØ¾ßÇÏ´Âµ¥
+					//ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ È¸ï¿½ï¿½ ï¿½ï¿½ï¿½ÊµÚ¿ï¿½ È£ï¿½ï¿½ï¿½Ø¾ï¿½ï¿½Ï´Âµï¿½
 					FTimerHandle ddd;
 					GetWorld()->GetTimerManager().SetTimer(ddd, this, &AEnemy_Skeleton::reStamina, 2.0f, false);
 				}
@@ -214,45 +214,45 @@ void AEnemy_Skeleton::OnOverlapBeginshield(class UPrimitiveComponent* selfComp, 
 	AWeapon* weapon = Cast<AWeapon>(otherActor);
 	if (weapon != nullptr)
 	{
-		//Ä®ÄÝ¸®Àü²ô±â
+		//Ä®ï¿½Ý¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 		FActorSpawnParameters params;
 		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		//Æ¨°ÜÁö´Â ÀÌÆåÆ® »ý¼º
+		//Æ¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
 		GetWorld()->SpawnActor<AActor>(effectfactory,weapon->GetActorTransform(), params);
 		
-		//ÇÇ°ÝÈ£Ãâ¾ÈµÇµµ·Ï ¸ÕÀú ¸·±â
+		//ï¿½Ç°ï¿½È£ï¿½ï¿½ÈµÇµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		one=true;
 		
-		//¹æÆÐ¿¡ ¸ÂÀ¸¸é ¸öÀÇ ÄÝ¸®ÀüÀ» Àá½Ã ²ô°í ´Ù½Ã Å°´Â°Å - ¹æÆÐ ¸Â°í ¸ö¸Â¾Æ¼­ µûºí·Î ¸ÂÀ¸¸é ¾ÈµÇ´Ï±î
+		//ï¿½ï¿½ï¿½Ð¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ý¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ù½ï¿½ Å°ï¿½Â°ï¿½ - ï¿½ï¿½ï¿½ï¿½ ï¿½Â°ï¿½ ï¿½ï¿½ï¿½Â¾Æ¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ÈµÇ´Ï±ï¿½
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		
-		//È¿°úÀ½ ¹ß»ý
+		//È¿ï¿½ï¿½ï¿½ï¿½ ï¿½ß»ï¿½
 		UGameplayStatics::PlaySound2D(GetWorld(), blockSound);
 	
-		//¸ùÅ¸ÁÖ½ÇÇà
+		//ï¿½ï¿½Å¸ï¿½Ö½ï¿½ï¿½ï¿½
 		FString sectionName = FString::Printf(TEXT("Block"));
 		PlayAnimMontage(fsm->damageMontage, 1.0f, FName(*sectionName));
-		//½ºÅ×ÀÌÆ® º¯°æ
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
 		fsm->mState = EEnemyState1::Shield;
-		//ÇÃ·¹ÀÌ¾î ºÒ·¯¿À±â
+		//ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½Ò·ï¿½ï¿½ï¿½ï¿½ï¿½
 		auto actor = UGameplayStatics::GetActorOfClass(GetWorld(), AOnsSoulPlayer::StaticClass());
 		player = Cast<AOnsSoulPlayer>(actor);
-		//ÇÃ·¹ÀÌ¾î Ä«¸Þ¶ó Èçµé¸®±â
+		//ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ Ä«ï¿½Þ¶ï¿½ ï¿½ï¿½é¸®ï¿½ï¿½
 		player->Shake();
-		//ÇÃ·¹ÀÌ¾î°¡ ¹æÆÐ¸¦ ¶§·Á¼­ ¹Ýµ¿ ¾Ö´Ï¸ÞÀÌ¼Ç Àç»ý
+		//ï¿½Ã·ï¿½ï¿½Ì¾î°¡ ï¿½ï¿½ï¿½Ð¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ýµï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½
 		player->compPlayerBase->SAR();
-		//ÇÃ·¹ÀÌ¾î Ä® ÄÝ¸®Àü ²ô±â
+		//ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ Ä® ï¿½Ý¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 		weapon->WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		//ÇÃ·¹ÀÌ¾î µÚ·Î ³Ë¹é½ÃÅ°±â
+		//ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½Ú·ï¿½ ï¿½Ë¹ï¿½ï¿½Å°ï¿½ï¿½
 		FVector imp = player->GetActorForwardVector() * -3000.0f;
 		player->GetCharacterMovement()->AddImpulse(imp, true);
-		//°ø°Ý¾ÈµÇ´Â ¹ö±×ÀÖ¾î¼­ ´Ù½Ã °ø°ÝÇÏ·Á¸é
+		//ï¿½ï¿½ï¿½Ý¾ÈµÇ´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾î¼­ ï¿½Ù½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï·ï¿½ï¿½ï¿½
 		player->IsAttacking=false;
 		
 
-		//1ÃÊ µÚ¿¡ ¸öÀÇ ÄÝ¸®ÀüÀ» Å°´Â ÇÔ¼öÈ£Ãâ
+		//1ï¿½ï¿½ ï¿½Ú¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ý¸ï¿½ï¿½ï¿½ï¿½ï¿½ Å°ï¿½ï¿½ ï¿½Ô¼ï¿½È£ï¿½ï¿½
 		FTimerHandle ddd;
 		GetWorld()->GetTimerManager().SetTimer(ddd, this, &AEnemy_Skeleton::oncoll, 1.5f, false);
 	}

@@ -493,7 +493,7 @@ public:
 	class UOneSoulGameInstance* gameInst;
 	
 
-	//ÇÃ·¹ÀÌ¾î Ä«¸Þ¶ó Èçµé¸®°Ô ÇÏ·Á´Â ¿ä¼Òµé
+	//ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ Ä«ï¿½Þ¶ï¿½ ï¿½ï¿½é¸®ï¿½ï¿½ ï¿½Ï·ï¿½ï¿½ï¿½ ï¿½ï¿½Òµï¿½
 	bool camShake = false;
 	float currCamShakeTime = 0;
 	float camShakeTime = 1;
