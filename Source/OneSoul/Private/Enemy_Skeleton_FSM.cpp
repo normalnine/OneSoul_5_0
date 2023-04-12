@@ -265,7 +265,7 @@ void UEnemy_Skeleton_FSM::AttackCombo1()
 	currTime += GetWorld()->DeltaTimeSeconds;
 
 		
-		if (currTime > 2)
+		if (currTime > 1)
 		{
 
 			currTime = 0;
@@ -318,12 +318,12 @@ void UEnemy_Skeleton_FSM::BlockAttack()
 	currTime += GetWorld()->DeltaTimeSeconds;
 
 
-	if (currTime > 2)
+	if (currTime > 1)
 	{
 
 		currTime = 0;
 
-		ChangeState(EEnemyState1::Idle);
+		ChangeState(EEnemyState1::MovetoTarget);
 	}
 
 
@@ -331,6 +331,7 @@ void UEnemy_Skeleton_FSM::BlockAttack()
 
 void UEnemy_Skeleton_FSM::UpdaetAttackDelay()
 {
+	me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	/*UE_LOG(LogTemp, Warning, TEXT("UpdaetAttackDelay"));*/
 	superArm = false;
 	if (target->Health < 1)
@@ -371,11 +372,13 @@ void UEnemy_Skeleton_FSM::DamageState()
 	/*UE_LOG(LogTemp, Warning, TEXT("DamageState"));*/
 	if (cri)
 	{
+		me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		cri = false;
 		moveBack();
 	}
 	if (Hitback)
 	{
+		me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		Hitback = false;
 	}
 	//damageDelayTime 이 지나면
@@ -433,7 +436,6 @@ void UEnemy_Skeleton_FSM::OnDamageProcess(float damage)
 					FVector lookVot = target->GetActorLocation() - me->GetActorLocation();
 					FRotator lookRot = lookVot.Rotation();
 					me->SetActorRotation(lookRot);
-
 					FString sectionName = FString::Printf(TEXT("Cri"));
 					me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 					FTimerHandle aaa;
@@ -471,13 +473,26 @@ void UEnemy_Skeleton_FSM::OnDamageProcess(float damage)
 		}
 		else
 		{
+			if (cri)
+			{
+				FVector lookVot = target->GetActorLocation() - me->GetActorLocation();
+				FRotator lookRot = lookVot.Rotation();
+				me->SetActorRotation(lookRot);
+				FString sectionName = FString::Printf(TEXT("CriDie"));
+				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+				
+			}
+			else
+			{
+				FString sectionName = FString::Printf(TEXT("Die"));
+				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+			}
 			//상태를 죽음으로 전환
 			mState = EEnemyState1::Die;
 			//캡슐 충돌체 비활성화
 			me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			//죽음 애니메이션 재생
-			FString sectionName = FString::Printf(TEXT("Die"));
-			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+			
 			GetWorld()->SpawnActor<AActor>(dropFactory, me->GetActorTransform());
 			//사망효과음
 			UGameplayStatics::PlaySound2D(GetWorld(), SeeplayerSound);
@@ -519,7 +534,7 @@ void UEnemy_Skeleton_FSM::groggy()
 
 		currTime = 0;
 		
-		ChangeState(EEnemyState1::Move);
+		ChangeState(EEnemyState1::MovetoTarget);
 	}
 
 }
@@ -532,7 +547,7 @@ void UEnemy_Skeleton_FSM::moveBack()
 		if (FB){a=-1;}else{a=1;}*/
 		FVector imp = /*a * */(target->GetActorForwardVector()) * 2000.0f;
 		me->GetCharacterMovement()->AddImpulse(imp, true);
-	
+		me->SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 }
 

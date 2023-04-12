@@ -43,7 +43,7 @@ void AEnemy_Magician_magic2::OnOverlapBeginMagic(class UPrimitiveComponent* self
 	if (target != nullptr)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("OverLap 1"));
-		target->ReceiveDamage(1);
+		target->ReceiveDamage(5);
 		target->DirectionalHitReact(GetActorLocation());
 		target->HitReactSounds();
 		FTimerHandle ddd;

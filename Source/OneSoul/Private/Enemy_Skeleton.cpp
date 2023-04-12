@@ -137,7 +137,7 @@ void AEnemy_Skeleton::OnOverlapBeginsword(class UPrimitiveComponent* selfComp, c
 				//	++It;
 				//	player->EnableInput(Pcon);
 				//}
-				SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				/*SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);*/
 				//효과음 발생
 				UGameplayStatics::PlaySound2D(GetWorld(), blockSound);
 				changeGroggy = true;
@@ -147,8 +147,9 @@ void AEnemy_Skeleton::OnOverlapBeginsword(class UPrimitiveComponent* selfComp, c
 				GetWorld()->SpawnActor<AActor>(effectfactory1, target->GetMesh()->GetSocketTransform("ring_01_l"), params);
 			}
  			else
- 			{	if(target->Health>1)
-			{
+ 			{	
+				if(target->Health>1)
+				{
 				SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 				//플레이어 데미지 호출하는함수
 				UGameplayStatics::ApplyDamage(target, 40, fsm->ai, this, UDamageType::StaticClass());
@@ -213,6 +214,9 @@ void AEnemy_Skeleton::OnOverlapBeginshield(class UPrimitiveComponent* selfComp, 
 	AWeapon* weapon = Cast<AWeapon>(otherActor);
 	if (weapon != nullptr)
 	{
+		//칼콜리전끄기
+		SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 		FActorSpawnParameters params;
 		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		//튕겨지는 이펙트 생성
@@ -265,9 +269,11 @@ void AEnemy_Skeleton::OnOverlapME(class UPrimitiveComponent* selfComp, class AAc
 	AWeapon* weapon = Cast<AWeapon>(otherActor);
 	if (weapon != nullptr)
 	{
+		SwordCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 		FActorSpawnParameters params;
 		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
+		//GetWorld()->SpawnActor<AActor>(HitresultFactory, GetActorTransform(), params);
 
 		//FVector HitLocation = SweepResult.Location;
 		/*FName HitLocation = SweepResult.BoneName;

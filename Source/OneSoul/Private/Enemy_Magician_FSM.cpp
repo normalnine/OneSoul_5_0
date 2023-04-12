@@ -321,9 +321,18 @@ void UEnemy_Magician_FSM::OnDamageProcess(float damage)
 	me->HpWidget->SetVisibility(true);
 	//체력감소
 	hp -= damage;
-	//hp--;
 	//피격되었을때 hp표시줄을 보여주는거 한번만 실행되면됨
 	me->HpWidget->UpdateCurrHP(hp, maxhp);
+	allDamage += damage;
+	me->HpWidget->UpdateDamage(allDamage);
+	onedam = true;
+
+	FActorSpawnParameters params;
+	params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	GetWorld()->SpawnActor<AActor>(HitresultFactory, me->GetActorTransform(), params);
+
+	FTimerHandle dam;
+	GetWorld()->GetTimerManager().SetTimer(dam, this, &UEnemy_Magician_FSM::resetDamage, 3.0f, false);
 
 	if (hp > 0)
 	{
@@ -425,6 +434,21 @@ void UEnemy_Magician_FSM::moveBack()
 {
 	FVector imp =(target->GetActorForwardVector()) * 2000.0f;
 	me->GetCharacterMovement()->AddImpulse(imp, true);
+}
+
+void UEnemy_Magician_FSM::resetDamage()
+{
+	if (onedam)
+	{
+		onedam = false;
+		FTimerHandle dam;
+		GetWorld()->GetTimerManager().SetTimer(dam, this, &UEnemy_Magician_FSM::resetDamage, 3.0f, false);
+	}
+	else
+	{
+		allDamage = 0;
+		me->HpWidget->UpdateDamage(0);
+	}
 }
 
 bool UEnemy_Magician_FSM::IsTargetTrace()
