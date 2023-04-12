@@ -167,6 +167,11 @@ public:
 	//피격 효과음
 	UPROPERTY(EditDefaultsOnly, Category = Sound)
 		class USoundBase* HITSound;
+	//데미지 누적
+	float allDamage = 0;
+	//3초동안만 실행 누적실행 안되게
+	bool onedam = true;
+	void resetDamage();
 };
 
 	

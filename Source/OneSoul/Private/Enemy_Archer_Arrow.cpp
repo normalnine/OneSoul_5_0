@@ -70,7 +70,7 @@ void AEnemy_Archer_Arrow::OnOverlapBegin(class UPrimitiveComponent* selfComp, cl
 	}
 	if (target != nullptr)
 	{
-		target->ReceiveDamage(1);
+		target->ReceiveDamage(30);
 		target->DirectionalHitReact(GetActorLocation());
 		target->HitReactSounds();
 

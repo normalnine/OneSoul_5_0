@@ -188,4 +188,12 @@ public:
 		//피격 효과음
 		UPROPERTY(EditDefaultsOnly, Category = Sound)
 			class USoundBase* HITSound;
+		//데미지 누적
+		float allDamage = 0;
+		//3초동안만 실행 누적실행 안되게
+		bool onedam = true;
+		void resetDamage();
+		//칼이랑 충돌되면 나오는 피 이펙트
+		UPROPERTY(EditDefaultsOnly, Category = HitresultFactory)
+			TSubclassOf<class AActor> HitresultFactory;
 };

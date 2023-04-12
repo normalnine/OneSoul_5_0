@@ -305,24 +305,28 @@ void UEnemy_Archer_FSM::OnDamageProcess(float damage)
 	UGameplayStatics::PlaySound2D(GetWorld(), HITSound);
 	//체력감소
 	hp -= damage;
-	//hp--;
 	//피격되었을때 hp표시줄을 보여주는거 한번만 실행되면됨
 	me->HpWidget->UpdateCurrHP(hp, maxhp);
+	allDamage += damage;
+	me->HpWidget->UpdateDamage(allDamage);
+	onedam = true;
+	FTimerHandle dam;
+	GetWorld()->GetTimerManager().SetTimer(dam, this, &UEnemy_Archer_FSM::resetDamage, 3.0f, false);
 	if (hp > 0)
 	{
-		if (Hitback)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("backattack"));
+		//if (Hitback)
+		//{
+		//	UE_LOG(LogTemp, Warning, TEXT("backattack"));
 
-			FString sectionName = FString::Printf(TEXT("BackAttack"));
-			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
-			//뒤로 밀려나는 함수
-			FTimerHandle aaa;
-			GetWorld()->GetTimerManager().SetTimer(aaa, this, &UEnemy_Archer_FSM::moveBack, 1.0f, false);
-			mState = EEnemyState5::Damage;
-		}
-		else
-		{
+		//	FString sectionName = FString::Printf(TEXT("BackAttack"));
+		//	me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+		//	//뒤로 밀려나는 함수
+		//	FTimerHandle aaa;
+		//	GetWorld()->GetTimerManager().SetTimer(aaa, this, &UEnemy_Archer_FSM::moveBack, 1.0f, false);
+		//	mState = EEnemyState5::Damage;
+		//}
+		//else
+		//{
 			UE_LOG(LogTemp, Warning, TEXT("defultattack"));
 			//피격 애니메이션 재생
 			FString sectionName = FString::Printf(TEXT("Damage0"));
@@ -330,7 +334,7 @@ void UEnemy_Archer_FSM::OnDamageProcess(float damage)
 			FVector imp = target->GetActorForwardVector() * 500.0f;
 			me->GetCharacterMovement()->AddImpulse(imp, true);
 			mState = EEnemyState5::Damage;
-		}
+		//}
 
 	}
 	else
@@ -545,5 +549,19 @@ void UEnemy_Archer_FSM::MoveToPos(FVector pos)
 	{
 		//Idle 상태로 전환
 		ChangeState(EEnemyState5::Idle);
+	}
+}
+void UEnemy_Archer_FSM::resetDamage()
+{
+	if (onedam)
+	{
+		onedam = false;
+		FTimerHandle dam;
+		GetWorld()->GetTimerManager().SetTimer(dam, this, &UEnemy_Archer_FSM::resetDamage, 3.0f, false);
+	}
+	else
+	{
+		allDamage = 0;
+		me->HpWidget->UpdateDamage(0);
 	}
 }

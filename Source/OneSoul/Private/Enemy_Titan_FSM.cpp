@@ -104,7 +104,10 @@ void UEnemy_Titan_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 		UpdateReturnPos();
 		break;
 	case EEnemyState4::Groggy:
-		UpdateReturnPos();
+		groggy();
+		break;
+	case EEnemyState4::CriHitReact:
+		crihitreact();
 		break;
 	}
 
@@ -179,8 +182,8 @@ void UEnemy_Titan_FSM::MoveState()
 {
 	// 시야에 들어왔는지 여부
 	bool bTrace = IsTargetTrace();
-	/*if (!(target == nullptr))
-	{*/
+	if (!(target == nullptr))
+	{
 	//타겟을 향하는 방향을 구하고
 	FVector dir = target->GetActorLocation() - me->GetActorLocation();
 
@@ -240,7 +243,7 @@ void UEnemy_Titan_FSM::MoveState()
 	//	//UE_LOG(LogTemp, Warning, TEXT("movetorandpos"));
 	//	// 랜덤한 위치까지 도착한 후 Idle 상태로 전환
 	//	MoveToPos(randPos);
-	//}
+	}
 }
 
 void UEnemy_Titan_FSM::movetoPlayer()
@@ -320,11 +323,16 @@ void UEnemy_Titan_FSM::AttackState()
 
 void UEnemy_Titan_FSM::AttackState1()
 {
-	superArmor = true;
+	
 
 	currTime += GetWorld()->DeltaTimeSeconds;
-
-
+	if (me->changeGroggy)
+	{
+		me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		ChangeState(EEnemyState4::Groggy);
+	}
+	superArmor = true;
 	if (currTime > 2)
 	{
 
@@ -337,20 +345,17 @@ void UEnemy_Titan_FSM::AttackState1()
 }
 void UEnemy_Titan_FSM::AttackState2()
 {
-	superArmor=true;
+	
 
-	//몬스터가 플레이어 방향으로 공격하도록 하는 거
-	//FVector des = target->GetActorLocation();
-	//FVector dir = des - me->GetActorLocation();
-	//FRotator dirx = dir.Rotation();
-	//me->SetActorRotation(dirx);
-
-	//애니메이션에서 끄고 키는걸로 수정
-	/*me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);*/
+	if (me->changeGroggy)
+	{
+		me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		ChangeState(EEnemyState4::Groggy);
+	}
 
 	currTime += GetWorld()->DeltaTimeSeconds;
-
+	superArmor = true;
 
 	if (currTime > 2)
 	{
@@ -364,21 +369,18 @@ void UEnemy_Titan_FSM::AttackState2()
 }
 void UEnemy_Titan_FSM::AttackState3()
 {
-	superArmor = true;
+	
 
-	//몬스터가 플레이어 방향으로 공격하도록 하는 거
-	//FVector des = target->GetActorLocation();
-	//FVector dir = des - me->GetActorLocation();
-	//FRotator dirx = dir.Rotation();
-	//me->SetActorRotation(dirx);
-
-	//애니메이션에서 끄고 키는걸로 수정
-	/*me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);*/
+	if (me->changeGroggy)
+	{
+		me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		ChangeState(EEnemyState4::Groggy);
+	}
 
 	currTime += GetWorld()->DeltaTimeSeconds;
 
-
+	superArmor = true;
 	if (currTime > 2)
 	{
 
@@ -462,6 +464,9 @@ void UEnemy_Titan_FSM::UpdaetAttackDelay()
 }
 void UEnemy_Titan_FSM::DamageState()
 {
+	me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
 	//damageDelayTime 이 지나면
 	if (IsWaitComplete(damageDelayTime))
 	{
@@ -474,28 +479,7 @@ void UEnemy_Titan_FSM::DieState()
 	me->HpWidget->SetVisibility(false);
 	me->RcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	me->LcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//아직 죽음 애니메이션이 끝나지 않았다면
-	//바닥내려가지 않도록 처리
-	/*if (anim->bDieDone == false)
-	{
-		return;
-	}*/
 
-	//계속 아래로 내려가고 싶다.
-	//동속ㅇ운동ㅇ 공식 피=피제+브이티
-	//FVector p0 = me->GetActorLocation();
-	//FVector vt = FVector::DownVector * dieSpeed * GetWorld()->DeltaTimeSeconds;
-	//FVector p = p0 + vt;
-	////2. 만약에 p.Z 가 -200 보다 작으면 파괴한다
-	//if (p.Z < -200)
-	//{
-	//	me->Destroy();
-	//}
-	//3. 그렇지 않으면 해당 위치로 셋팅한다
-	//else
-	//{
-	//	me->SetActorLocation(p);
-	//}
 
 
 }
@@ -534,7 +518,6 @@ void UEnemy_Titan_FSM::OnDamageProcess(float damage)
 			//체력이 절반이면 2페이즈 진입
 			if (hp<1250 && shout == true)
 			{	
-				UE_LOG(LogTemp, Warning, TEXT("2page"));
 				//몽타주실행
 				FString sectionName = FString::Printf(TEXT("Shout"));
 				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
@@ -543,6 +526,19 @@ void UEnemy_Titan_FSM::OnDamageProcess(float damage)
 				//한번만 실행하려고 폴스로 바꿈
 				shout=false;
 				mState = EEnemyState4::AttackDelay;
+			}
+			if (cri)
+			{	
+				//몽타주실행
+				FString sectionName = FString::Printf(TEXT("CriHit"));
+				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+
+				cri = false;
+				crihit = true;
+
+				FTimerHandle aaa;
+				GetWorld()->GetTimerManager().SetTimer(aaa, this, &UEnemy_Titan_FSM::moveBack, 1.0f, false);
+				UE_LOG(LogTemp, Warning, TEXT("cri"));
 			}
 			//뒷각에서 맞았을때
 			if (Hitback&&!superArmor)
@@ -570,13 +566,20 @@ void UEnemy_Titan_FSM::OnDamageProcess(float damage)
 
 		else
 		{
+			if (cri)
+			{
+				FString sectionName = FString::Printf(TEXT("CriHitDie"));
+				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+			}
+			else
+			{
+				FString sectionName = FString::Printf(TEXT("Die"));
+				me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
+			}
 			//상태를 죽음으로 전환
 			mState = EEnemyState4::Die;
 			//캡슐 충돌체 비활성화
 			me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			//죽음 애니메이션 재생
-			FString sectionName = FString::Printf(TEXT("Die"));
-			me->PlayAnimMontage(damageMontage, 1.0f, FName(*sectionName));
 			GetWorld()->SpawnActor<AActor>(dropFactory, me->GetActorTransform());
 			target->killtitan = true;
 		}
@@ -601,13 +604,22 @@ bool UEnemy_Titan_FSM::GetRandomPositionInNavMesh(FVector centerLocation, float 
 void UEnemy_Titan_FSM::groggy()
 {
 	UE_LOG(LogTemp, Warning, TEXT("groggy"));
+	cri = true;
 	anim->animState = mState;
-
 	me->changeGroggy = false;
+	superArmor = false;
+	currTime += GetWorld()->DeltaTimeSeconds;
+	if (currTime > 3)
+	{	crihit = false;
+		cri = false;
+	}
+	if (currTime > 3)
+	{
 
-	ai->StopMovement();
-	
-	ChangeState(EEnemyState4::Idle);
+		currTime = 0;
+
+		ChangeState(EEnemyState4::MovetoTarget);
+	}
 
 }
 
@@ -824,4 +836,24 @@ void UEnemy_Titan_FSM::resetDamage()
 		me->HpWidget->UpdateDamage(0);
 	}
 
+}
+void UEnemy_Titan_FSM::moveBack()
+{
+	FVector imp = target->GetActorForwardVector() * 3000.0f;
+	me->GetCharacterMovement()->AddImpulse(imp, true);
+	//UE_LOG(LogTemp, Warning, TEXT("moveBack"));
+}
+
+void UEnemy_Titan_FSM::crihitreact()
+{
+	UE_LOG(LogTemp, Warning, TEXT("crihitreact"));
+	crihit =false;
+	currTime += GetWorld()->DeltaTimeSeconds;
+	if (currTime > 2)
+	{
+
+		currTime = 0;
+
+		ChangeState(EEnemyState4::MovetoTarget);
+	}
 }

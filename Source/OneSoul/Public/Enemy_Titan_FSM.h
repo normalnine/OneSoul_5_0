@@ -21,7 +21,8 @@ enum class EEnemyState4 : uint8
 	Damage,
 	Die,
 	ReturnPos,
-	Groggy
+	Groggy,
+	CriHitReact
 };
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ONESOUL_API UEnemy_Titan_FSM : public UActorComponent
@@ -93,7 +94,7 @@ public:
 
 	//대기시간
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
-		float idleDelayTime = 2;
+		float idleDelayTime = 1;
 	//경과시간
 	float currentTime = 0;
 
@@ -121,7 +122,7 @@ public:
 
 	//공격대기시간
 	UPROPERTY(EditAnywhere, Category = FSM)
-		float attackDelayTime = 1.2f;
+		float attackDelayTime = 1;
 	//체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FSM)
 		int32 hp = 2500;
@@ -209,4 +210,17 @@ public:
 	//바로 플레이어를 공격하러 이동
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool movetoattack = false;
+
+	//크리티컬 데미지 애니메이션 재생여부 함수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool cri = false;
+
+	void moveBack();
+	//크리 피격실행
+	void crihitreact();
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool crihit = false;
+
 };

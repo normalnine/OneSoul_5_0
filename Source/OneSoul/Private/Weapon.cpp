@@ -115,7 +115,23 @@ void AWeapon::OnBoxOverlap(
 
 		  if (Enemy4 != nullptr)
 		  {
-			  Enemy4->fsm->OnDamageProcess(randDamage);
+			if (Enemy4->fsm->cri)
+			{
+				AOnsSoulPlayer* me = Cast<AOnsSoulPlayer>(GetOwner());
+				//Į �ݸ��� ���� - ���ͳ� Į �ݸ��� ���� �ϳ��� ���������� ���ѹݺ��� �Ƚ����
+				WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				//���Ͷ� ��ġ���߱�
+				Enemy4->SetActorLocation(me->GetActorLocation() + me->GetActorForwardVector() * 100.0f);
+				Enemy4->fsm->OnDamageProcess(randDamage);
+				me->compPlayerBase->CriAttack();
+				me->IsAttacking = false;
+			}
+			else
+			{
+				WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				Enemy4->fsm->OnDamageProcess(randDamage);
+			}
+
 		  }
 		  //�������ϰ� �浹�Ǿ�����
 		  if (Enemy2 != nullptr)

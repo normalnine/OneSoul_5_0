@@ -63,9 +63,17 @@ void AEnemy_Titan::OnOverlapBegin(class UPrimitiveComponent* selfComp, class AAc
 
 	if (target != nullptr)
 	{
-		
-			if (target->Health > 1)
-			{
+		if (target->parrying)
+		{
+			changeGroggy = true;
+
+			FActorSpawnParameters params;
+			params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			//이펙트 발생
+			GetWorld()->SpawnActor<AActor>(effectfactory1, target->GetMesh()->GetSocketTransform("ring_01_l"), params);
+		}
+		else if(target->Health > 1)
+		{
 				//플레이어 데미지 호출하는함수
 				UGameplayStatics::ApplyDamage(target, 70, fsm->ai, this, UDamageType::StaticClass());
 				//플레이어를 넉백시킨다
@@ -74,7 +82,7 @@ void AEnemy_Titan::OnOverlapBegin(class UPrimitiveComponent* selfComp, class AAc
 				LcollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 				FVector imp = -1 * target->GetActorForwardVector() * 2000.0f;
 				target->GetCharacterMovement()->AddImpulse(imp, true);
-			}
+		}
 
 	}
 
@@ -83,18 +91,22 @@ void AEnemy_Titan::OnOverlapBegin(class UPrimitiveComponent* selfComp, class AAc
 	{
 		if (player != nullptr)
 		{
+				
+				
+				
+				//플레이어를 넉백시킨다
+				FVector imp = -1 * player->GetActorForwardVector() * 3000.0f;
+				player->GetCharacterMovement()->AddImpulse(imp, true);
 
-			//플레이어를 넉백시킨다
-			FVector imp = -1 * player->GetActorForwardVector() * 3000.0f;
-			player->GetCharacterMovement()->AddImpulse(imp, true);
+				//플레이어의 기력 감소
+				player->CurrentStamina = FMath::Clamp(player->CurrentStamina - 20.f, player->MinStamina, player->MaxStamina);
 
-			//플레이어의 기력 감소
-			player->CurrentStamina = FMath::Clamp(player->CurrentStamina - 20.f, player->MinStamina, player->MaxStamina);
-
-			//플레이어의 기력 회복 몇초뒤에 호출해야하는데
-			FTimerHandle ddd;
-			GetWorld()->GetTimerManager().SetTimer(ddd, this, &AEnemy_Titan::reStamina, 1.0f, false);
+				//플레이어의 기력 회복 몇초뒤에 호출해야하는데
+				FTimerHandle ddd;
+				GetWorld()->GetTimerManager().SetTimer(ddd, this, &AEnemy_Titan::reStamina, 1.0f, false);
+				
 		}
+			
 	}
 
 }
@@ -112,7 +124,7 @@ void AEnemy_Titan::OnOverlapME(class UPrimitiveComponent* selfComp, class AActor
 	{
 		
 
-		UE_LOG(LogTemp, Warning, TEXT("titan"));
+		//UE_LOG(LogTemp, Warning, TEXT("titan"));
 		/*	FString LocationString = HitLocation.ToString();
 
 			UKismetSystemLibrary::PrintString(this, LocationString, true, true, FLinearColor::Green); */

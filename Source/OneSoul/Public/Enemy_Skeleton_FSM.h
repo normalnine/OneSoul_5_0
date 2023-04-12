@@ -127,7 +127,7 @@ public:
 		int32 maxhp = 500;
 	//피격 대기 시간
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
-		float damageDelayTime = 3.0f;
+		float damageDelayTime = 1.5f;
 	//아래로 사라지는 속도
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
 		float dieSpeed = 50.0f;
