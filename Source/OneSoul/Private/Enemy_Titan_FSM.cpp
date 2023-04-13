@@ -56,6 +56,8 @@ void UEnemy_Titan_FSM::BeginPlay()
 	originPos = me->GetActorLocation();
 
 	me->HpWidget->UpdateCurrHP(hp, maxhp);
+
+	me->ActorHasTag(FName("OneSoulCharacter"));
 	
 }
 
@@ -201,7 +203,7 @@ void UEnemy_Titan_FSM::MoveState()
 			
 			int32 index = FMath::RandRange(0, 1);
 			//hp가 적어지면 공격패턴 추가
-			if (hp < 11)
+			if (hp < 1250)
 			{
 				index = FMath::RandRange(1, 3);
 			}
@@ -268,7 +270,7 @@ void UEnemy_Titan_FSM::movetoPlayer()
 	{
 
 		int32 index = FMath::RandRange(0, 1);
-		if (hp<11)
+		if (hp<1250)
 		{
 			 index = FMath::RandRange(1,3);
 		}

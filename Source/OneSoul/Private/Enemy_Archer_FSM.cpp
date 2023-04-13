@@ -55,6 +55,8 @@ void UEnemy_Archer_FSM::BeginPlay()
 	originPos = me->GetActorLocation();
 
 	me->HpWidget->UpdateCurrHP(hp, maxhp);
+
+	me->ActorHasTag(FName("OneSoulCharacter"));
 	
 }
 
