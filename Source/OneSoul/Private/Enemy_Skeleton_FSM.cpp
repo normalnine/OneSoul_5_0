@@ -62,6 +62,7 @@ void UEnemy_Skeleton_FSM::BeginPlay()
 
 	me->HpWidget->UpdateCurrHP(hp, maxhp);
 
+	me->ActorHasTag(FName("OneSoulCharacter"));
 }
 
 

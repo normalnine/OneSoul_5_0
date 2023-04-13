@@ -54,6 +54,7 @@ void AEnemy_Magician_magic::OnOverlapBeginMagic(class UPrimitiveComponent* selfC
 	AOnsSoulPlayer* target = Cast<AOnsSoulPlayer>(otherActor);
 	if (target != nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("player"));
 		//UE_LOG(LogTemp, Warning, TEXT("OverLap 1"));
 		target->ReceiveDamage(30);
 		target->DirectionalHitReact(GetActorLocation());
@@ -65,6 +66,7 @@ void AEnemy_Magician_magic::OnOverlapBeginMagic(class UPrimitiveComponent* selfC
 	AShield* shield = Cast<AShield>(otherActor);
 	if (shield != nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("shield"));
 		//플레이어 캐스팅해서
 		auto actor = UGameplayStatics::GetActorOfClass(GetWorld(), AOnsSoulPlayer::StaticClass());
 		player = Cast<AOnsSoulPlayer>(actor);
@@ -77,7 +79,7 @@ void AEnemy_Magician_magic::OnOverlapBeginMagic(class UPrimitiveComponent* selfC
 			player->GetCharacterMovement()->AddImpulse(imp, true);
 
 			//플레이어의 기력 감소
-			player->CurrentStamina = FMath::Clamp(target->CurrentStamina - 10.f, target->MinStamina, target->MaxStamina);
+			//player->CurrentStamina = FMath::Clamp(target->CurrentStamina - 10.f, target->MinStamina, target->MaxStamina);	
 		}
 
 		Destroy();
